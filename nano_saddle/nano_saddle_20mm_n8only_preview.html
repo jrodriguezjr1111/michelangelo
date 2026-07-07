@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Nano Saddle Ø20 — #8-32 only — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --tube:#101319; --tube-dk:#8b93a7;
+    --n8:#e07a5a; --n8-dk:#9a4a30;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:220px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Nano Saddle — Ø20 mm tubes / #8-32 only</h1>
+  <p>Minimal variant: <strong>only the #8-32 mounting holes</strong> (Ø5 assembly,
+     Jetson Nano, and Jetson Orin M3 patterns removed). Block reduced in X and Y to
+     just wrap the #8-32 pattern. Source:
+     <code>nano_saddle/make_nano_saddle_20mm_n8only.py</code> (generator not yet created).</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Block (assembled)</th><td id="s-block">—</td></tr>
+      <tr><th>Tubes</th><td id="s-tube">—</td></tr>
+      <tr><th>Bridge clear span</th><td id="s-bridge">—</td></tr>
+      <tr><th>#8-32 holes</th><td id="s-n8">—</td></tr>
+      <tr><th>Footprint vs original</th><td id="s-cmp">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Tubes run along X; #8-32 holes on the wings, outboard of the bores.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Body</span>
+      <span><span class="sw" style="background:var(--tube);border:1px solid var(--tube-dk)"></span>Tube bore</span>
+      <span><span class="sw" style="background:var(--n8)"></span>#8-32</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 360 640"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (Y × Z) through tube centers</h2>
+    <p class="sub">Half profile: two Ø20.4 bores scooped from the split face; #8-32 on the wings.</p>
+    <svg id="sec-svg" viewBox="0 0 640 220"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print outer face on bed, split face UP — no supports. The #8-32 holes both join
+  the two halves and mount the saddle to a platform.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — #8-32-only variant of make_nano_saddle_20mm.py
+// =====================================================================
+const TUBE_OD = 20.0, TUBE_CENTER_SEP = 60.17, CLEARANCE = 0.4;
+
+// #8-32 mounting holes — the only hole feature in this variant.
+const N8_CLEAR_D = 4.4, N8_PAT_X = 51.83, N8_PAT_Y = 120.18;
+const N8_EDGE = 6.0;   // hole-center → block edge margin (sets block size)
+
+// Block sized to just wrap the #8-32 pattern.
+const BLOCK_LEN = N8_PAT_X + 2 * N8_EDGE;   // X  -> 63.83
+const BLOCK_WID = N8_PAT_Y + 2 * N8_EDGE;   // Y  -> 132.18
+const BLOCK_HT  = 28.0;                       // Z (unchanged, set by tube bore)
+
+// Original footprint, for the comparison row.
+const ORIG_LEN = 101.0, ORIG_WID = 197.0;
+
+const HALF_HT = BLOCK_HT / 2;
+const R_IN = TUBE_OD / 2 + CLEARANCE / 2;
+const TUBE_Y = TUBE_CENTER_SEP / 2;
+const BRIDGE = TUBE_Y - R_IN;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text){
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+
+// 4-corner rectangular pattern helper
+function rectPattern(svg, X, Y, patX, patY, ycen, holeR, headR, col, colDk){
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+    const hx = sx*patX/2, hy = ycen + sy*patY/2;
+    if (headR) el(svg, 'circle', { cx:X(hx), cy:Y(hy), r:headR,
+      fill:'none', stroke:col, 'stroke-width':0.8, 'stroke-dasharray':'2 2' });
+    el(svg, 'circle', { cx:X(hx), cy:Y(hy), r:holeR,
+      fill:'#101319', stroke:colDk, 'stroke-width':1 });
+  }
+  el(svg, 'rect', { x:X(-patX/2), y:Y(ycen+patY/2), width:patX, height:patY,
+    fill:'none', stroke:col, 'stroke-width':0.5, 'stroke-dasharray':'4 3', opacity:0.5 });
+}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 360, VB_H = 640, margin = 34;
+  const s = Math.min((VB_W - 2*margin)/BLOCK_LEN, (VB_H - 2*margin)/BLOCK_WID);
+  const cx = VB_W/2, cy = VB_H/2;
+  const X = x => cx + x*s;
+  const Y = y => cy - y*s;     // +Y up
+  const px = v => v*s;
+
+  // Body
+  el(svg, 'rect', { x:X(-BLOCK_LEN/2), y:Y(BLOCK_WID/2),
+    width:px(BLOCK_LEN), height:px(BLOCK_WID),
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5, rx:3 });
+
+  // Tube bores (full-length along X), at Y = ±TUBE_Y
+  for (const sy of [-1,1]) {
+    el(svg, 'rect', { x:X(-BLOCK_LEN/2-0.1), y:Y(sy*TUBE_Y + R_IN),
+      width:px(BLOCK_LEN+0.2), height:px(2*R_IN),
+      fill:'var(--tube)', stroke:'var(--tube-dk)', 'stroke-width':0.8, 'stroke-dasharray':'3 3' });
+    el(svg, 'text', { x:cx, y:Y(sy*TUBE_Y)+3, 'text-anchor':'middle', class:'dim' },
+      `Ø${(2*R_IN).toFixed(1)} bore`);
+  }
+
+  // #8-32 pattern (only hole feature)
+  rectPattern(svg, X, Y, N8_PAT_X, N8_PAT_Y, 0,
+    px(N8_CLEAR_D/2), 0, 'var(--n8)', 'var(--n8-dk)');
+  el(svg, 'text', { x:X(0), y:Y(N8_PAT_Y/2)-4, 'text-anchor':'middle', class:'dim', fill:'var(--n8)' },
+    `#8-32  ${N8_PAT_X}×${N8_PAT_Y}`);
+
+  // Dims
+  const yd = Y(-BLOCK_WID/2) + 18;
+  el(svg, 'line', { x1:X(-BLOCK_LEN/2), y1:yd, x2:X(BLOCK_LEN/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${BLOCK_LEN.toFixed(2)} mm (X)`);
+  const xd = X(-BLOCK_LEN/2) - 16;
+  el(svg, 'line', { x1:xd, y1:Y(-BLOCK_WID/2), x2:xd, y2:Y(BLOCK_WID/2), stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:xd-4, y:cy+4, 'text-anchor':'end', class:'dim' }, `${BLOCK_WID.toFixed(2)} (Y)`);
+})();
+
+// =====================================================================
+// Cross-section (Y × Z) through tube centers — half profile
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 640, VB_H = 220, margin = 40;
+  const s = Math.min((VB_W - 2*margin)/BLOCK_WID, (VB_H - 2*margin - 20)/HALF_HT);
+  const cx = VB_W/2, floorY = VB_H - margin - 10;
+  const Y = y => cx + y*s;
+  const Z = z => floorY - z*s;
+
+  // Half profile
+  el(svg, 'rect', { x:Y(-BLOCK_WID/2), y:Z(HALF_HT), width:BLOCK_WID*s, height:HALF_HT*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5 });
+
+  // Tube bores (half-circle scoops from split face at z=HALF_HT)
+  for (const sy of [-1,1]) {
+    el(svg, 'path', {
+      d: `M ${Y(sy*TUBE_Y - R_IN)} ${Z(HALF_HT)} `
+       + `A ${R_IN*s} ${R_IN*s} 0 0 0 ${Y(sy*TUBE_Y + R_IN)} ${Z(HALF_HT)} Z`,
+      fill:'#101319', stroke:'var(--tube-dk)', 'stroke-width':1 });
+  }
+
+  // #8-32 holes (wings)
+  for (const sy of [-1,1]) {
+    const yv = sy*N8_PAT_Y/2;
+    el(svg, 'rect', { x:Y(yv)-N8_CLEAR_D/2*s, y:Z(HALF_HT), width:N8_CLEAR_D*s, height:HALF_HT*s,
+      fill:'#101319', stroke:'var(--n8)', 'stroke-width':1 });
+  }
+
+  // Dims
+  const yd = Z(0) + 22;
+  el(svg, 'line', { x1:Y(-BLOCK_WID/2), y1:yd, x2:Y(BLOCK_WID/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${BLOCK_WID.toFixed(2)} mm (Y)`);
+  el(svg, 'text', { x:Y(BLOCK_WID/2)-4, y:Z(HALF_HT)-3, 'text-anchor':'end', class:'dim' }, `half ${HALF_HT}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-block').textContent = `${BLOCK_LEN.toFixed(2)} × ${BLOCK_WID.toFixed(2)} × ${BLOCK_HT} mm`;
+document.getElementById('s-tube').textContent  = `Ø${TUBE_OD} at Y = ±${TUBE_Y.toFixed(2)} (bore Ø${(2*R_IN).toFixed(2)}, ${CLEARANCE} clr)`;
+document.getElementById('s-bridge').textContent = `${(2*BRIDGE).toFixed(2)} mm between bores`;
+document.getElementById('s-n8').textContent  = `4× Ø${N8_CLEAR_D} (#8-32) at (±${(N8_PAT_X/2).toFixed(2)}, ±${(N8_PAT_Y/2).toFixed(2)}) — ${N8_PAT_X}×${N8_PAT_Y}; ${N8_EDGE} mm edge margin`;
+document.getElementById('s-cmp').textContent =
+  `${BLOCK_LEN.toFixed(2)}×${BLOCK_WID.toFixed(2)} vs ${ORIG_LEN}×${ORIG_WID} — area ${(100*(BLOCK_LEN*BLOCK_WID)/(ORIG_LEN*ORIG_WID)).toFixed(0)}% of original`;
+
+const n8EdgeX = BLOCK_LEN/2 - N8_PAT_X/2 - N8_CLEAR_D/2;
+const n8EdgeY = BLOCK_WID/2 - N8_PAT_Y/2 - N8_CLEAR_D/2;
+const n8Bore  = (N8_PAT_Y/2 - N8_CLEAR_D/2) - (TUBE_Y + R_IN);
+const boreWall = BLOCK_WID/2 - (TUBE_Y + R_IN);
+
+const checks = [
+  { ok: n8EdgeX >= 0.5, msg: `#8-32 hole → X edge: ${n8EdgeX.toFixed(2)} mm` },
+  { ok: n8EdgeY >= 0.5, msg: `#8-32 hole → Y edge: ${n8EdgeY.toFixed(2)} mm` },
+  { ok: n8Bore >= 0.0, msg: `#8-32 hole → tube bore: ${n8Bore.toFixed(2)} mm (outboard)` },
+  { ok: boreWall >= 2.0, msg: `Tube bore → Y edge wall: ${boreWall.toFixed(2)} mm` },
+  { ok: R_IN + 2.0 <= HALF_HT, msg: `Half-height clears bore: ${(HALF_HT - R_IN).toFixed(2)} mm over Ø${(2*R_IN).toFixed(1)}` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

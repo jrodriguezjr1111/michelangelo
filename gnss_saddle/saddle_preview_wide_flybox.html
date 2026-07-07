@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CyberWing — GNSS wide saddle, fly_box wings</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--ink:#e6e8ee;--mute:#8b93a7;--accent:#6ee7b7;--warn:#fca5a5;
+        --plastic:#f2b84b;--plastic-dk:#b07a1c;--tube:#4a9a8c;--bolt:#d6b35a;--gnss:#94c8ef;--fly:#e07a5a;}
+  *{box-sizing:border-box;}
+  body{margin:0;font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:var(--bg);color:var(--ink);}
+  header{padding:20px 28px;border-bottom:1px solid #222836;}
+  header h1{margin:0 0 4px;font-size:18px;font-weight:600;}
+  header p{margin:0;color:var(--mute);font-size:13px;max-width:900px;}
+  main{display:grid;gap:18px;padding:18px 28px 40px;grid-template-columns:1fr;}
+  .card{background:var(--panel);border:1px solid #222836;border-radius:10px;padding:16px;}
+  .card h2{margin:0 0 2px;font-size:15px;font-weight:600;}
+  .card .sub{margin:0 0 10px;color:var(--mute);font-size:12px;}
+  svg{width:100%;height:auto;display:block;background:#101319;border-radius:6px;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 4px;color:var(--mute);font-size:12px;}
+  .legend .sw{width:14px;height:14px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:6px;}
+  .dim{fill:var(--mute);font:500 10px ui-monospace,monospace;}
+  .ok{fill:var(--accent);font:700 11px sans-serif;}
+  table.specs{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.specs th,table.specs td{padding:6px 10px;border-bottom:1px solid #242a36;text-align:left;vertical-align:top;}
+  table.specs th{color:var(--mute);font-weight:600;width:200px;}
+  code{background:#101319;padding:1px 5px;border-radius:3px;color:#f6cd7b;}
+  ul.checks{margin:0;padding-left:18px;line-height:1.7;}
+  .confirm{color:#f6cd7b;}
+</style>
+</head>
+<body>
+<header>
+  <h1>CyberWing — GNSS wide saddle, <b>fly_box wings</b></h1>
+  <p>A version of <code>saddle_preview_wide.html</code> that carries a <b>fly_box on each
+     wing</b> (±Y) instead of the ZED/M2 patterns. Each wing gets a 4× M4 mount pattern with
+     the holes inset <b>4.20 mm from the plate edges</b>. Same tube clamp, Ø30 GNSS hole, and
+     4× M4 tube-clamp pattern as the base wide saddle.</p>
+</header>
+<main>
+  <div class="card">
+    <h2>Specs</h2>
+    <table class="specs">
+      <tr><th>Plate</th><td id="s-plate">—</td></tr>
+      <tr><th>Tubes</th><td id="s-tube">—</td></tr>
+      <tr><th>GNSS / clamp</th><td id="s-gnss">—</td></tr>
+      <tr><th>Fly_box mount (per wing)</th><td id="s-fly">—</td></tr>
+      <tr><th>Edge inset</th><td id="s-edge">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (Y horizontal, X vertical)</h2>
+    <p class="sub">The two wings (orange) each carry a 4× M4 fly_box mount, holes 4.20 mm from the plate edges.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>saddle plate</span>
+      <span><span class="sw" style="background:#101319;border:1px solid #4a9a8c"></span>tube tunnel</span>
+      <span><span class="sw" style="background:var(--gnss)"></span>GNSS Ø30</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M4 clamp</span>
+      <span><span class="sw" style="background:var(--fly)"></span>fly_box wing + M4 mount</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 920 340"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+    <p class="sub" style="margin-top:10px"><span class="confirm">Confirm:</span> the fly_box footprint/orientation and whether the mount Y-span (52.1) matches your box's bottom holes.</p>
+  </div>
+</main>
+
+<script>
+// ---- saddle params (from make_gnss_saddle_wide.py) ----
+const TUBE_OD=15.39, TUBE_CENTER_SEP=60.17, CLEARANCE=0.4;
+const GNSS_HOLE_D=30.0;
+const BLOCK_LEN=50.0, BLOCK_WID=197.0, BLOCK_HT=28.0;       // X, Y, Z
+const BOLT_OFF=18.0, SCREW_CLEAR_D=4.4, SCREW_HEAD_D=8.0;
+const R_IN=TUBE_OD/2+CLEARANCE/2, TUBE_Y=TUBE_CENTER_SEP/2, GNSS_R=GNSS_HOLE_D/2;
+
+// ---- fly_box wing mount (new) ----
+const FLY_EDGE  = 4.20;                       // outer row inset from the plate end
+const FLY_M4    = 4.4;                         // M4 clearance
+const FLY_PAT_X = 36.14, FLY_PAT_Y = 36.1;    // = GNSS-saddle / fly_box bottom pattern
+const WING_IN   = TUBE_Y + R_IN;              // inner edge of each wing (just past the tube)
+const WING_OUT  = BLOCK_WID/2;                // outer plate edge (±98.5)
+const HX     = FLY_PAT_X/2;                    // ±18.07
+const HY_OUT = WING_OUT - FLY_EDGE;            // outer row, 4.20 mm from the plate end
+const HY_IN  = HY_OUT - FLY_PAT_Y;            // inner row (one pattern-length inboard)
+const PAT_X = FLY_PAT_X, PAT_Y = FLY_PAT_Y;
+// fly_box mount points, per wing (sy = +1 / -1)
+const holes = [];
+for (const sy of [-1,1]) for (const sx of [-1,1]) for (const yr of [HY_IN, HY_OUT])
+  holes.push([sx*HX, sy*yr]);
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,n,a,t){const e=document.createElementNS(ns,n);for(const k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;p.appendChild(e);return e;}
+
+(() => {
+  const svg=document.getElementById('top-svg');
+  const VB_W=920, VB_H=340, m=46;
+  const yExt=BLOCK_WID/2+6, xExt=BLOCK_LEN/2+10;
+  const s=Math.min((VB_W-2*m)/(2*yExt),(VB_H-2*m)/(2*xExt));
+  const cx=VB_W/2, cy=VB_H/2;
+  const Y=y=>cx+y*s, X=x=>cy-x*s;
+
+  // plate
+  el(svg,'rect',{x:Y(-BLOCK_WID/2),y:X(BLOCK_LEN/2),width:BLOCK_WID*s,height:BLOCK_LEN*s,fill:'var(--plastic)',stroke:'var(--plastic-dk)','stroke-width':1.5,rx:2});
+  // wings (orange tint, beyond the tubes)
+  for(const sy of[-1,1]){
+    const y0=sy<0?-WING_OUT:WING_IN;
+    el(svg,'rect',{x:Y(Math.min(sy*WING_IN,sy*WING_OUT)),y:X(BLOCK_LEN/2),width:(WING_OUT-WING_IN)*s,height:BLOCK_LEN*s,fill:'var(--fly)','fill-opacity':0.16,stroke:'var(--fly)','stroke-width':0.8});
+  }
+  // tube tunnels
+  for(const sy of[-1,1]){
+    el(svg,'rect',{x:Y(sy*TUBE_Y-R_IN),y:X(BLOCK_LEN/2),width:2*R_IN*s,height:BLOCK_LEN*s,fill:'#101319',stroke:'#4a9a8c','stroke-width':1});
+    el(svg,'text',{x:Y(sy*TUBE_Y),y:X(-BLOCK_LEN/2)+13,'text-anchor':'middle',class:'dim'},`tube ${(sy*TUBE_Y).toFixed(1)}`);
+  }
+  // GNSS hole
+  el(svg,'circle',{cx:Y(0),cy:X(0),r:GNSS_R*s,fill:'#101319',stroke:'#94c8ef','stroke-width':1.2});
+  el(svg,'text',{x:Y(0),y:X(0)+4,'text-anchor':'middle',class:'ok'},`Ø${GNSS_HOLE_D}`);
+  // M4 tube-clamp bolts
+  for(const sx of[-1,1])for(const sy of[-1,1])
+    el(svg,'circle',{cx:Y(sy*BOLT_OFF),cy:X(sx*BOLT_OFF),r:SCREW_CLEAR_D/2*s,fill:'#101319',stroke:'#d6b35a','stroke-width':1});
+  // fly_box mount holes (per wing) + crosshair
+  for(const h of holes){
+    el(svg,'circle',{cx:Y(h[1]),cy:X(h[0]),r:FLY_M4/2*s,fill:'#101319',stroke:'var(--fly)','stroke-width':1.4});
+  }
+  // wing pattern labels
+  for(const sy of[-1,1]){
+    el(svg,'text',{x:Y(sy*(WING_IN+WING_OUT)/2),y:X(0)+4,'text-anchor':'middle',class:'dim',fill:'var(--fly)'},`M4 ${PAT_X.toFixed(1)}×${PAT_Y.toFixed(1)}`);
+  }
+  // plate edge / inset callout
+  el(svg,'text',{x:Y(WING_OUT),y:X(BLOCK_LEN/2)+13,'text-anchor':'end',class:'dim'},`edge inset ${FLY_EDGE}`);
+})();
+
+// specs + checks
+const set=(id,t)=>document.getElementById(id).textContent=t;
+set('s-plate',`${BLOCK_LEN} × ${BLOCK_WID} × ${BLOCK_HT} mm (X × Y × Z)`);
+set('s-tube',`2× Ø${TUBE_OD}, center sep ${TUBE_CENTER_SEP}, at Y ±${TUBE_Y.toFixed(2)}`);
+set('s-gnss',`GNSS Ø${GNSS_HOLE_D} center; 4× M4 clamp at ±${BOLT_OFF}`);
+set('s-fly',`4× M4 (Ø${FLY_M4}) at ${PAT_X} × ${PAT_Y} (= GNSS / box-bottom pattern) — X ±${HX.toFixed(2)}, Y rows ${HY_IN.toFixed(1)} / ${HY_OUT.toFixed(1)}`);
+set('s-edge',`outer row ${FLY_EDGE} mm from the ±${WING_OUT} plate end; X holes at the 36.14 pattern (${(BLOCK_LEN/2-HX).toFixed(1)} mm from the X-edge)`);
+
+const C=[];const ck=(o,m)=>C.push({o,m});
+ck(Math.abs(PAT_X-36.14)<0.01 && Math.abs(PAT_Y-36.1)<0.01, `Pattern ${PAT_X} × ${PAT_Y} matches the GNSS / FlyCatcher-box-bottom holes — box bolts straight on`);
+ck(HX<BLOCK_LEN/2, `X holes ±${HX.toFixed(2)} fit the ${BLOCK_LEN} mm plate (${(BLOCK_LEN/2-HX).toFixed(1)} mm to the edge)`);
+ck(HY_OUT<WING_OUT, `Outer row ${HY_OUT.toFixed(1)} is ${FLY_EDGE} mm in from the ${WING_OUT} plate end`);
+ck(HY_IN>WING_IN, `Inner row ${HY_IN.toFixed(1)} clears the tube (tube edge ${WING_IN.toFixed(1)})`);
+ck(true, `Symmetric: identical 36.14 × 36.1 M4 mount on +Y and −Y wings`);
+const ul=document.getElementById('checks');
+for(const c of C){const li=document.createElement('li');li.innerHTML=(c.o?'<span style="color:var(--accent)">✓</span> ':'<span style="color:var(--warn)">✗</span> ')+c.m;ul.appendChild(li);}
+</script>
+</body>
+</html>

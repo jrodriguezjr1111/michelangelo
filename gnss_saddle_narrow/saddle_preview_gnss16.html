@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CyberWing — GNSS narrow saddle preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --plastic: #f2b84b; --plastic-dk: #b07a1c; --plastic-lt: #f7d489;
+    --tube: #4a9a8c; --bolt: #d6b35a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.wide { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .label { fill: var(--ink); font: 600 11px sans-serif; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  .ok { fill: var(--accent); font: 700 11px sans-serif; }
+  .warn { fill: var(--warn); font: 700 11px sans-serif; }
+  table.bom { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.bom th, table.bom td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                               text-align: left; vertical-align: top; }
+  table.bom th { color: var(--mute); font-weight: 600; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CyberWing — GNSS narrow saddle (quarter-wrap) — <b>Ø16 GNSS bolt</b></h1>
+  <p>Same quarter-wrap clamp as
+     <code>gnss_saddle_narrow/make_gnss_saddle_narrow.py</code> (two mirror-identical
+     halves around two parallel tubes), with a <b>Ø16 mm through-hole at the center
+     for the GNSS bolt</b>. The hole clears the 4× M4 clamps and the tube bores.</p>
+</header>
+
+<main>
+
+  <div class="card wide">
+    <h2>Specifications</h2>
+    <table class="bom">
+      <tr><th>Block (assembled)</th><td id="spec-block">—</td></tr>
+      <tr><th>Tubes</th><td id="spec-tubes">—</td></tr>
+      <tr><th>Tube bore</th><td id="spec-bore">—</td></tr>
+      <tr><th>Wrap angle</th><td id="spec-wrap">—</td></tr>
+      <tr><th>Clamp bolts</th><td id="spec-bolts">—</td></tr>
+      <tr><th>GNSS bolt hole</th><td id="spec-gnss">—</td></tr>
+      <tr><th>Half thickness</th><td id="spec-half">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view — split face</h2>
+    <p class="sub">Looking down Z at one half. Tube centers sit outboard of the block edge → quarter-bore scoops on the corners.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>plastic</span>
+      <span><span class="sw" style="background:#101319;border:1px solid #555"></span>void</span>
+      <span><span class="sw" style="background:var(--tube);opacity:0.5"></span>tube path</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M4 clamp</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 600 520"></svg>
+  </div>
+
+  <div class="card">
+    <h2>End view — assembled (look along X)</h2>
+    <p class="sub">Cross-section of both halves stacked. Tubes (green) cross the block edges; only the quarter inside the block is captured by plastic.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>upper half</span>
+      <span><span class="sw" style="background:var(--plastic-lt)"></span>lower half</span>
+      <span><span class="sw" style="background:var(--tube)"></span>tube</span>
+    </div>
+    <svg id="end-svg" viewBox="0 0 600 360"></svg>
+  </div>
+
+  <div class="card wide">
+    <h2>Fit-check assertions</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL source of truth: <code>gnss_saddle_narrow/make_gnss_saddle_narrow.py</code>.
+  Print 2 copies of the half STL, outer face on bed, split face up.
+  Hardware per saddle: 4× M4 × 30 mm socket caps + M4 nuts.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_gnss_saddle_narrow.py
+// =====================================================================
+const TUBE_OD          = 15.39;
+const TUBE_CENTER_SEP  = 60.17;
+const CLEARANCE        = 0.4;
+
+const BLOCK_LEN = 50.0;
+const BLOCK_WID = 60.0;
+const BLOCK_HT  = 28.0;
+
+// GNSS bolt — Ø16 through-hole, centered (this version)
+const GNSS_BOLT_D = 16.0;
+
+const BOLT_X_OFFSET  = 18.0;
+const BOLT_Y_OFFSET  = 18.0;
+const SCREW_CLEAR_D  = 4.4;
+const SCREW_HEAD_D   = 8.0;
+const SCREW_HEAD_DEPTH = 4.5;
+
+// =====================================================================
+// Derived
+// =====================================================================
+const HALF_HT = BLOCK_HT / 2;
+const R_IN    = TUBE_OD / 2 + CLEARANCE / 2;
+const TUBE_Y  = TUBE_CENTER_SEP / 2;
+
+// Wrap geometry. The half-block occupies Z<HALF_HT (split plane up); the
+// tube bore is a horizontal cylinder centered at (Y=±TUBE_Y, Z=HALF_HT).
+// Per-half captured arc = portion of the bore circle with Y inside the block
+// (|Y|<BLOCK_WID/2) AND Z<HALF_HT. With inset = BLOCK_WID/2 - TUBE_Y:
+//   inset >= R_IN : per-half wrap = 180°  (full half-cylinder)
+//   inset <= -R_IN: per-half wrap = 0°   (no contact)
+//   else          : per-half wrap = arccos(-inset/R_IN)
+//                                = arccos(overhang/R_IN)
+// Assembled wrap (two halves stacked) = 2× per-half.
+const overhang = TUBE_Y - BLOCK_WID/2;   // positive ⇒ tube center is outside block
+let wrapHalfDeg = NaN;
+if (overhang >= R_IN) {
+  wrapHalfDeg = 0;
+} else if (overhang <= -R_IN) {
+  wrapHalfDeg = 180;
+} else {
+  wrapHalfDeg = Math.acos(overhang / R_IN) * 180 / Math.PI;
+}
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, name, attrs, text) {
+  const e = document.createElementNS(ns, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// TOP VIEW (Y horizontal, X vertical)
+// Use a viewbox-padded scale that accounts for tubes sticking out of block
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 600, VB_H = 520;
+  // include tubes (which extend Y past block edges) in the visible extent
+  const halfYExtent = Math.max(BLOCK_WID/2, TUBE_Y + R_IN) + 4;
+  const halfXExtent = BLOCK_LEN/2 + 4;
+  const scale = Math.min((VB_W - 80) / (2*halfYExtent),
+                         (VB_H - 100) / (2*halfXExtent));
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const Y = y => cx + y * scale;
+  const X = x => cy - x * scale;
+
+  // Block outline
+  el(svg, 'rect', {
+    x: Y(-BLOCK_WID/2), y: X(BLOCK_LEN/2),
+    width: BLOCK_WID * scale, height: BLOCK_LEN * scale,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5,
+    rx: 2
+  });
+
+  // Tube footprints — full circles at each end so user sees full path
+  for (const sy of [-1, 1]) {
+    // tube cylinder seen from above = rectangle along X centered on Y=TUBE_Y
+    el(svg, 'rect', {
+      x: Y(sy * TUBE_Y - R_IN), y: X(BLOCK_LEN/2 + 0.5),
+      width: 2 * R_IN * scale, height: BLOCK_LEN * scale + 1,
+      fill: 'none', stroke: '#4a9a8c', 'stroke-width': 1,
+      'stroke-dasharray': '4 3', opacity: 0.7
+    });
+    // centerline
+    el(svg, 'line', {
+      x1: Y(sy * TUBE_Y), y1: X(BLOCK_LEN/2 + 4),
+      x2: Y(sy * TUBE_Y), y2: X(-BLOCK_LEN/2 - 4),
+      stroke: '#4a9a8c', 'stroke-dasharray': '4 4', 'stroke-width': 0.7, opacity: 0.8
+    });
+    el(svg, 'text', {
+      x: Y(sy * TUBE_Y), y: X(-BLOCK_LEN/2) + 18,
+      'text-anchor': 'middle', class: 'dim'
+    }, `tube Y=${(sy*TUBE_Y).toFixed(2)}`);
+
+    // scooped void inside block (the part of the bore that intersects the block)
+    // approximate via clip-path on a rect representing the bore extent
+    const clipId = `clip-tube-${sy>0?'p':'n'}`;
+    const defs = el(svg, 'defs', {});
+    const cp = el(defs, 'clipPath', { id: clipId });
+    el(cp, 'rect', {
+      x: Y(-BLOCK_WID/2), y: X(BLOCK_LEN/2),
+      width: BLOCK_WID * scale, height: BLOCK_LEN * scale
+    });
+    el(svg, 'rect', {
+      x: Y(sy * TUBE_Y - R_IN), y: X(BLOCK_LEN/2),
+      width: 2 * R_IN * scale, height: BLOCK_LEN * scale,
+      fill: '#101319', stroke: 'none', 'clip-path': `url(#${clipId})`
+    });
+  }
+
+  // Clamp bolts (4 corners)
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    el(svg, 'circle', {
+      cx: Y(sy * BOLT_Y_OFFSET), cy: X(sx * BOLT_X_OFFSET),
+      r: SCREW_HEAD_D / 2 * scale,
+      fill: 'none', stroke: '#d6b35a', 'stroke-width': 0.8,
+      'stroke-dasharray': '2 2', opacity: 0.55
+    });
+    el(svg, 'circle', {
+      cx: Y(sy * BOLT_Y_OFFSET), cy: X(sx * BOLT_X_OFFSET),
+      r: SCREW_CLEAR_D / 2 * scale,
+      fill: '#101319', stroke: '#d6b35a', 'stroke-width': 1
+    });
+  }
+
+  // GNSS bolt Ø16 through-hole (centered)
+  el(svg, 'circle', {
+    cx: Y(0), cy: X(0), r: GNSS_BOLT_D / 2 * scale,
+    fill: '#101319', stroke: '#94c8ef', 'stroke-width': 1.4
+  });
+  el(svg, 'text', { x: Y(0), y: X(0) + 4, 'text-anchor': 'middle',
+    fill: '#94c8ef', style: 'font:700 11px sans-serif' }, `Ø${GNSS_BOLT_D}`);
+
+  // Y dim
+  const yd = X(-BLOCK_LEN/2) + 36;
+  el(svg, 'line', { x1: Y(-BLOCK_WID/2), y1: yd, x2: Y(BLOCK_WID/2), y2: yd, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: Y(-BLOCK_WID/2), y1: yd-4, x2: Y(-BLOCK_WID/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: Y( BLOCK_WID/2), y1: yd-4, x2: Y( BLOCK_WID/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'text', { x: Y(0), y: yd+14, 'text-anchor': 'middle', class: 'dim' },
+    `${BLOCK_WID.toFixed(2)} mm  (Y, across tubes)`);
+
+  // tube center spacing
+  const ytcs = X(BLOCK_LEN/2) - 10;
+  el(svg, 'line', { x1: Y(-TUBE_Y), y1: ytcs, x2: Y(TUBE_Y), y2: ytcs, stroke: '#94efb1' });
+  el(svg, 'line', { x1: Y(-TUBE_Y), y1: ytcs-4, x2: Y(-TUBE_Y), y2: ytcs+4, stroke: '#94efb1' });
+  el(svg, 'line', { x1: Y( TUBE_Y), y1: ytcs-4, x2: Y( TUBE_Y), y2: ytcs+4, stroke: '#94efb1' });
+  el(svg, 'text', { x: Y(0), y: ytcs - 6, 'text-anchor': 'middle', class: 'ok' },
+    `tube C-C ${TUBE_CENTER_SEP.toFixed(2)} mm`);
+
+  // X dim
+  const xd = Y(-halfYExtent) + 8;
+  el(svg, 'line', { x1: xd, y1: X(-BLOCK_LEN/2), x2: xd, y2: X(BLOCK_LEN/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: X(-BLOCK_LEN/2), x2: xd+4, y2: X(-BLOCK_LEN/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: X( BLOCK_LEN/2), x2: xd+4, y2: X( BLOCK_LEN/2), stroke: '#8b93a7' });
+  el(svg, 'text', {
+    x: xd-8, y: X(0), 'text-anchor': 'end', class: 'dim',
+    transform: `rotate(-90 ${xd-8} ${X(0)})`
+  }, `${BLOCK_LEN.toFixed(2)} mm  (X, tube axis)`);
+})();
+
+// =====================================================================
+// END VIEW (Y horizontal, Z vertical, assembled — look along +X)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('end-svg');
+  const VB_W = 600, VB_H = 360;
+  const halfYExtent = Math.max(BLOCK_WID/2, TUBE_Y + R_IN) + 6;
+  const scale = Math.min((VB_W - 80) / (2*halfYExtent), (VB_H - 80) / BLOCK_HT);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const Y = y => cx + y * scale;
+  const Z = z => cy - (z - HALF_HT) * scale;
+
+  // Lower half
+  el(svg, 'rect', {
+    x: Y(-BLOCK_WID/2), y: Z(HALF_HT),
+    width: BLOCK_WID * scale, height: HALF_HT * scale,
+    fill: 'var(--plastic-lt)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5
+  });
+  // Upper half
+  el(svg, 'rect', {
+    x: Y(-BLOCK_WID/2), y: Z(BLOCK_HT),
+    width: BLOCK_WID * scale, height: HALF_HT * scale,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5
+  });
+
+  // Split line
+  el(svg, 'line', {
+    x1: Y(-BLOCK_WID/2), y1: Z(HALF_HT),
+    x2: Y( BLOCK_WID/2), y2: Z(HALF_HT),
+    stroke: '#8b93a7', 'stroke-dasharray': '5 4', 'stroke-width': 1
+  });
+
+  // Tubes — full circles at split plane (extend outside block on Y axis)
+  for (const sy of [-1, 1]) {
+    el(svg, 'circle', {
+      cx: Y(sy * TUBE_Y), cy: Z(HALF_HT), r: R_IN * scale,
+      fill: 'none', stroke: '#4a9a8c', 'stroke-width': 1,
+      'stroke-dasharray': '3 3', opacity: 0.6
+    });
+    el(svg, 'circle', {
+      cx: Y(sy * TUBE_Y), cy: Z(HALF_HT), r: TUBE_OD / 2 * scale,
+      fill: '#4a9a8c', stroke: '#2c635c', 'stroke-width': 1
+    });
+    el(svg, 'circle', { cx: Y(sy * TUBE_Y), cy: Z(HALF_HT), r: 2, fill: '#fff' });
+    el(svg, 'text', {
+      x: Y(sy * TUBE_Y), y: Z(HALF_HT) - TUBE_OD/2 * scale - 6,
+      'text-anchor': 'middle', class: 'dim'
+    }, `Ø${TUBE_OD}`);
+  }
+
+  // Clamp bolts (2 representative — Y = ±BOLT_Y_OFFSET)
+  for (const sy of [-1, 1]) {
+    const bx = Y(sy * BOLT_Y_OFFSET);
+    el(svg, 'line', {
+      x1: bx, y1: Z(BLOCK_HT), x2: bx, y2: Z(0),
+      stroke: '#d6b35a', 'stroke-width': SCREW_CLEAR_D * scale * 0.6, opacity: 0.85
+    });
+    el(svg, 'rect', {
+      x: bx - SCREW_HEAD_D/2 * scale, y: Z(BLOCK_HT),
+      width: SCREW_HEAD_D * scale, height: SCREW_HEAD_DEPTH * scale,
+      fill: '#b07a1c', stroke: '#7a4f0f', 'stroke-width': 0.8
+    });
+    el(svg, 'rect', {
+      x: bx - SCREW_HEAD_D/2 * scale, y: Z(SCREW_HEAD_DEPTH),
+      width: SCREW_HEAD_D * scale, height: SCREW_HEAD_DEPTH * scale,
+      fill: '#7a4f0f', stroke: '#5a3a0c', 'stroke-width': 0.8
+    });
+    el(svg, 'text', {
+      x: bx, y: Z(0) + 14, 'text-anchor': 'middle', class: 'dim'
+    }, `M4 @Y=${(sy*BOLT_Y_OFFSET).toFixed(0)}`);
+  }
+
+  // Dim: tube C-C
+  const ydim = Z(0) + 28;
+  el(svg, 'line', { x1: Y(-TUBE_Y), y1: ydim, x2: Y(TUBE_Y), y2: ydim, stroke: '#94efb1' });
+  el(svg, 'line', { x1: Y(-TUBE_Y), y1: ydim-4, x2: Y(-TUBE_Y), y2: ydim+4, stroke: '#94efb1' });
+  el(svg, 'line', { x1: Y( TUBE_Y), y1: ydim-4, x2: Y( TUBE_Y), y2: ydim+4, stroke: '#94efb1' });
+  el(svg, 'text', { x: Y(0), y: ydim+14, 'text-anchor': 'middle', class: 'ok' },
+    `tube C-C ${TUBE_CENTER_SEP.toFixed(2)} mm`);
+
+  // Z dim
+  const zdim = Y(halfYExtent) - 8;
+  el(svg, 'line', { x1: zdim, y1: Z(0), x2: zdim, y2: Z(BLOCK_HT), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: zdim-4, y1: Z(0), x2: zdim+4, y2: Z(0), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: zdim-4, y1: Z(BLOCK_HT), x2: zdim+4, y2: Z(BLOCK_HT), stroke: '#8b93a7' });
+  el(svg, 'text', {
+    x: zdim+8, y: Z(HALF_HT)+4, class: 'dim',
+    transform: `rotate(-90 ${zdim+8} ${Z(HALF_HT)+4})`
+  }, `${BLOCK_HT} mm  (Z)`);
+})();
+
+// =====================================================================
+// Specs + fit checks
+// =====================================================================
+document.getElementById('spec-block').textContent =
+  `${BLOCK_LEN} × ${BLOCK_WID} × ${BLOCK_HT} mm`;
+document.getElementById('spec-tubes').textContent =
+  `2× Ø${TUBE_OD} mm at Y = ±${TUBE_Y.toFixed(2)} (C-C ${TUBE_CENTER_SEP} mm)`;
+document.getElementById('spec-bore').textContent =
+  `Ø${(2*R_IN).toFixed(2)} mm  (Ø${TUBE_OD} + ${CLEARANCE} mm clearance)`;
+document.getElementById('spec-wrap').textContent =
+  wrapHalfDeg > 0
+    ? `${wrapHalfDeg.toFixed(1)}° per half  →  assembled wrap ${(2*wrapHalfDeg).toFixed(1)}° per tube`
+    : `tube does not intersect block — no engagement!`;
+document.getElementById('spec-bolts').textContent =
+  `4× M4 at (±${BOLT_X_OFFSET}, ±${BOLT_Y_OFFSET}) — clearance Ø${SCREW_CLEAR_D}, head/nut counterbore Ø${SCREW_HEAD_D}×${SCREW_HEAD_DEPTH}`;
+document.getElementById('spec-gnss').textContent =
+  `Ø${GNSS_BOLT_D} mm through-hole, centered`;
+document.getElementById('spec-half').textContent =
+  `${HALF_HT} mm  (each printed half)`;
+
+const checks = [];
+function check(ok, msg) { checks.push({ ok, msg }); }
+
+const heightClr = HALF_HT - R_IN;
+const boltTubeY = (TUBE_Y - BOLT_Y_OFFSET) - (R_IN + SCREW_CLEAR_D/2);
+check(wrapHalfDeg > 30, `Wrap per half: ${wrapHalfDeg.toFixed(1)}°  (> 30° for grip)`);
+check(overhang < R_IN, `Tube intersects block (overhang ${overhang.toFixed(2)} < bore R ${R_IN.toFixed(2)})`);
+check(heightClr > 2, `Half-height clearance above bore: ${heightClr.toFixed(2)} mm (> 2)`);
+check(boltTubeY > 1, `Bolt to tube-bore Y clearance: ${boltTubeY.toFixed(2)} mm (> 1)`);
+check(SCREW_HEAD_DEPTH < HALF_HT, `Counterbore depth (${SCREW_HEAD_DEPTH}) < half height (${HALF_HT})`);
+check(SCREW_HEAD_DEPTH * 2 < BLOCK_HT - 6, `Bolt shaft engagement: ${(BLOCK_HT - 2*SCREW_HEAD_DEPTH).toFixed(1)} mm`);
+const gnssToBolt = Math.hypot(BOLT_X_OFFSET, BOLT_Y_OFFSET) - (GNSS_BOLT_D/2 + SCREW_CLEAR_D/2);
+const gnssToTube = (TUBE_Y - R_IN) - GNSS_BOLT_D/2;
+check(gnssToBolt > 1, `Ø${GNSS_BOLT_D} GNSS hole → M4 clamp clearance: ${gnssToBolt.toFixed(2)} mm (> 1)`);
+check(gnssToTube > 1, `Ø${GNSS_BOLT_D} GNSS hole → tube bore clearance: ${gnssToTube.toFixed(2)} mm (> 1)`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

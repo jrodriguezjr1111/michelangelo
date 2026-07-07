@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jetson Orin Nano Deck — Preview</title>
+<style>
+  :root{
+    --bg:#0d0f14; --card:#161922; --mute:#8b93a7; --txt:#e6e9ef;
+    --body:#2a3142; --body-dk:#444c61; --hole:#f6cd7b; --board:#3fae6b;
+    --screw:#e0796b; --foot:#6aa0e0; --post:#c08be0; --accent:#4fd28a; --warn:#e05a5a;
+  }
+  *{box-sizing:border-box;} body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+  header{padding:24px 28px 8px;} h1{margin:0;font-size:22px;}
+  header p{color:var(--mute);margin:6px 0 0;font-size:13px;}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px 28px;}
+  .card{background:var(--card);border-radius:10px;padding:16px 18px;}
+  .card.full{grid-column:1 / -1;}
+  h2{margin:0 0 4px;font-size:15px;} .sub{color:var(--mute);font-size:12px;margin:0 0 10px;}
+  svg{width:100%;height:auto;background:#0a0c11;border-radius:6px;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-bottom:8px;}
+  .sw{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:-1px;margin-right:5px;}
+  table.specs{width:100%;border-collapse:collapse;font-size:13px;}
+  table.specs td,table.specs th{padding:5px 8px;border-bottom:1px solid #222633;text-align:left;}
+  table.specs th{color:var(--mute);font-weight:600;width:230px;}
+  code{background:#101319;padding:1px 5px;border-radius:3px;color:#f6cd7b;}
+  .dim{fill:#8b93a7;font-size:10px;} ul.checks{margin:0;padding-left:18px;line-height:1.7;}
+  footer{color:var(--mute);padding:0 28px 28px;font-size:12px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Jetson Orin Nano — Stackable Deck Plate</h1>
+  <p>A single flat surface: board mounts on 4 short standoffs; 4 corner posts
+     carry the next deck above. Fast to print — no tall walls.
+     Source: <code>orin_box/make_orin_deck.py</code></p>
+</header>
+
+<main>
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Base plate</th><td id="s-plate">—</td></tr>
+      <tr><th>Board / hole pattern</th><td id="s-board">—</td></tr>
+      <tr><th>Board standoffs</th><td id="s-standoff">—</td></tr>
+      <tr><th>Support posts (next layer)</th><td id="s-post">—</td></tr>
+      <tr><th>Clearance to next deck</th><td id="s-clear">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Looking down at the deck. Board shifted to &minus;Y, leaving +Y room for cables.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Plate</span>
+      <span><span class="sw" style="background:var(--board)"></span>Board / standoff</span>
+      <span><span class="sw" style="background:var(--post)"></span>Support post</span>
+      <span><span class="sw" style="background:var(--screw)"></span>Screw hole</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 520 600"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (X × Z)</h2>
+    <p class="sub">Board rides on short standoffs; tall posts hold the deck above.</p>
+    <svg id="sec-svg" viewBox="0 0 520 360"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+</main>
+
+<footer>
+  Print flat, no supports. Board fastens to 4 standoffs (M2.5 self-tap). Stack decks
+  by running 4× M3 screws up through each post into the post of the deck above
+  (or use threaded standoffs). Connector clearance set by post height.
+</footer>
+
+<script>
+// Parameters — sync with make_orin_deck.py
+// Board (Jetson Orin Nano dev kit)
+const BOARD_X=100.0, BOARD_Y=81.0, HOLE_X=92.0, HOLE_Y=58.0;
+const BOARD_Y_OFF=-12.0;            // shift board toward -Y for cable room at +Y
+const BOARD_T=1.6;                  // PCB thickness (visual only)
+
+// Board standoffs (board sits this high above the plate)
+const STANDOFF_D=6.0, STANDOFF_H=7.0, STANDOFF_PILOT=2.1;  // M2.5 self-tap
+
+// Base plate (the printed surface)
+const PLATE_X=112.0, PLATE_Y=138.0, PLATE_T=3.0;
+
+// Corner support posts -> carry the next deck
+const SUPPORT_D=8.0, SUPPORT_H=40.0, SUPPORT_THRU=3.4;     // M3 clearance through-hole
+const SUPPORT_INSET=8.0;            // post-center inset from each plate edge
+const SUPPORT_X=PLATE_X/2-SUPPORT_INSET;
+const SUPPORT_Y=PLATE_Y/2-SUPPORT_INSET;
+
+// Derived
+const BOARD_TOP_Z=PLATE_T+STANDOFF_H+BOARD_T;   // top of seated PCB
+const NEXT_Z=PLATE_T+SUPPORT_H;                  // underside of next deck
+const TOTAL_H=NEXT_Z+PLATE_T;                    // through the next deck plate
+const CLEAR=NEXT_Z-BOARD_TOP_Z;                  // free height above PCB
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// TOP VIEW — X horizontal, Y vertical (+Y up)
+(()=>{
+  const svg=document.getElementById('top-svg');
+  const VB_W=520,VB_H=600,m=40;
+  const s=Math.min((VB_W-2*m)/PLATE_X,(VB_H-2*m)/PLATE_Y);
+  const cx=VB_W/2,cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s;
+  // plate
+  el(svg,'rect',{x:X(-PLATE_X/2),y:Y(PLATE_Y/2),width:PLATE_X*s,height:PLATE_Y*s,fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.5,rx:5});
+  // board outline
+  el(svg,'rect',{x:X(-BOARD_X/2),y:Y(BOARD_Y/2+BOARD_Y_OFF),width:BOARD_X*s,height:BOARD_Y*s,fill:'none',stroke:'var(--board)','stroke-width':1,'stroke-dasharray':'2 2'});
+  // board standoffs
+  for(const sx of[-1,1])for(const sy of[-1,1]){
+    el(svg,'circle',{cx:X(sx*HOLE_X/2),cy:Y(sy*HOLE_Y/2+BOARD_Y_OFF),r:STANDOFF_D/2*s,fill:'var(--board)',stroke:'var(--body-dk)','stroke-width':0.8});
+    el(svg,'circle',{cx:X(sx*HOLE_X/2),cy:Y(sy*HOLE_Y/2+BOARD_Y_OFF),r:STANDOFF_PILOT/2*s,fill:'#101319'});
+  }
+  // support posts at corners
+  for(const sx of[-1,1])for(const sy of[-1,1]){
+    el(svg,'circle',{cx:X(sx*SUPPORT_X),cy:Y(sy*SUPPORT_Y),r:SUPPORT_D/2*s,fill:'var(--post)',stroke:'var(--body-dk)','stroke-width':0.8});
+    el(svg,'circle',{cx:X(sx*SUPPORT_X),cy:Y(sy*SUPPORT_Y),r:SUPPORT_THRU/2*s,fill:'#101319',stroke:'var(--screw)','stroke-width':1});
+  }
+  el(svg,'text',{x:cx,y:Y(PLATE_Y/2)-6,'text-anchor':'middle',class:'dim'},`${PLATE_X} mm`);
+  el(svg,'text',{x:X(PLATE_X/2)+4,y:cy,'text-anchor':'start',class:'dim'},`${PLATE_Y} mm`);
+})();
+
+// CROSS-SECTION — X horizontal, Z vertical
+(()=>{
+  const svg=document.getElementById('sec-svg');
+  const VB_W=520,VB_H=360,m=40;
+  const s=Math.min((VB_W-2*m)/PLATE_X,(VB_H-2*m)/(TOTAL_H*1.15));
+  const cx=VB_W/2,floorY=VB_H-m;
+  const X=x=>cx+x*s, Z=z=>floorY-z*s;
+  // base plate
+  el(svg,'rect',{x:X(-PLATE_X/2),y:Z(PLATE_T),width:PLATE_X*s,height:PLATE_T*s,fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+  // board standoffs (the two in this section plane, at X=±HOLE_X/2)
+  for(const sx of[-1,1])
+    el(svg,'rect',{x:X(sx*HOLE_X/2-STANDOFF_D/2),y:Z(PLATE_T+STANDOFF_H),width:STANDOFF_D*s,height:STANDOFF_H*s,fill:'var(--board)'});
+  // seated PCB
+  el(svg,'rect',{x:X(-BOARD_X/2),y:Z(PLATE_T+STANDOFF_H+BOARD_T),width:BOARD_X*s,height:BOARD_T*s,fill:'none',stroke:'var(--board)','stroke-width':1,'stroke-dasharray':'3 2'});
+  // support posts (at X=±SUPPORT_X)
+  for(const sx of[-1,1]){
+    el(svg,'rect',{x:X(sx*SUPPORT_X-SUPPORT_D/2),y:Z(PLATE_T+SUPPORT_H),width:SUPPORT_D*s,height:SUPPORT_H*s,fill:'var(--post)'});
+    el(svg,'line',{x1:X(sx*SUPPORT_X),y1:Z(0),x2:X(sx*SUPPORT_X),y2:Z(PLATE_T+SUPPORT_H),stroke:'var(--screw)','stroke-width':1,'stroke-dasharray':'2 2'});
+  }
+  // next deck above (dashed)
+  el(svg,'rect',{x:X(-PLATE_X/2),y:Z(NEXT_Z+PLATE_T),width:PLATE_X*s,height:PLATE_T*s,fill:'none',stroke:'var(--foot)','stroke-width':1,'stroke-dasharray':'4 3'});
+  el(svg,'text',{x:cx,y:Z(NEXT_Z)+12,'text-anchor':'middle',class:'dim'},'next deck');
+  // clearance dimension
+  el(svg,'text',{x:X(PLATE_X/2)-4,y:Z(PLATE_T+SUPPORT_H/2),'text-anchor':'end',class:'dim'},`post ${SUPPORT_H}`);
+})();
+
+// SPECS
+document.getElementById('s-plate').textContent=`${PLATE_X} × ${PLATE_Y} × ${PLATE_T} mm`;
+document.getElementById('s-board').textContent=`board ${BOARD_X} × ${BOARD_Y}; holes ${HOLE_X} × ${HOLE_Y} (Y offset ${BOARD_Y_OFF})`;
+document.getElementById('s-standoff').textContent=`4× ⌀${STANDOFF_D} × ${STANDOFF_H} mm, ${STANDOFF_PILOT} pilot (M2.5 self-tap)`;
+document.getElementById('s-post').textContent=`4× ⌀${SUPPORT_D} × ${SUPPORT_H} mm at X=±${SUPPORT_X}, Y=±${SUPPORT_Y}; ${SUPPORT_THRU} M3 through-hole`;
+document.getElementById('s-clear').textContent=`${CLEAR.toFixed(1)} mm free above PCB (top of deck stack ${TOTAL_H} mm)`;
+
+// post-to-board footprint clearance (min gap from post edge to board rectangle)
+function postGap(px,py){
+  const bx0=-BOARD_X/2,bx1=BOARD_X/2,by0=-BOARD_Y/2+BOARD_Y_OFF,by1=BOARD_Y/2+BOARD_Y_OFF;
+  const dx=Math.max(bx0-px,0,px-bx1), dy=Math.max(by0-py,0,py-by1);
+  return Math.hypot(dx,dy)-SUPPORT_D/2;
+}
+let minGap=Infinity;
+for(const sx of[-1,1])for(const sy of[-1,1])minGap=Math.min(minGap,postGap(sx*SUPPORT_X,sy*SUPPORT_Y));
+
+// CHECKS
+const checks=[
+  {ok:BOARD_X+2<PLATE_X, msg:`Board width fits plate: ${(PLATE_X-BOARD_X).toFixed(1)} mm total slack`},
+  {ok:(BOARD_Y/2+Math.abs(BOARD_Y_OFF))*2<PLATE_Y, msg:`Board length fits plate (incl. offset)`},
+  {ok:minGap>0.5, msg:`Posts clear board footprint: ${minGap.toFixed(1)} mm min gap`},
+  {ok:STANDOFF_PILOT<STANDOFF_D-1, msg:`Standoff wall around M2.5 pilot OK`},
+  {ok:SUPPORT_THRU<SUPPORT_D-1, msg:`Post wall around M3 through-hole OK`},
+  {ok:CLEAR>0, msg:`Next deck clears seated PCB by ${CLEAR.toFixed(1)} mm`},
+  {ok:SUPPORT_X<PLATE_X/2&&SUPPORT_Y<PLATE_Y/2, msg:`Posts inside plate footprint`},
+];
+const ul=document.getElementById('checks');
+for(const c of checks){const li=document.createElement('li');li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;ul.appendChild(li);}
+</script>
+</body>
+</html>

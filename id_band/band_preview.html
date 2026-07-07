@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Newborn ID band — preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5;
+    --band: #eef0f3; --band-dk: #8f96a3;
+    --emboss: #c9cfd8; --emboss-edge: #5b6272;
+    --hole: #101319;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr; }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  table.bom { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.bom th, table.bom td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; }
+  table.bom th { color:var(--mute); font-weight:600; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Newborn ID band — Mother's Day keepsake</h1>
+  <p>Rendered from the same parameters as <code>id_band/make_id_band.py</code>.
+     Text is shown as it will appear raised (embossed) on the top face of the band.</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>Specifications</h2>
+    <table class="bom">
+      <tr><th>Strip</th><td id="spec-strip">—</td></tr>
+      <tr><th>Emboss</th><td id="spec-emboss">—</td></tr>
+      <tr><th>Tie holes</th><td id="spec-ties">—</td></tr>
+      <tr><th>Text</th><td id="spec-text">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (to scale in viewport)</h2>
+    <p class="sub">Band shown face-up. Embossed text in lighter fill with darker edge;
+       tie holes at each end for ribbon or string.</p>
+    <svg id="top-svg" viewBox="0 0 920 260"></svg>
+  </div>
+
+</main>
+
+<footer>
+  STL source of truth: <code>id_band/make_id_band.py</code>.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_id_band.py
+// =====================================================================
+const STRIP_L = 160.0;
+const STRIP_W = 32.0;
+const STRIP_T = 3.0;
+const END_R   = STRIP_W / 2;
+
+const TEXT_H_NAME = 5.5;
+const TEXT_H_INFO = 4.5;
+const TEXT_EMBOSS = 1.2;
+const LINE_SPACE  = 8.0;
+const FONT = "Arial, 'Helvetica Neue', Helvetica, sans-serif";
+
+const LINES = [
+  { t: "NICOLAS XAVIER RODRIGUEZ", h: TEXT_H_NAME, bold: true  },
+  { t: "DOB: 05/08/23    SEX: M",  h: TEXT_H_INFO, bold: false },
+  { t: "MOTHER: PERLA HUIZAR",     h: TEXT_H_INFO, bold: false },
+];
+
+const TIE_D     = 4.0;
+const TIE_COUNT = 2;
+const TIE_PITCH = 8.0;
+const TIE_EDGE  = 8.0;
+
+// =====================================================================
+// SVG helpers
+// =====================================================================
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, name, attrs, text) {
+  const e = document.createElementNS(ns, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// TOP VIEW
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 920, VB_H = 260;
+  const scale = Math.min((VB_W - 60) / STRIP_L, (VB_H - 80) / STRIP_W);
+  const ox = VB_W / 2, oy = VB_H / 2;
+  const X = x => ox + x * scale;
+  const Y = y => oy - y * scale;   // +Y up
+
+  // Band body (rounded rect via rx=END_R)
+  el(svg, 'rect', {
+    x: X(-STRIP_L/2), y: Y(STRIP_W/2),
+    width: STRIP_L * scale, height: STRIP_W * scale,
+    rx: END_R * scale, ry: END_R * scale,
+    fill: 'var(--band)', stroke: 'var(--band-dk)', 'stroke-width': 1.2
+  });
+
+  // Tie holes at both ends
+  for (const sx of [-1, 1]) {
+    const xFirst = sx * (STRIP_L/2 - TIE_EDGE);
+    for (let i = 0; i < TIE_COUNT; i++) {
+      const x = xFirst - sx * i * TIE_PITCH;
+      el(svg, 'circle', {
+        cx: X(x), cy: Y(0), r: (TIE_D/2) * scale,
+        fill: 'var(--hole)', stroke: 'var(--band-dk)', 'stroke-width': 0.8
+      });
+    }
+  }
+
+  // Embossed text lines (centered on band, stacked vertically)
+  const totalH = (LINES.length - 1) * LINE_SPACE;
+  const yTop = totalH / 2;
+  LINES.forEach((L, i) => {
+    const y = yTop - i * LINE_SPACE;
+    // cap-height ≈ 0.72 * font-size for Arial — scale font-size up to match mm cap height
+    const fontPx = (L.h / 0.72) * scale;
+    // Edge stroke for "emboss" feel
+    el(svg, 'text', {
+      x: X(0), y: Y(y) + fontPx * 0.34, 'text-anchor': 'middle',
+      'font-family': FONT, 'font-size': fontPx,
+      'font-weight': L.bold ? 700 : 500,
+      fill: 'var(--emboss)',
+      stroke: 'var(--emboss-edge)', 'stroke-width': 0.6,
+      'paint-order': 'stroke fill'
+    }, L.t);
+  });
+
+  // Dimension: overall length along bottom
+  const yd = Y(-STRIP_W/2) + 26;
+  el(svg, 'line', { x1: X(-STRIP_L/2), y1: yd, x2: X(STRIP_L/2), y2: yd, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(-STRIP_L/2), y1: yd-4, x2: X(-STRIP_L/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X( STRIP_L/2), y1: yd-4, x2: X( STRIP_L/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'text', { x: X(0), y: yd+14, 'text-anchor': 'middle', class: 'dim' },
+    `${STRIP_L.toFixed(1)} mm`);
+
+  // Dimension: width on right
+  const xd = X(STRIP_L/2) + 20;
+  el(svg, 'line', { x1: xd, y1: Y(-STRIP_W/2), x2: xd, y2: Y(STRIP_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: Y(-STRIP_W/2), x2: xd+4, y2: Y(-STRIP_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: Y( STRIP_W/2), x2: xd+4, y2: Y( STRIP_W/2), stroke: '#8b93a7' });
+  el(svg, 'text', {
+    x: xd+8, y: Y(0)+4, class: 'dim',
+    transform: `rotate(-90 ${xd+8} ${Y(0)+4})`
+  }, `${STRIP_W.toFixed(1)} mm`);
+})();
+
+// =====================================================================
+// Specs
+// =====================================================================
+document.getElementById('spec-strip').textContent =
+  `${STRIP_L} × ${STRIP_W} × ${STRIP_T} mm, rounded ends (R${END_R})`;
+document.getElementById('spec-emboss').textContent =
+  `raised ${TEXT_EMBOSS} mm — name ${TEXT_H_NAME} mm cap, info ${TEXT_H_INFO} mm cap`;
+document.getElementById('spec-ties').textContent =
+  `${TIE_COUNT} × Ø${TIE_D} mm per end, ${TIE_PITCH} mm pitch, ${TIE_EDGE} mm from end`;
+document.getElementById('spec-text').innerHTML =
+  LINES.map(L => `<div>${L.bold ? '<b>'+L.t+'</b>' : L.t}</div>`).join('');
+</script>
+</body>
+</html>

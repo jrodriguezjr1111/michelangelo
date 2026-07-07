@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>ZED-F9P Platform — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --pcb:  #2a8f5a; --pcb-dk: #1d6b42;
+    --post: #f2b84b; --post-dk: #b27e1e;
+    --cable: #e06c75; --bolt: #d6b35a;
+    --slot: #c87aff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                                   text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 160px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ZED-F9P Platform — Cable Wrap Post Design</h1>
+  <p>43.5 × 43.5 mm mounting plate with hollow underside and central post
+     for USB cable coiling. Source: <code>zed_f9p_platform/make_platform.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <h2>Specifications</h2>
+    <table class="specs">
+      <tr><th>Footprint</th><td id="spec-foot">—</td></tr>
+      <tr><th>Top plate</th><td id="spec-top">—</td></tr>
+      <tr><th>Walls</th><td id="spec-wall">—</td></tr>
+      <tr><th>M3 mount pattern</th><td id="spec-m3">—</td></tr>
+      <tr><th>Wrap post</th><td id="spec-post">—</td></tr>
+      <tr><th>Cable slot</th><td id="spec-slot">—</td></tr>
+      <tr><th>Print</th><td id="spec-print">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (mount face)</h2>
+    <p class="sub">Board sits on top. 4× M3 countersunk holes in 37.6 mm square pattern.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Top plate</span>
+      <span><span class="sw" style="background:var(--pcb);opacity:0.5"></span>ZED-F9P board (ghost)</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 countersunk holes</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 360 360"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Bottom view (cavity + post)</h2>
+    <p class="sub">Looking up at the underside. Central post, cable wrapped around it, side slot.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall</span>
+      <span><span class="sw" style="background:var(--post)"></span>Wrap post</span>
+      <span><span class="sw" style="background:var(--cable)"></span>Cable (coiled)</span>
+      <span><span class="sw" style="background:var(--slot)"></span>Cable slot</span>
+    </div>
+    <svg id="bot-svg" viewBox="0 0 360 360"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Side cross-section (X–Z through center)</h2>
+    <p class="sub">Cable enters from +X side slot, wraps around central post inside the cavity.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Platform body</span>
+      <span><span class="sw" style="background:var(--post)"></span>Wrap post</span>
+      <span><span class="sw" style="background:var(--pcb);opacity:0.5"></span>ZED-F9P board</span>
+      <span><span class="sw" style="background:var(--cable);opacity:0.6"></span>Cable cross-sections</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 bolt path</span>
+    </div>
+    <svg id="section-svg" viewBox="0 0 680 320"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print top-face DOWN on bed (STL already flipped). No supports. PLA, ~30 min est.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_platform.py
+// =====================================================================
+const PLATE_L = 60.0;
+const PLATE_W = 60.0;
+const PLATE_H = 14.0;
+const TOP_T   = 3.0;
+const WALL_T  = 2.5;
+
+const M3_PATTERN = 37.6;
+const M3_CLEAR_D = 3.4;
+const M3_CSK_D   = 6.2;
+const M3_CSK_DEPTH = 1.8;
+
+const POST_D = 14.0;
+const POST_H = PLATE_H - TOP_T;
+
+const CABLE_D = 5.0;
+const SLOT_W  = 11.0;
+const SLOT_H  = 9.0;
+const SLOT_Z_CENTER = (PLATE_H - TOP_T) / 2;
+const SLOT_Y_OFFSET = (PLATE_W/2 - WALL_T) - SLOT_W/2 - 2.0;
+
+// ZED-F9P board approximate footprint
+const PCB_SIZE = 40.0; // assumed ~40×40 mm PCB (fits 37.6 hole pattern)
+
+// =====================================================================
+// SVG helpers
+// =====================================================================
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// TOP VIEW
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB = 360, margin = 50;
+  const scale = (VB - 2 * margin) / PLATE_L;
+  const c = VB / 2;
+  const X = x => c + x * scale;
+  const Y = y => c - y * scale;
+
+  // Plate
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+    width: PLATE_L * scale, height: PLATE_W * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3
+  });
+
+  // PCB ghost
+  el(svg, 'rect', {
+    x: X(-PCB_SIZE/2), y: Y(PCB_SIZE/2),
+    width: PCB_SIZE * scale, height: PCB_SIZE * scale,
+    fill: 'var(--pcb)', opacity: 0.3,
+    stroke: 'var(--pcb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3'
+  });
+  el(svg, 'text', { x: c, y: c + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--pcb)' }, 'ZED-F9P');
+
+  // M3 holes
+  const half = M3_PATTERN / 2;
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const cx = sx * half, cy = sy * half;
+    el(svg, 'circle', { cx: X(cx), cy: Y(cy), r: M3_CSK_D/2 * scale,
+      fill: 'var(--bolt)', opacity: 0.4 });
+    el(svg, 'circle', { cx: X(cx), cy: Y(cy), r: M3_CLEAR_D/2 * scale,
+      fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1 });
+  }
+
+  // Dimensions
+  // Plate L
+  const yd = Y(-PLATE_W/2) + 22;
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: yd, x2: X(PLATE_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: yd-3, x2: X(-PLATE_L/2), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(PLATE_L/2), y1: yd-3, x2: X(PLATE_L/2), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'text', { x: c, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L} mm`);
+
+  // M3 pattern
+  const ym = Y(half) - 8;
+  el(svg, 'line', { x1: X(-half), y1: ym, x2: X(half), y2: ym,
+    stroke: 'var(--bolt)', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: X(-half), y1: ym-3, x2: X(-half), y2: ym+3, stroke: 'var(--bolt)' });
+  el(svg, 'line', { x1: X(half), y1: ym-3, x2: X(half), y2: ym+3, stroke: 'var(--bolt)' });
+  el(svg, 'text', { x: c, y: ym - 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--bolt)' }, `${M3_PATTERN} mm`);
+
+  // Plate W (left)
+  const xd = X(-PLATE_L/2) - 22;
+  el(svg, 'line', { x1: xd, y1: Y(-PLATE_W/2), x2: xd, y2: Y(PLATE_W/2),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xd-3, y1: Y(-PLATE_W/2), x2: xd+3, y2: Y(-PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-3, y1: Y(PLATE_W/2), x2: xd+3, y2: Y(PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xd - 4, y: c + 4, 'text-anchor': 'end', class: 'dim' },
+    `${PLATE_W} mm`);
+})();
+
+// =====================================================================
+// BOTTOM VIEW
+// =====================================================================
+(() => {
+  const svg = document.getElementById('bot-svg');
+  const VB = 360, margin = 50;
+  const scale = (VB - 2 * margin) / PLATE_L;
+  const c = VB / 2;
+  const X = x => c + x * scale;
+  const Y = y => c - y * scale;
+
+  // Outer plate outline
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+    width: PLATE_L * scale, height: PLATE_W * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3
+  });
+
+  // Cavity (inner)
+  const cavL = PLATE_L - 2 * WALL_T;
+  const cavW = PLATE_W - 2 * WALL_T;
+  el(svg, 'rect', {
+    x: X(-cavL/2), y: Y(cavW/2),
+    width: cavL * scale, height: cavW * scale,
+    fill: '#101319', stroke: 'var(--body-dk)', 'stroke-width': 0.8
+  });
+
+  // Cable coil (ghost, 1.5 wraps around post)
+  const coilMax = Math.min(cavL, cavW) / 2 - 1;
+  for (let t = 0; t < 1.8; t += 0.02) {
+    const theta = t * Math.PI * 2;
+    const r = POST_D/2 + CABLE_D/2 + t * (CABLE_D + 0.5);
+    if (r > coilMax) break;
+  }
+  // Draw a 1.25-turn spiral
+  let d = '';
+  const turns = 1.25;
+  for (let t = 0; t <= turns; t += 0.01) {
+    const theta = t * Math.PI * 2;
+    const r = POST_D/2 + CABLE_D/2 + t * (CABLE_D + 0.3);
+    if (r > coilMax - CABLE_D/2) break;
+    const px = X(r * Math.cos(theta + Math.PI));
+    const py = Y(r * Math.sin(theta + Math.PI));
+    d += (d === '' ? 'M' : 'L') + px + ' ' + py + ' ';
+  }
+  el(svg, 'path', { d, fill: 'none', stroke: 'var(--cable)', 'stroke-width': CABLE_D * scale,
+    'stroke-linecap': 'round', opacity: 0.55 });
+
+  // Post (central)
+  el(svg, 'circle', {
+    cx: c, cy: c, r: POST_D/2 * scale,
+    fill: 'var(--post)', stroke: 'var(--post-dk)', 'stroke-width': 1.5
+  });
+  el(svg, 'text', { x: c, y: c + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: '#000' }, `Ø${POST_D}`);
+
+  // Cable slot 1 (+X side, offset toward +Y)
+  el(svg, 'rect', {
+    x: X(PLATE_L/2 - WALL_T - 0.5), y: Y(SLOT_Y_OFFSET + SLOT_W/2),
+    width: (WALL_T + 1) * scale, height: SLOT_W * scale,
+    fill: 'var(--slot)', opacity: 0.6, stroke: 'var(--slot)', 'stroke-width': 1
+  });
+  // Cable slot 2 (-X side, offset toward +Y — same side)
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2 - 0.5), y: Y(SLOT_Y_OFFSET + SLOT_W/2),
+    width: (WALL_T + 1) * scale, height: SLOT_W * scale,
+    fill: 'var(--slot)', opacity: 0.6, stroke: 'var(--slot)', 'stroke-width': 1
+  });
+
+  // Cable entry arrow (+X)
+  el(svg, 'line', {
+    x1: X(PLATE_L/2 + 8), y1: Y(SLOT_Y_OFFSET), x2: X(PLATE_L/2 + 1), y2: Y(SLOT_Y_OFFSET),
+    stroke: 'var(--cable)', 'stroke-width': 2, 'marker-end': 'url(#arrow)'
+  });
+  // Arrow marker
+  const defs = el(svg, 'defs', {});
+  const m = el(defs, 'marker', { id: 'arrow', markerWidth: 6, markerHeight: 6,
+    refX: 5, refY: 3, orient: 'auto' });
+  el(m, 'path', { d: 'M0,0 L6,3 L0,6 z', fill: 'var(--cable)' });
+
+  // Labels
+  el(svg, 'text', { x: X(PLATE_L/2 + 10), y: Y(SLOT_Y_OFFSET) + 4, class: 'dim',
+    fill: 'var(--cable)' }, 'USB in');
+
+  // Cable exit arrow (-X side, same Y offset)
+  el(svg, 'line', {
+    x1: X(-PLATE_L/2 - 1), y1: Y(SLOT_Y_OFFSET), x2: X(-PLATE_L/2 - 8), y2: Y(SLOT_Y_OFFSET),
+    stroke: 'var(--cable)', 'stroke-width': 2, 'marker-end': 'url(#arrow)'
+  });
+  el(svg, 'text', { x: X(-PLATE_L/2 - 10), y: Y(SLOT_Y_OFFSET) + 4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--cable)' }, 'USB out');
+
+  // Post diameter dim
+  // Cavity dim
+  const yd = Y(-PLATE_W/2) + 22;
+  el(svg, 'line', { x1: X(-cavL/2), y1: yd, x2: X(cavL/2), y2: yd,
+    stroke: 'var(--info)', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: X(-cavL/2), y1: yd-3, x2: X(-cavL/2), y2: yd+3, stroke: 'var(--info)' });
+  el(svg, 'line', { x1: X(cavL/2), y1: yd-3, x2: X(cavL/2), y2: yd+3, stroke: 'var(--info)' });
+  el(svg, 'text', { x: c, y: yd + 12, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--info)' }, `cavity ${cavL.toFixed(1)} mm`);
+})();
+
+// =====================================================================
+// SIDE CROSS-SECTION (X-Z through center)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('section-svg');
+  const VB_W = 680, VB_H = 320;
+  const scale = 5; // px/mm
+  const cx = VB_W / 2, floorY = VB_H - 80;
+  const X = x => cx + x * scale;
+  const Y = z => floorY - z * scale;
+
+  // Outer body outline (rectangle with cavity cut out, post inside)
+  // Draw as path: outer rect minus cavity plus post
+  const pL = -PLATE_L/2, pR = PLATE_L/2;
+  const cL = -(PLATE_L/2 - WALL_T), cR = PLATE_L/2 - WALL_T;
+  const ceilZ = PLATE_H - TOP_T;
+
+  // Body fill (two rectangles: top plate + two side walls)
+  // Top plate (full width, from z=ceilZ to PLATE_H)
+  el(svg, 'rect', {
+    x: X(pL), y: Y(PLATE_H),
+    width: (pR - pL) * scale, height: TOP_T * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2
+  });
+  // Left wall
+  el(svg, 'rect', {
+    x: X(pL), y: Y(ceilZ),
+    width: WALL_T * scale, height: ceilZ * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2
+  });
+  // Right wall (with slot gap later)
+  el(svg, 'rect', {
+    x: X(cR), y: Y(ceilZ),
+    width: WALL_T * scale, height: ceilZ * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2
+  });
+
+  // Cut slot from right wall (+X)
+  const slotZ0 = SLOT_Z_CENTER - SLOT_H/2;
+  const slotZ1 = SLOT_Z_CENTER + SLOT_H/2;
+  el(svg, 'rect', {
+    x: X(cR), y: Y(slotZ1),
+    width: WALL_T * scale, height: SLOT_H * scale,
+    fill: '#101319', stroke: 'var(--slot)', 'stroke-width': 1, 'stroke-dasharray': '2 2'
+  });
+  // Cut slot from left wall (-X) — same Z, offset shown in note
+  el(svg, 'rect', {
+    x: X(pL), y: Y(slotZ1),
+    width: WALL_T * scale, height: SLOT_H * scale,
+    fill: '#101319', stroke: 'var(--slot)', 'stroke-width': 1, 'stroke-dasharray': '2 2'
+  });
+
+  // Central post
+  el(svg, 'rect', {
+    x: X(-POST_D/2), y: Y(POST_H),
+    width: POST_D * scale, height: POST_H * scale,
+    fill: 'var(--post)', stroke: 'var(--post-dk)', 'stroke-width': 1.2
+  });
+
+  // Cable cross-sections (between post and walls — cable coils around)
+  // Two on left side of post, two on right side (1.25 wraps)
+  const cableXR1 = POST_D/2 + CABLE_D/2 + 0.5;
+  const cableXR2 = cableXR1 + CABLE_D + 0.3;
+  const cableZ = SLOT_Z_CENTER;
+  for (const xv of [-cableXR2, -cableXR1, cableXR1, cableXR2]) {
+    el(svg, 'circle', {
+      cx: X(xv), cy: Y(cableZ), r: CABLE_D/2 * scale,
+      fill: 'var(--cable)', opacity: 0.55, stroke: 'var(--cable)', 'stroke-width': 1
+    });
+  }
+
+  // Cable exiting through slot
+  el(svg, 'line', {
+    x1: X(cableXR2), y1: Y(cableZ), x2: X(pR + 8), y2: Y(cableZ),
+    stroke: 'var(--cable)', 'stroke-width': CABLE_D * scale * 0.9,
+    'stroke-linecap': 'round', opacity: 0.5
+  });
+
+  // ZED-F9P board above
+  el(svg, 'rect', {
+    x: X(-PCB_SIZE/2), y: Y(PLATE_H + 1.6),
+    width: PCB_SIZE * scale, height: 1.6 * scale,
+    fill: 'var(--pcb)', opacity: 0.5, stroke: 'var(--pcb-dk)', 'stroke-width': 1
+  });
+  el(svg, 'text', { x: cx, y: Y(PLATE_H + 1.6) - 6, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--pcb)' }, 'ZED-F9P board');
+
+  // M3 bolts through (at ±M3_PATTERN/2)
+  const mh = M3_PATTERN / 2;
+  for (const xv of [-mh, mh]) {
+    // bolt path
+    el(svg, 'line', {
+      x1: X(xv), y1: Y(PLATE_H + 4), x2: X(xv), y2: Y(-1),
+      stroke: 'var(--bolt)', 'stroke-width': M3_CLEAR_D * scale, opacity: 0.7,
+      'stroke-linecap': 'round'
+    });
+    // countersink on top (becomes bottom in print)
+    el(svg, 'rect', {
+      x: X(xv - M3_CSK_D/2), y: Y(PLATE_H),
+      width: M3_CSK_D * scale, height: M3_CSK_DEPTH * scale,
+      fill: '#1a1c22', stroke: 'var(--bolt)', 'stroke-width': 1
+    });
+  }
+
+  // Bed line
+  el(svg, 'line', {
+    x1: X(pL) - 20, y1: Y(0), x2: X(pR) + 20, y2: Y(0),
+    stroke: '#8b93a7', 'stroke-width': 0.8, 'stroke-dasharray': '4 3'
+  });
+  el(svg, 'text', { x: X(pR) + 24, y: Y(0) + 4, class: 'dim' }, 'bottom (open)');
+
+  // Dimensions
+  // Total height
+  const xd = X(pL) - 24;
+  el(svg, 'line', { x1: xd, y1: Y(0), x2: xd, y2: Y(PLATE_H),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xd-3, y1: Y(0), x2: xd+3, y2: Y(0), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-3, y1: Y(PLATE_H), x2: xd+3, y2: Y(PLATE_H), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xd - 4, y: Y(PLATE_H/2) + 4, 'text-anchor': 'end', class: 'dim' },
+    `${PLATE_H} mm`);
+
+  // Top thickness
+  const xt = X(pR) + 10;
+  el(svg, 'line', { x1: xt, y1: Y(ceilZ), x2: xt, y2: Y(PLATE_H),
+    stroke: 'var(--info)', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xt-3, y1: Y(ceilZ), x2: xt+3, y2: Y(ceilZ), stroke: 'var(--info)' });
+  el(svg, 'line', { x1: xt-3, y1: Y(PLATE_H), x2: xt+3, y2: Y(PLATE_H), stroke: 'var(--info)' });
+  el(svg, 'text', { x: xt + 5, y: Y(ceilZ + TOP_T/2) + 4, class: 'dim',
+    fill: 'var(--info)' }, `top ${TOP_T}`);
+
+  // Post height
+  el(svg, 'text', { x: cx, y: Y(POST_H/2) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: '#000' }, `post`);
+
+  // Length
+  const yd = Y(0) + 28;
+  el(svg, 'line', { x1: X(pL), y1: yd, x2: X(pR), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: X(pL), y1: yd-3, x2: X(pL), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(pR), y1: yd-3, x2: X(pR), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L} mm`);
+
+  // Slot label
+  el(svg, 'text', { x: X(cR + WALL_T/2), y: Y(slotZ1) - 6, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--slot)' }, 'slot');
+})();
+
+// =====================================================================
+// Specs
+// =====================================================================
+document.getElementById('spec-foot').textContent =
+  `${PLATE_L} × ${PLATE_W} × ${PLATE_H} mm`;
+document.getElementById('spec-top').textContent =
+  `${TOP_T} mm thick (mount surface)`;
+document.getElementById('spec-wall').textContent =
+  `${WALL_T} mm, cavity ${(PLATE_L-2*WALL_T).toFixed(1)} × ${(PLATE_W-2*WALL_T).toFixed(1)} × ${(PLATE_H-TOP_T).toFixed(1)} mm`;
+document.getElementById('spec-m3').textContent =
+  `4× Ø${M3_CLEAR_D} clearance in ${M3_PATTERN} mm square pattern, countersunk Ø${M3_CSK_D}×${M3_CSK_DEPTH} on top`;
+document.getElementById('spec-post').textContent =
+  `Ø${POST_D} × ${POST_H} mm (cable loop Ø ${POST_D + CABLE_D} mm minimum)`;
+document.getElementById('spec-slot').textContent =
+  `${SLOT_W} × ${SLOT_H} mm (W×H) on ±X walls, both offset Y=+${SLOT_Y_OFFSET.toFixed(1)} mm`;
+document.getElementById('spec-print').textContent =
+  `Top face on bed (STL pre-flipped). No supports. PLA recommended.`;
+
+// =====================================================================
+// Design checks
+// =====================================================================
+const checks = [];
+function check(ok, msg) { checks.push({ ok, msg }); }
+
+const cavL = PLATE_L - 2 * WALL_T;
+const cavW = PLATE_W - 2 * WALL_T;
+const cavH = PLATE_H - TOP_T;
+
+check(M3_PATTERN < PLATE_L - M3_CSK_D - 2,
+  `M3 pattern fits in plate: ${M3_PATTERN} mm holes in ${PLATE_L} mm plate (${(PLATE_L/2 - M3_PATTERN/2 - M3_CSK_D/2).toFixed(1)} mm edge clearance)`);
+
+check(POST_D < cavL - CABLE_D * 4,
+  `Post fits with cable wrap room: post Ø${POST_D} + 2×(Ø${CABLE_D} + margin) ≤ cavity ${cavL.toFixed(1)} mm — ${((cavL - POST_D) / 2).toFixed(1)} mm wrap space each side`);
+
+const wrapD = POST_D + CABLE_D;
+check(wrapD >= 20,
+  `Cable wrap diameter: ${wrapD} mm — ${wrapD >= 25 ? 'generous' : 'OK'} (≥20 mm avoids USB cable kinking)`);
+
+check(TOP_T >= 2.5,
+  `Top plate thickness: ${TOP_T} mm — solid for M3 countersink`);
+
+check(M3_CSK_DEPTH < TOP_T - 0.8,
+  `Countersink ${M3_CSK_DEPTH} mm leaves ${(TOP_T - M3_CSK_DEPTH).toFixed(1)} mm of top above hole`);
+
+check(cavH > CABLE_D + 1,
+  `Cavity height ${cavH} mm > cable Ø${CABLE_D} + 1 mm — cable fits with clearance`);
+
+check(SLOT_H > CABLE_D,
+  `Slot height ${SLOT_H} mm > cable Ø${CABLE_D} — cable passes through`);
+
+check(SLOT_W > CABLE_D,
+  `Slot width ${SLOT_W} mm > cable Ø${CABLE_D} — cable passes through`);
+
+const edgeToHole = PLATE_L/2 - M3_PATTERN/2 - M3_CSK_D/2;
+check(edgeToHole >= 0.5,
+  `M3 hole to plate edge: ${edgeToHole.toFixed(2)} mm — ${edgeToHole >= 1.0 ? 'good' : edgeToHole >= 0.5 ? 'OK' : 'VERY TIGHT'}`);
+
+const slot2Edge = PLATE_W/2 - WALL_T - SLOT_Y_OFFSET - SLOT_W/2;
+check(slot2Edge >= 1.0,
+  `Offset slot to corner: ${slot2Edge.toFixed(1)} mm wall remaining at +Y end`);
+
+const slotTopMargin = (PLATE_H - TOP_T) - (SLOT_Z_CENTER + SLOT_H/2);
+const slotBotMargin = SLOT_Z_CENTER - SLOT_H/2;
+check(slotTopMargin >= 0.5 && slotBotMargin >= 0.5,
+  `Slot vertical margins: ${slotBotMargin.toFixed(2)} mm below, ${slotTopMargin.toFixed(2)} mm above (in side wall)`);
+
+check(POST_D >= 10,
+  `Post diameter ${POST_D} mm — ${POST_D >= 12 ? 'strong enough as column' : 'may be thin'}`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

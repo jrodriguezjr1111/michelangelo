@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Nano + Orin Modular Stack — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --nano:#3fae6b; --nano-dk:#2f9e74;
+    --orin:#b58df0; --orin-dk:#6a4c9a;
+    --post:#d6b35a; --post-dk:#8a7028; --pass:#c87aff; --hex:#2a3142;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:200px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Modular Nano + Orin Stack — ventilated, saddle-mounted</h1>
+  <p>Base (solid) → Nano → hex middle deck → Orin → hex top cap, joined by 4 corner
+     posts, with hex-perforated walls. Bolts to the GNSS saddle (M4 ±18). Source:
+     <code>gnss_saddle/make_nano_orin_stack.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Deck plate</th><td id="s-deck">—</td></tr>
+      <tr><th>Compartments</th><td id="s-comp">—</td></tr>
+      <tr><th>Corner posts</th><td id="s-post">—</td></tr>
+      <tr><th>Nano standoffs (base)</th><td id="s-nano">—</td></tr>
+      <tr><th>Orin standoffs (middle)</th><td id="s-orin">—</td></tr>
+      <tr><th>Saddle mount</th><td id="s-m4">—</td></tr>
+      <tr><th>Parts</th><td id="s-parts">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Side elevation (Y × Z)</h2>
+    <p class="sub">The assembled stack on the saddle. Boards on standoffs; perforated decks + walls hatched.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Deck / wall</span>
+      <span><span class="sw" style="background:var(--nano)"></span>Nano</span>
+      <span><span class="sw" style="background:var(--orin)"></span>Orin</span>
+      <span><span class="sw" style="background:var(--post)"></span>Corner post</span>
+    </div>
+    <svg id="elev-svg" viewBox="0 0 460 460"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Middle deck — plan (X × Y)</h2>
+    <p class="sub">Hex/honeycomb perforation, Orin standoffs on top, corner posts, central passthrough.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--orin)"></span>Orin standoff</span>
+      <span><span class="sw" style="background:var(--post)"></span>Corner post</span>
+      <span><span class="sw" style="background:var(--pass)"></span>Passthrough</span>
+    </div>
+    <svg id="deck-svg" viewBox="0 0 380 480"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print each deck floor-down, no supports. 4 parts: base, middle, top, wall (×4 per
+  compartment). Decks bolt to corner posts with M3; whole stack bolts to the saddle
+  with 4× longer M4 (through the base + both saddle halves). Board heatsink heights
+  set the compartment gaps — tune NANO_GAP / ORIN_GAP.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_nano_orin_stack.py
+// =====================================================================
+const NANO_HX=58.25, NANO_HY=86.14, ORIN_HX=58.0, ORIN_HY=92.0;
+const STANDOFF_OD=6.0, STANDOFF_H=8.0;
+const DECK_X=100.0, DECK_Y=128.0, DECK_T=3.0, BORDER=6.0;
+const POST_X=41.0, POST_Y=58.0, POST_OD=8.0, POST_BORE=3.4;
+const NANO_GAP=42.0, ORIN_GAP=48.0;
+const M4_PAT=18.0, M4_CLEAR_D=4.4, PASS_D=20.0;
+const HEX_AF=8.0, HEX_WEB=2.2, HEX_R=8.0/Math.sqrt(3), HEX_KEEPOUT=2.0;
+const BOARD_HY=50.0;        // half board length in Y (both boards ~100 long)
+const BOARD_T=1.6;
+const TOTAL_H = DECK_T + NANO_GAP + DECK_T + ORIN_GAP + DECK_T;
+
+const ns='http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text){
+  const e=document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text!=null) e.textContent=text;
+  parent.appendChild(e); return e;
+}
+function hexCenters(rx, ry, keepouts){
+  const R=HEX_R, D=HEX_AF+HEX_WEB, dx=D, dy=D*Math.sqrt(3)/2;
+  const xmax=rx/2-BORDER-R, ymax=ry/2-BORDER-R, out=[];
+  const ny=Math.floor(ymax/dy)+2, nx=Math.floor(xmax/dx)+2;
+  for (let j=-ny;j<=ny;j++){ const y=j*dy; if (Math.abs(y)>ymax) continue;
+    const xoff=(((j%2)+2)%2) ? dx/2 : 0;
+    for (let i=-nx;i<=nx;i++){ const x=i*dx+xoff; if (Math.abs(x)>xmax) continue;
+      let skip=false;
+      for (const [kx,ky,kr] of keepouts){ if ((x-kx)**2+(y-ky)**2 < (kr+R)**2){ skip=true; break; } }
+      if (!skip) out.push([x,y]);
+    }
+  }
+  return out;
+}
+
+// =====================================================================
+// Side elevation (Y × Z)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('elev-svg');
+  const VB_W=460, VB_H=460, m=34;
+  const s=Math.min((VB_W-2*m)/DECK_Y, (VB_H-2*m)/(TOTAL_H+10));
+  const cx=VB_W/2, baseY=VB_H-m;
+  const Y=y=>cx+y*s, Z=z=>baseY-z*s;
+
+  // saddle reference (below z=0)
+  el(svg,'rect',{x:Y(-DECK_Y/2+8),y:Z(0),width:(DECK_Y-16)*s,height:8*s,
+    fill:'#1a1c22',stroke:'#3a6fa0','stroke-width':1});
+  el(svg,'text',{x:Y(DECK_Y/2-10),y:Z(0)+ (8*s)+11,'text-anchor':'end',class:'dim'},'GNSS saddle');
+
+  // helper to draw a deck (perforated => dashed top)
+  function deck(z0, perf){
+    el(svg,'rect',{x:Y(-DECK_Y/2),y:Z(z0+DECK_T),width:DECK_Y*s,height:DECK_T*s,
+      fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+    if (perf) for (let yy=-DECK_Y/2+10; yy<DECK_Y/2-10; yy+=11.2)
+      el(svg,'rect',{x:Y(yy),y:Z(z0+DECK_T-0.5),width:6*s,height:(DECK_T-1)*s,fill:'#101319'});
+  }
+  // corner posts (Y=±POST_Y) over a compartment
+  function posts(z0,h){
+    for (const sy of [-1,1])
+      el(svg,'rect',{x:Y(sy*POST_Y)-POST_OD/2*s,y:Z(z0+h),width:POST_OD*s,height:h*s,
+        fill:'var(--post)',stroke:'var(--post-dk)','stroke-width':0.8});
+  }
+  // perforated wall (back panel) hatch over a compartment
+  function wall(z0,h){
+    const cs=hexCenters(2*POST_Y, h+2*BORDER, []);  // approx panel field
+    for (const [yy,zz] of cs){
+      const cyp=z0+DECK_T+ (zz + h/2);
+      // draw small hex marker
+      const pts=[];
+      for (let k=0;k<6;k++){ const a=(90+60*k)*Math.PI/180; pts.push(`${Y(yy+HEX_R*Math.cos(a))},${Z(cyp+HEX_R*Math.sin(a))}`); }
+      if (cyp>z0+DECK_T+2 && cyp<z0+DECK_T+h-2)
+        el(svg,'polygon',{points:pts.join(' '),fill:'none',stroke:'#2f3a4f','stroke-width':0.5});
+    }
+  }
+
+  // base (solid) at z=0
+  deck(0,false);
+  el(svg,'text',{x:Y(-DECK_Y/2)+3,y:Z(DECK_T/2)+3,class:'dim',fill:'#8b93a7'},'base');
+  // Nano compartment
+  wall(DECK_T, NANO_GAP);
+  posts(DECK_T, NANO_GAP);
+  el(svg,'rect',{x:Y(-BOARD_HY),y:Z(DECK_T+STANDOFF_H+BOARD_T),width:2*BOARD_HY*s,height:BOARD_T*s,
+    fill:'var(--nano)',stroke:'var(--nano-dk)','stroke-width':1});
+  el(svg,'text',{x:cx,y:Z(DECK_T+STANDOFF_H+BOARD_T)-4,'text-anchor':'middle',class:'dim',fill:'var(--nano)'},'Jetson Nano');
+  // middle deck (perforated)
+  deck(DECK_T+NANO_GAP,true);
+  el(svg,'text',{x:Y(-DECK_Y/2)+3,y:Z(DECK_T+NANO_GAP+DECK_T/2)+3,class:'dim',fill:'#8b93a7'},'mid');
+  // Orin compartment
+  const z2=DECK_T+NANO_GAP+DECK_T;
+  wall(z2, ORIN_GAP);
+  posts(z2, ORIN_GAP);
+  el(svg,'rect',{x:Y(-BOARD_HY),y:Z(z2+STANDOFF_H+BOARD_T),width:2*BOARD_HY*s,height:BOARD_T*s,
+    fill:'var(--orin)',stroke:'var(--orin-dk)','stroke-width':1});
+  el(svg,'text',{x:cx,y:Z(z2+STANDOFF_H+BOARD_T)-4,'text-anchor':'middle',class:'dim',fill:'var(--orin)'},'Jetson Orin Nano');
+  // top deck (perforated)
+  deck(z2+ORIN_GAP,true);
+  el(svg,'text',{x:Y(-DECK_Y/2)+3,y:Z(z2+ORIN_GAP+DECK_T/2)+3,class:'dim',fill:'#8b93a7'},'top');
+
+  // height dim
+  const xd=Y(DECK_Y/2)+16;
+  el(svg,'line',{x1:xd,y1:Z(0),x2:xd,y2:Z(TOTAL_H),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:xd+6,y:Z(TOTAL_H/2)+3,class:'dim',transform:`rotate(-90 ${xd+6} ${Z(TOTAL_H/2)+3})`},`${TOTAL_H.toFixed(0)} mm`);
+})();
+
+// =====================================================================
+// Middle deck plan (X × Y) — honeycomb
+// =====================================================================
+(() => {
+  const svg=document.getElementById('deck-svg');
+  const VB_W=380, VB_H=480, m=24;
+  const s=Math.min((VB_W-2*m)/DECK_X, (VB_H-2*m)/DECK_Y);
+  const cx=VB_W/2, cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s, px=v=>v*s;
+
+  // plate
+  el(svg,'rect',{x:X(-DECK_X/2),y:Y(DECK_Y/2),width:px(DECK_X),height:px(DECK_Y),
+    fill:'var(--body)','fill-opacity':0.18,stroke:'var(--body-dk)','stroke-width':1.5,rx:3});
+
+  // keepouts: posts, Orin standoffs, passthrough
+  const keep=[];
+  for (const sx of [-1,1]) for (const sy of [-1,1]) keep.push([sx*POST_X,sy*POST_Y,POST_OD/2+HEX_KEEPOUT]);
+  for (const sx of [-1,1]) for (const sy of [-1,1]) keep.push([sx*ORIN_HX/2,sy*ORIN_HY/2,STANDOFF_OD/2+HEX_KEEPOUT]);
+  keep.push([0,0,PASS_D/2+HEX_KEEPOUT]);
+
+  // honeycomb
+  for (const [hx,hy] of hexCenters(DECK_X,DECK_Y,keep)){
+    const pts=[];
+    for (let k=0;k<6;k++){ const a=(90+60*k)*Math.PI/180; pts.push(`${X(hx+HEX_R*Math.cos(a))},${Y(hy+HEX_R*Math.sin(a))}`); }
+    el(svg,'polygon',{points:pts.join(' '),fill:'#101319',stroke:'#3a4a6f','stroke-width':0.5});
+  }
+
+  // central passthrough
+  el(svg,'circle',{cx:X(0),cy:Y(0),r:px(PASS_D/2),fill:'#101319',stroke:'var(--pass)','stroke-width':1.5});
+
+  // corner posts
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*POST_X),cy:Y(sy*POST_Y),r:px(POST_OD/2),fill:'var(--post)',stroke:'var(--post-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(sx*POST_X),cy:Y(sy*POST_Y),r:px(POST_BORE/2),fill:'#101319'});
+  }
+  // Orin standoffs
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*ORIN_HX/2),cy:Y(sy*ORIN_HY/2),r:px(STANDOFF_OD/2),fill:'var(--orin)',stroke:'var(--orin-dk)','stroke-width':1});
+  }
+  // dims
+  const yd=Y(-DECK_Y/2)+14;
+  el(svg,'line',{x1:X(-DECK_X/2),y1:yd,x2:X(DECK_X/2),y2:yd,stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:cx,y:yd+12,'text-anchor':'middle',class:'dim'},`${DECK_X} mm (X)`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-deck').textContent  = `${DECK_X} × ${DECK_Y} × ${DECK_T} mm (hex AF ${HEX_AF}, web ${HEX_WEB})`;
+document.getElementById('s-comp').textContent  = `Nano ${NANO_GAP} mm + Orin ${ORIN_GAP} mm → stack ${TOTAL_H.toFixed(0)} mm tall`;
+document.getElementById('s-post').textContent  = `4× Ø${POST_OD} at (±${POST_X}, ±${POST_Y}), M3 bore`;
+document.getElementById('s-nano').textContent  = `4× ⌀${STANDOFF_OD}×${STANDOFF_H} at (±${(NANO_HX/2).toFixed(2)}, ±${(NANO_HY/2).toFixed(2)})`;
+document.getElementById('s-orin').textContent  = `4× ⌀${STANDOFF_OD}×${STANDOFF_H} at (±${(ORIN_HX/2).toFixed(2)}, ±${(ORIN_HY/2).toFixed(2)})`;
+document.getElementById('s-m4').textContent    = `4× M4 at (±${M4_PAT}, ±${M4_PAT}) on the base; Ø${PASS_D} passthrough`;
+document.getElementById('s-parts').textContent = `base + middle + top + wall (4 STLs)`;
+
+const postEdgeX = DECK_X/2 - POST_X - POST_OD/2;
+const postEdgeY = DECK_Y/2 - POST_Y - POST_OD/2;
+const nanoPost  = POST_Y - (NANO_HY/2 + STANDOFF_OD/2);
+const orinPost  = POST_Y - (ORIN_HY/2 + STANDOFF_OD/2);
+const boardFitY = POST_Y - BOARD_HY;
+const checks=[
+  { ok: postEdgeX>=1 && postEdgeY>=1, msg:`Corner post → deck edge: X=${postEdgeX.toFixed(1)}, Y=${postEdgeY.toFixed(1)} mm` },
+  { ok: nanoPost>=2, msg:`Nano standoff → corner post: ${nanoPost.toFixed(1)} mm` },
+  { ok: orinPost>=2, msg:`Orin standoff → corner post: ${orinPost.toFixed(1)} mm` },
+  { ok: boardFitY>=4, msg:`Board end → corner post: ${boardFitY.toFixed(1)} mm (board ~100 long)` },
+  { ok: M4_PAT===18.0, msg:`Base M4 at ±18 matches the saddle bolt pattern` },
+  { ok: PASS_D<30, msg:`Ø${PASS_D} passthrough fits the saddle's Ø30 GNSS hole` },
+  { ok: STANDOFF_H-4>=1, msg:`Nano board clears base M4 cap heads: ${(STANDOFF_H-4).toFixed(1)} mm` },
+];
+const ul=document.getElementById('checks');
+for (const c of checks){
+  const li=document.createElement('li');
+  li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

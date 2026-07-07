@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>USB Cable Saddle — Preview (Split Half)</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --body2: #4a9a6e; --body2-dk: #2e6b47;
+    --cable: #e06c75; --slot: #c87aff;
+    --lip: #f2b84b; --bolt: #d6b35a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                                   text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 140px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>USB Cable Saddle — Horizontal Split (Tray + Cap)</h1>
+  <p>Bottom tray holds cables in semi-circular channels; top cap clamps down.
+     Print 2× same part, flip one. M3 bolts through both ends.
+     Source: <code>cable_saddle/make_cable_saddle.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <h2>Specifications</h2>
+    <table class="specs">
+      <tr><th>Full assembly</th><td id="spec-full">—</td></tr>
+      <tr><th>Each half</th><td id="spec-half">—</td></tr>
+      <tr><th>Cables</th><td id="spec-cables">—</td></tr>
+      <tr><th>Slots</th><td id="spec-slots">—</td></tr>
+      <tr><th>Snap fit</th><td id="spec-snap">—</td></tr>
+      <tr><th>M3 holes</th><td id="spec-m3">—</td></tr>
+      <tr><th>Print</th><td id="spec-print">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card full">
+    <h2>Top view — single half (channels face up)</h2>
+    <p class="sub">Semi-circular cable channels on top face. M3 through-holes at each end.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Body</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 holes</span>
+      <span><span class="sw" style="background:var(--slot)"></span>Cable channels</span>
+      <span><span class="sw" style="background:var(--cable)"></span>Cable (Ø5mm)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 650 180"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Side cross-section (assembled, single channel)</h2>
+    <p class="sub">Shows how cable sits in the tray; cap clamps from above. M3 bolt detail on right.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Bottom tray</span>
+      <span><span class="sw" style="background:var(--body2)"></span>Top cap (flipped)</span>
+      <span><span class="sw" style="background:var(--cable);opacity:0.6"></span>Cable</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 bolt</span>
+    </div>
+    <svg id="section-svg" viewBox="0 0 300 300"></svg>
+  </div>
+
+  <div class="card">
+    <h2>End view (assembled)</h2>
+    <p class="sub">Cross-section through an M3 bolt showing countersink and clamping.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Bottom tray</span>
+      <span><span class="sw" style="background:var(--body2)"></span>Top cap</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 bolt path</span>
+    </div>
+    <svg id="end-svg" viewBox="0 0 300 300"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print 2× <code>cable_saddle_half.stl</code>. Flip one for the cap.
+  Use M3×14 bolts + nuts to clamp. Cables lay in the tray, cap locks them in.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_cable_saddle.py
+// =====================================================================
+const SADDLE_L = 108.49;
+const SADDLE_W = 20.0;
+const SADDLE_H = 12.0;
+const HALF_H   = SADDLE_H / 2;
+
+const N_CABLES = 7;
+const CABLE_D = 5.0;
+const SLOT_D = CABLE_D + 0.8;
+const SLOT_R = SLOT_D / 2;
+
+const M3_CLEAR_D  = 3.4;
+const M3_CSK_D    = 6.2;
+const M3_CSK_DEPTH = 2.0;
+const M3_INSET    = 5.0;
+
+const SLOT_SPACING = SADDLE_L / (N_CABLES + 1);
+
+// M3 positions (one each end)
+const m3Holes = [
+  { x: -SADDLE_L/2 + M3_INSET, y: 0 },
+  { x: +SADDLE_L/2 - M3_INSET, y: 0 },
+];
+
+// =====================================================================
+// SVG helpers
+// =====================================================================
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// TOP VIEW — single half, channels facing up
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 650, VB_H = 180;
+  const scale = (VB_W - 100) / SADDLE_L;
+  const ox = VB_W / 2, oy = VB_H / 2;
+  const X = x => ox + x * scale;
+  const Y = y => oy - y * scale;
+
+  // Body
+  el(svg, 'rect', {
+    x: X(-SADDLE_L/2), y: Y(SADDLE_W/2),
+    width: SADDLE_L * scale, height: SADDLE_W * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3
+  });
+
+  // Cable channels (semi-circles visible from top)
+  for (let i = 0; i < N_CABLES; i++) {
+    const cx = -SADDLE_L/2 + SLOT_SPACING * (i + 1);
+    // Channel runs along Y (full width)
+    el(svg, 'rect', {
+      x: X(cx) - SLOT_R * scale, y: Y(SADDLE_W/2),
+      width: SLOT_D * scale, height: SADDLE_W * scale,
+      fill: '#101319', stroke: 'var(--slot)', 'stroke-width': 0.8, rx: SLOT_R * scale
+    });
+    // Cable ghost
+    el(svg, 'rect', {
+      x: X(cx) - CABLE_D/2 * scale, y: Y(SADDLE_W/2) + 2,
+      width: CABLE_D * scale, height: SADDLE_W * scale - 4,
+      fill: 'var(--cable)', opacity: 0.3, rx: CABLE_D/2 * scale
+    });
+    el(svg, 'text', { x: X(cx), y: oy + SLOT_R * scale + 14,
+      'text-anchor': 'middle', class: 'dim' }, `${i+1}`);
+  }
+
+  // M3 holes
+  for (const h of m3Holes) {
+    el(svg, 'circle', {
+      cx: X(h.x), cy: oy, r: M3_CSK_D/2 * scale,
+      fill: 'var(--bolt)', opacity: 0.4
+    });
+    el(svg, 'circle', {
+      cx: X(h.x), cy: oy, r: M3_CLEAR_D/2 * scale,
+      fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1
+    });
+  }
+
+  // Dimension: length
+  const yd = Y(-SADDLE_W/2) + 20;
+  el(svg, 'line', { x1: X(-SADDLE_L/2), y1: yd, x2: X(SADDLE_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: X(-SADDLE_L/2), y1: yd-3, x2: X(-SADDLE_L/2), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(SADDLE_L/2), y1: yd-3, x2: X(SADDLE_L/2), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'text', { x: ox, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${SADDLE_L} mm`);
+
+  // Dimension: spacing
+  const sx1 = -SADDLE_L/2 + SLOT_SPACING;
+  const sx2 = -SADDLE_L/2 + SLOT_SPACING * 2;
+  const ys = Y(SADDLE_W/2) - 10;
+  el(svg, 'line', { x1: X(sx1), y1: ys, x2: X(sx2), y2: ys,
+    stroke: 'var(--info)', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: X(sx1), y1: ys-3, x2: X(sx1), y2: ys+3, stroke: 'var(--info)' });
+  el(svg, 'line', { x1: X(sx2), y1: ys-3, x2: X(sx2), y2: ys+3, stroke: 'var(--info)' });
+  el(svg, 'text', { x: X((sx1+sx2)/2), y: ys - 5, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--info)' }, `${SLOT_SPACING.toFixed(1)} mm`);
+})();
+
+// =====================================================================
+// CROSS-SECTION VIEW — assembled (single channel)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('section-svg');
+  const VB = 300;
+  const scale = (VB - 100) / SADDLE_H;
+  const cx = VB / 2, floorY = VB - 50;
+  const X = x => cx + x * scale;
+  const Y = y => floorY - y * scale;
+
+  const blockW = SLOT_SPACING * 0.9;
+
+  // Bottom tray
+  el(svg, 'rect', {
+    x: X(-blockW/2), y: Y(HALF_H),
+    width: blockW * scale, height: HALF_H * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 2
+  });
+
+  // Top cap (flipped)
+  el(svg, 'rect', {
+    x: X(-blockW/2), y: Y(SADDLE_H),
+    width: blockW * scale, height: HALF_H * scale,
+    fill: 'var(--body2)', stroke: 'var(--body2-dk)', 'stroke-width': 1.5, rx: 2
+  });
+
+  // Split line
+  el(svg, 'line', {
+    x1: X(-blockW/2) - 6, y1: Y(HALF_H), x2: X(blockW/2) + 6, y2: Y(HALF_H),
+    stroke: '#fff', 'stroke-width': 0.8, 'stroke-dasharray': '3 2', opacity: 0.5
+  });
+
+  // Bottom semi-circle channel
+  el(svg, 'path', {
+    d: `M ${X(-SLOT_R)} ${Y(HALF_H)} A ${SLOT_R*scale} ${SLOT_R*scale} 0 0 1 ${X(SLOT_R)} ${Y(HALF_H)}`,
+    fill: '#101319', stroke: 'var(--slot)', 'stroke-width': 1.2
+  });
+
+  // Top semi-circle channel (mirrored)
+  el(svg, 'path', {
+    d: `M ${X(-SLOT_R)} ${Y(HALF_H)} A ${SLOT_R*scale} ${SLOT_R*scale} 0 0 0 ${X(SLOT_R)} ${Y(HALF_H)}`,
+    fill: '#101319', stroke: 'var(--slot)', 'stroke-width': 1.2
+  });
+
+  // Cable in the middle
+  el(svg, 'circle', {
+    cx: X(0), cy: Y(HALF_H), r: CABLE_D/2 * scale,
+    fill: 'var(--cable)', opacity: 0.5, stroke: 'var(--cable)', 'stroke-width': 1.5
+  });
+
+  // Dimension: channel diameter
+  el(svg, 'line', { x1: X(-SLOT_R), y1: Y(HALF_H), x2: X(SLOT_R), y2: Y(HALF_H),
+    stroke: '#ccc', 'stroke-width': 0.5, 'stroke-dasharray': '3 2' });
+  el(svg, 'text', { x: X(0), y: Y(HALF_H) - SLOT_R*scale - 8, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--slot)' }, `Ø${SLOT_D.toFixed(1)} channel`);
+
+  // Dimension: total height
+  const xl = X(-blockW/2) - 14;
+  el(svg, 'line', { x1: xl, y1: Y(0), x2: xl, y2: Y(SADDLE_H), stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xl-3, y1: Y(0), x2: xl+3, y2: Y(0), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xl-3, y1: Y(SADDLE_H), x2: xl+3, y2: Y(SADDLE_H), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xl - 6, y: Y(SADDLE_H/2) + 4, class: 'dim',
+    transform: `rotate(-90 ${xl-6} ${Y(SADDLE_H/2)+4})` }, `${SADDLE_H} mm`);
+
+  // Dimension: each half
+  const xr = X(blockW/2) + 14;
+  el(svg, 'line', { x1: xr, y1: Y(0), x2: xr, y2: Y(HALF_H),
+    stroke: 'var(--info)', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xr-3, y1: Y(0), x2: xr+3, y2: Y(0), stroke: 'var(--info)' });
+  el(svg, 'line', { x1: xr-3, y1: Y(HALF_H), x2: xr+3, y2: Y(HALF_H), stroke: 'var(--info)' });
+  el(svg, 'text', { x: xr + 6, y: Y(HALF_H/2) + 4, class: 'dim',
+    fill: 'var(--info)' }, `${HALF_H} mm`);
+
+  // Labels
+  el(svg, 'text', { x: X(0), y: Y(HALF_H/2) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--body)' }, 'tray');
+  el(svg, 'text', { x: X(0), y: Y(HALF_H + HALF_H/2) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--body2)' }, 'cap');
+})();
+
+// =====================================================================
+// END VIEW — assembled, through M3 bolt
+// =====================================================================
+(() => {
+  const svg = document.getElementById('end-svg');
+  const VB = 300;
+  const scale = (VB - 100) / SADDLE_H;
+  const cx = VB / 2, floorY = VB - 50;
+  const X = x => cx + x * scale;
+  const Y = y => floorY - y * scale;
+
+  // Bottom tray
+  el(svg, 'rect', {
+    x: X(-SADDLE_W/2), y: Y(HALF_H),
+    width: SADDLE_W * scale, height: HALF_H * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 2
+  });
+
+  // Top cap
+  el(svg, 'rect', {
+    x: X(-SADDLE_W/2), y: Y(SADDLE_H),
+    width: SADDLE_W * scale, height: HALF_H * scale,
+    fill: 'var(--body2)', stroke: 'var(--body2-dk)', 'stroke-width': 1.5, rx: 2
+  });
+
+  // M3 through hole (full height)
+  el(svg, 'rect', {
+    x: X(-M3_CLEAR_D/2), y: Y(SADDLE_H),
+    width: M3_CLEAR_D * scale, height: SADDLE_H * scale,
+    fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1
+  });
+
+  // Countersink from bottom of bottom tray
+  el(svg, 'rect', {
+    x: X(-M3_CSK_D/2), y: Y(M3_CSK_DEPTH),
+    width: M3_CSK_D * scale, height: M3_CSK_DEPTH * scale,
+    fill: '#1a1c22', stroke: 'var(--bolt)', 'stroke-width': 1.2
+  });
+
+  // Countersink from top of top cap (flipped)
+  el(svg, 'rect', {
+    x: X(-M3_CSK_D/2), y: Y(SADDLE_H),
+    width: M3_CSK_D * scale, height: M3_CSK_DEPTH * scale,
+    fill: '#1a1c22', stroke: 'var(--bolt)', 'stroke-width': 1.2
+  });
+
+  // Split line
+  el(svg, 'line', {
+    x1: X(-SADDLE_W/2) - 4, y1: Y(HALF_H), x2: X(SADDLE_W/2) + 4, y2: Y(HALF_H),
+    stroke: '#fff', 'stroke-width': 0.8, 'stroke-dasharray': '3 2', opacity: 0.5
+  });
+
+  // Dimension: hole diameter
+  el(svg, 'text', { x: X(0), y: Y(SADDLE_H/2) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--bolt)' }, `Ø${M3_CLEAR_D}`);
+
+  // Dimension: countersink
+  const xr = X(M3_CSK_D/2) + 12;
+  el(svg, 'line', { x1: xr, y1: Y(0), x2: xr, y2: Y(M3_CSK_DEPTH),
+    stroke: 'var(--bolt)', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xr-3, y1: Y(0), x2: xr+3, y2: Y(0), stroke: 'var(--bolt)' });
+  el(svg, 'line', { x1: xr-3, y1: Y(M3_CSK_DEPTH), x2: xr+3, y2: Y(M3_CSK_DEPTH), stroke: 'var(--bolt)' });
+  el(svg, 'text', { x: xr + 6, y: Y(M3_CSK_DEPTH/2) + 4, class: 'dim',
+    fill: 'var(--bolt)' }, `csk ${M3_CSK_DEPTH}`);
+
+  // Width dimension
+  const yd = Y(SADDLE_H) - 18;
+  el(svg, 'line', { x1: X(-SADDLE_W/2), y1: yd, x2: X(SADDLE_W/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: X(-SADDLE_W/2), y1: yd-3, x2: X(-SADDLE_W/2), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(SADDLE_W/2), y1: yd-3, x2: X(SADDLE_W/2), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'text', { x: X(0), y: yd - 5, 'text-anchor': 'middle', class: 'dim' }, `${SADDLE_W} mm`);
+
+  // Total height
+  const xl = X(-SADDLE_W/2) - 14;
+  el(svg, 'line', { x1: xl, y1: Y(0), x2: xl, y2: Y(SADDLE_H), stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xl-3, y1: Y(0), x2: xl+3, y2: Y(0), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xl-3, y1: Y(SADDLE_H), x2: xl+3, y2: Y(SADDLE_H), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xl - 6, y: Y(SADDLE_H/2) + 4, class: 'dim',
+    transform: `rotate(-90 ${xl-6} ${Y(SADDLE_H/2)+4})` }, `${SADDLE_H} mm`);
+
+  // Labels
+  el(svg, 'text', { x: X(SADDLE_W/4), y: Y(HALF_H/2) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--body)' }, 'tray');
+  el(svg, 'text', { x: X(SADDLE_W/4), y: Y(HALF_H + HALF_H/2) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--body2)' }, 'cap');
+})();
+
+// =====================================================================
+// Specs
+// =====================================================================
+document.getElementById('spec-full').textContent =
+  `${SADDLE_L} × ${SADDLE_W} × ${SADDLE_H} mm assembled (tray + cap)`;
+document.getElementById('spec-half').textContent =
+  `${SADDLE_L} × ${SADDLE_W} × ${HALF_H} mm each — print 2×, flip one for cap`;
+document.getElementById('spec-cables').textContent =
+  `${N_CABLES} × USB (Ø${CABLE_D} mm), ${SLOT_SPACING.toFixed(2)} mm center-to-center`;
+document.getElementById('spec-slots').textContent =
+  `Ø${SLOT_D.toFixed(1)} mm semi-circular channels at split face`;
+document.getElementById('spec-snap').textContent =
+  `Clamping design — cables enclosed by top+bottom half-channels (no snap fit needed)`;
+document.getElementById('spec-m3').textContent =
+  `2 bolts (each end), Ø${M3_CLEAR_D} through, Ø${M3_CSK_D}×${M3_CSK_DEPTH} csk from bottom, inset ${M3_INSET} mm`;
+document.getElementById('spec-print').textContent =
+  `Print 2× same STL. No supports. Bolt with M3×14 + nuts.`;
+
+// =====================================================================
+// Design checks
+// =====================================================================
+const checks = [];
+function check(ok, msg) { checks.push({ ok, msg }); }
+
+check(SLOT_D > CABLE_D,
+  `Channel clearance: Ø${SLOT_D.toFixed(1)} > cable Ø${CABLE_D} — ${(SLOT_D - CABLE_D).toFixed(1)} mm play`);
+
+const wallBetweenSlots = SLOT_SPACING - SLOT_D;
+check(wallBetweenSlots >= 4,
+  `Wall between channels: ${wallBetweenSlots.toFixed(1)} mm — ${wallBetweenSlots >= 5 ? 'strong' : 'adequate'}`);
+
+const edgeToFirstSlot = SLOT_SPACING - SLOT_R;
+check(edgeToFirstSlot >= 5,
+  `Edge to first channel: ${edgeToFirstSlot.toFixed(1)} mm`);
+
+const materialUnderChannel = HALF_H - SLOT_R;
+check(materialUnderChannel >= 2.5,
+  `Material under channel: ${materialUnderChannel.toFixed(1)} mm — ${materialUnderChannel >= 3 ? 'solid' : 'adequate'}`);
+
+check(SLOT_R <= HALF_H,
+  `Channel fits in half: radius ${SLOT_R.toFixed(1)} mm ≤ half height ${HALF_H} mm`);
+
+const m3ToEdge = M3_INSET - M3_CSK_D/2;
+check(m3ToEdge >= 1.5,
+  `M3 to end edge: ${m3ToEdge.toFixed(1)} mm — ${m3ToEdge >= 2 ? 'safe' : 'tight'}`);
+
+const m3ToSide = SADDLE_W/2 - M3_CSK_D/2;
+check(m3ToSide >= 4,
+  `M3 to side edge: ${m3ToSide.toFixed(1)} mm — plenty of material`);
+
+check(M3_CSK_DEPTH < HALF_H - 1,
+  `Countersink depth: ${M3_CSK_DEPTH} mm < half height ${HALF_H} mm — structurally sound`);
+
+const nearestSlotToM3 = SLOT_SPACING - M3_INSET;
+check(nearestSlotToM3 > SLOT_R + M3_CSK_D/2,
+  `M3-to-channel clearance: ${(nearestSlotToM3 - SLOT_R - M3_CSK_D/2).toFixed(1)} mm gap`);
+
+check(HALF_H >= 5,
+  `Half height: ${HALF_H} mm — ${HALF_H >= 6 ? 'comfortable for M3' : 'workable'}`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

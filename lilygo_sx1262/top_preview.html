@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>LILYGO Housing — Top Plate Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --pcb:  #2a8f5a; --pcb-dk: #1d6b42;
+    --batt: #2ec27e; --batt-dk: #1a6f45;
+    --m2: #9ab6e6; --m2-dk: #5a7fbf;
+    --m3: #d6b35a; --m3-dk: #8a7028;
+    --plat: #ef7d7d; --plat-dk: #8a3232;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36; text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 200px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>LILYGO SX1262 Housing — Top Plate</h1>
+  <p>101 × 65 × 4 mm. Sits on top of the IMU platform-saddle (80 × 65). −X edges flush; +X (connector) end overhangs by 21 mm. Same Y dimension (65 mm) → both Y edges flush.
+     Sources: <code>lilygo_sx1262/make_top.py</code> + <code>flycatcher/make_imu_platform_saddle.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Plate</th><td id="s-plate">—</td></tr>
+      <tr><th>Inner cutout</th><td id="s-cut">—</td></tr>
+      <tr><th>M2 LILYGO mount</th><td id="s-m2">—</td></tr>
+      <tr><th>M3 attach (top↔bottom)</th><td id="s-m3">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (on IMU platform)</h2>
+    <p class="sub">M3 countersunk on this face. LILYGO PCB ghosted. Dashed red shows the IMU platform-saddle footprint underneath.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Plate (101×65)</span>
+      <span><span class="sw" style="background:var(--plat);opacity:0.5"></span>IMU platform (80×65)</span>
+      <span><span class="sw" style="background:var(--pcb);opacity:0.4"></span>LILYGO board</span>
+      <span><span class="sw" style="background:var(--m2)"></span>M2 (LILYGO)</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 csk (attach)</span>
+      <span><span class="sw" style="background:var(--batt);opacity:0.5"></span>Battery cutout</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 720 340"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Bottom view</h2>
+    <p class="sub">Underside (faces the bottom piece). M3 thru-holes shown without countersink.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Plate</span>
+      <span><span class="sw" style="background:var(--m2)"></span>M2 thru</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 thru</span>
+    </div>
+    <svg id="bot-svg" viewBox="0 0 720 340"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Side cross-section (X–Z)</h2>
+    <p class="sub">Through the M3 attach holes — shows countersinks on the top face.</p>
+    <svg id="sec-svg" viewBox="0 0 720 200"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print flat on the bed (any side down — countersink prints fine on the top face,
+  and the underside is flat). 0.2 mm layers, no supports.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_top.py
+// =====================================================================
+const TOP_L = 101.0, TOP_W = 65.0, TOP_T = 4.0;
+// IMU platform-saddle footprint that this top sits on top of.
+const PLATFORM_L = 80.0, PLATFORM_W = 65.0;
+// X shift applied at export so the −X edges align in assembly.
+const X_FLUSH_OFFSET = (TOP_L - PLATFORM_L) / 2;   // = +10.5 mm
+const CUT_L = 86.0, CUT_W = 23.0;
+const CUT_EXTEND_PLUS_X = 4.7;
+const CUT_TOTAL_L = CUT_L + CUT_EXTEND_PLUS_X;
+const CUT_CENTER_X = CUT_EXTEND_PLUS_X / 2;
+const M2_PX = 95.33, M2_PY = 28.55, M2_D = 2.4;
+const M2_BOSS_D = 4.5, M2_BOSS_H = 5.0;
+// M3 attach pattern now aligned to the flycatcher IMU platform-saddle
+// (58 × 49 mm centered on the platform). Asymmetric in plate-local frame.
+const FLYCATCHER_M3_X = 58.0, FLYCATCHER_M3_Y = 49.0;
+const M3_D = 3.4;
+const M3_CSK_D = 5.5, M3_CSK_DEPTH = 1.6;
+// Plate-local hole X coords (Y stays ±FLYCATCHER_M3_Y/2).
+const M3_LOCAL_X_PLUS  =  FLYCATCHER_M3_X / 2 - X_FLUSH_OFFSET;   // = +18.5
+const M3_LOCAL_X_MINUS = -FLYCATCHER_M3_X / 2 - X_FLUSH_OFFSET;   // = −39.5
+
+// LILYGO PCB approximate footprint
+const PCB_L = M2_PX + 4;
+const PCB_W = M2_PY + 4;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e); return e;
+}
+
+// =====================================================================
+// Plan view helper
+// =====================================================================
+function planView(svgId, opts) {
+  const svg = document.getElementById(svgId);
+  const VB_W = 720, VB_H = 340, margin = 50;
+  // Assembly-coord X range: platform −X (−PLATFORM_L/2) to plate +X (TOP_L/2 + X_FLUSH_OFFSET).
+  const ASM_X_MIN = -PLATFORM_L / 2;
+  const ASM_X_MAX = TOP_L / 2 + X_FLUSH_OFFSET;
+  const ASM_X_W   = ASM_X_MAX - ASM_X_MIN;
+  const sX = (VB_W - 2 * margin) / ASM_X_W;
+  const sY = (VB_H - 2 * margin) / TOP_W;
+  const s = Math.min(sX, sY);
+  // Center the assembly X range in the SVG (origin maps off-center).
+  const ASM_X_CENTER = (ASM_X_MIN + ASM_X_MAX) / 2;
+  const cx = VB_W / 2 - ASM_X_CENTER * s, cy = VB_H / 2;
+  const X = x => cx + x * s;
+  const Y = y => cy - y * s;
+
+  // IMU platform-saddle footprint (assembly origin), drawn first so it sits under the plate.
+  el(svg, 'rect', { x: X(-PLATFORM_L/2), y: Y(PLATFORM_W/2),
+    width: PLATFORM_L * s, height: PLATFORM_W * s,
+    fill: 'var(--plat)', opacity: 0.18,
+    stroke: 'var(--plat)', 'stroke-width': 1.2, 'stroke-dasharray': '5 3', rx: 2 });
+
+  // Plate outline (shifted +X_FLUSH_OFFSET so −X edges align with the platform).
+  el(svg, 'rect', { x: X(-TOP_L/2 + X_FLUSH_OFFSET), y: Y(TOP_W/2),
+    width: TOP_L * s, height: TOP_W * s,
+    fill: 'var(--body)', opacity: 0.85,
+    stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  if (opts.showPCB) {
+    el(svg, 'rect', { x: X(-PCB_L/2 + X_FLUSH_OFFSET), y: Y(PCB_W/2),
+      width: PCB_L * s, height: PCB_W * s,
+      fill: 'var(--pcb)', opacity: 0.3,
+      stroke: 'var(--pcb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' });
+  }
+
+  // Inner rectangular cutout (asymmetric: extended +X), shifted with the plate.
+  const cutX0 = CUT_CENTER_X - CUT_TOTAL_L/2 + X_FLUSH_OFFSET;
+  el(svg, 'rect', { x: X(cutX0), y: Y(CUT_W/2),
+    width: CUT_TOTAL_L * s, height: CUT_W * s,
+    fill: '#101319', stroke: 'var(--batt-dk)', 'stroke-width': 1, opacity: 0.95 });
+  el(svg, 'text', { x: X(CUT_CENTER_X + X_FLUSH_OFFSET), y: cy + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--batt)' }, `cutout ${CUT_TOTAL_L}×${CUT_W} (+${CUT_EXTEND_PLUS_X} on +X)`);
+
+  // M2 standoffs (boss outline + hole) — shifted with the plate.
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const hx = sx * M2_PX / 2 + X_FLUSH_OFFSET, hy = sy * M2_PY / 2;
+    if (opts.showBoss) {
+      el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: M2_BOSS_D/2 * s,
+        fill: 'var(--m2)', opacity: 0.35, stroke: 'var(--m2-dk)', 'stroke-width': 1 });
+    }
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: M2_D/2 * s,
+      fill: '#101319', stroke: 'var(--m2)', 'stroke-width': 1.2 });
+  }
+
+  // M3 attach holes — placed in ASSEMBLY coords (aligned to flycatcher).
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const hx = sx * FLYCATCHER_M3_X / 2;          // assembly X (platform-centered)
+    const hy = sy * FLYCATCHER_M3_Y / 2;
+    if (opts.showCsk) {
+      el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: M3_CSK_D/2 * s,
+        fill: 'var(--m3)', opacity: 0.4 });
+    }
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: M3_D/2 * s,
+      fill: '#101319', stroke: 'var(--m3-dk)', 'stroke-width': 1 });
+  }
+
+  // Dimensions
+  // Plate length (shifted)
+  const ydL = Y(-TOP_W/2) + 22;
+  el(svg, 'line', { x1: X(-TOP_L/2 + X_FLUSH_OFFSET), y1: ydL,
+    x2: X(TOP_L/2 + X_FLUSH_OFFSET), y2: ydL,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: X(X_FLUSH_OFFSET), y: ydL + 13, 'text-anchor': 'middle', class: 'dim' },
+    `plate ${TOP_L} mm`);
+  // Platform length (below plate dim)
+  const ydP = ydL + 24;
+  el(svg, 'line', { x1: X(-PLATFORM_L/2), y1: ydP, x2: X(PLATFORM_L/2), y2: ydP,
+    stroke: 'var(--plat)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: X(0), y: ydP + 13, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--plat)' }, `platform ${PLATFORM_L} mm`);
+  // Overhang annotation (+X)
+  const yOvh = Y(TOP_W/2) - 38;
+  el(svg, 'line', { x1: X(PLATFORM_L/2), y1: yOvh, x2: X(TOP_L/2 + X_FLUSH_OFFSET), y2: yOvh,
+    stroke: 'var(--accent)', 'stroke-width': 1 });
+  el(svg, 'text', { x: X((PLATFORM_L/2 + TOP_L/2 + X_FLUSH_OFFSET) / 2), y: yOvh - 4,
+    'text-anchor': 'middle', class: 'dim', fill: 'var(--accent)' },
+    `overhang +${(TOP_L - PLATFORM_L).toFixed(0)} mm`);
+
+  // Plate width
+  const xdW = X(-TOP_L/2 + X_FLUSH_OFFSET) - 22;
+  el(svg, 'line', { x1: xdW, y1: Y(-TOP_W/2), x2: xdW, y2: Y(TOP_W/2),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xdW - 4, y: cy + 4, 'text-anchor': 'end', class: 'dim' },
+    `${TOP_W}`);
+
+  // M2 pattern dim X (above plate, shifted)
+  const ym2 = Y(TOP_W/2) - 22;
+  el(svg, 'line', { x1: X(-M2_PX/2 + X_FLUSH_OFFSET), y1: ym2,
+    x2: X(M2_PX/2 + X_FLUSH_OFFSET), y2: ym2,
+    stroke: 'var(--m2)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: X(X_FLUSH_OFFSET), y: ym2 - 3, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--m2)' }, `M2: ${M2_PX} × ${M2_PY}`);
+
+  // M3 pattern dim X (assembly-centered, matches flycatcher)
+  const ym3 = Y(-TOP_W/2) + 66;
+  el(svg, 'line', { x1: X(-FLYCATCHER_M3_X/2), y1: ym3,
+    x2: X(FLYCATCHER_M3_X/2), y2: ym3,
+    stroke: 'var(--m3)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: X(0), y: ym3 + 13, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--m3)' }, `M3 (flycatcher): ${FLYCATCHER_M3_X} × ${FLYCATCHER_M3_Y}`);
+}
+
+planView('top-svg', { showPCB: true,  showCsk: true,  showBoss: true  });
+planView('bot-svg', { showPCB: false, showCsk: false, showBoss: false });
+
+// =====================================================================
+// Cross-section X–Z (through M3 holes at Y = ±FLYCATCHER_M3_Y/2). The two
+// M3 columns are asymmetric in plate-local X (−39.5 and +18.5 mm).
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 720, VB_H = 200, margin = 40;
+  const scale = (VB_W - 2 * margin) / TOP_L;
+  const cx = VB_W / 2, baseY = VB_H - 60;
+  const X = x => cx + x * scale;
+  const Y = z => baseY - z * scale * 4;  // exaggerate Z
+
+  // Plate body
+  el(svg, 'rect', { x: X(-TOP_L/2), y: Y(TOP_T),
+    width: TOP_L * scale, height: TOP_T * scale * 4,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5 });
+
+  // Cutout (asymmetric +X extension)
+  const cutX0s = CUT_CENTER_X - CUT_TOTAL_L/2;
+  el(svg, 'rect', { x: X(cutX0s), y: Y(TOP_T) - 1,
+    width: CUT_TOTAL_L * scale, height: TOP_T * scale * 4 + 2,
+    fill: '#101319', stroke: 'var(--batt-dk)', 'stroke-width': 1, 'stroke-dasharray': '3 3' });
+  el(svg, 'text', { x: X(CUT_CENTER_X), y: Y(TOP_T/2) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--batt)' }, `cutout ${CUT_TOTAL_L} mm`);
+
+  // M3 hole columns (paths through full thickness + csk on top) — asymmetric.
+  for (const xv of [M3_LOCAL_X_MINUS, M3_LOCAL_X_PLUS]) {
+    el(svg, 'rect', { x: X(xv) - M3_D/2 * scale, y: Y(TOP_T),
+      width: M3_D * scale, height: TOP_T * scale * 4,
+      fill: '#101319', stroke: 'var(--m3-dk)', 'stroke-width': 0.8 });
+    // Countersink at top
+    el(svg, 'rect', { x: X(xv) - M3_CSK_D/2 * scale, y: Y(TOP_T),
+      width: M3_CSK_D * scale, height: M3_CSK_DEPTH * scale * 4,
+      fill: '#1a1c22', stroke: 'var(--m3)', 'stroke-width': 1 });
+  }
+
+  // M2 standoff bosses (above plate) + thru-holes through boss and plate
+  for (const sx of [-1, 1]) {
+    const xv = sx * M2_PX/2;
+    // Boss rectangle above plate
+    el(svg, 'rect', { x: X(xv) - M2_BOSS_D/2 * scale, y: Y(TOP_T + M2_BOSS_H),
+      width: M2_BOSS_D * scale, height: M2_BOSS_H * scale * 4,
+      fill: 'var(--body)', stroke: 'var(--m2-dk)', 'stroke-width': 1 });
+    // Thru hole (plate + boss)
+    el(svg, 'rect', { x: X(xv) - M2_D/2 * scale, y: Y(TOP_T + M2_BOSS_H),
+      width: M2_D * scale, height: (TOP_T + M2_BOSS_H) * scale * 4,
+      fill: '#101319', stroke: 'var(--m2-dk)', 'stroke-width': 0.8 });
+  }
+
+  // Labels
+  el(svg, 'text', { x: X(-TOP_L/2) - 6, y: Y(TOP_T/2) + 4, 'text-anchor': 'end', class: 'dim' },
+    `${TOP_T} mm`);
+  el(svg, 'text', { x: X(M3_LOCAL_X_PLUS) + 8, y: Y(TOP_T) - 6, class: 'dim',
+    fill: 'var(--m3)' }, `csk top`);
+  el(svg, 'text', { x: X(M2_PX/2) + 6, y: Y(TOP_T + M2_BOSS_H/2) + 3, class: 'dim',
+    fill: 'var(--m2)' }, `Ø${M2_BOSS_D}×${M2_BOSS_H} boss`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-plate').textContent =
+  `${TOP_L} × ${TOP_W} × ${TOP_T} mm  —  on platform ${PLATFORM_L} × ${PLATFORM_W}: ` +
+  `−X edges flush, +X overhang ${(TOP_L - PLATFORM_L).toFixed(0)} mm (export shift +${X_FLUSH_OFFSET.toFixed(2)} mm in X)`;
+document.getElementById('s-cut').textContent  = `${CUT_TOTAL_L} × ${CUT_W} mm, extended +${CUT_EXTEND_PLUS_X} on +X (X range: ${(CUT_CENTER_X - CUT_TOTAL_L/2).toFixed(1)} to ${(CUT_CENTER_X + CUT_TOTAL_L/2).toFixed(1)})`;
+document.getElementById('s-m2').textContent   = `4× Ø${M2_D} clearance at ${M2_PX} × ${M2_PY} mm, with Ø${M2_BOSS_D}×${M2_BOSS_H} mm standoff bosses above top face`;
+document.getElementById('s-m3').textContent   =
+  `4× Ø${M3_D} clearance at flycatcher pattern ${FLYCATCHER_M3_X} × ${FLYCATCHER_M3_Y} mm (assembly-centered), ` +
+  `csk Ø${M3_CSK_D}×${M3_CSK_DEPTH} on top face. ` +
+  `Plate-local hole X: ${M3_LOCAL_X_MINUS.toFixed(2)}, ${M3_LOCAL_X_PLUS.toFixed(2)} mm; Y = ±${(FLYCATCHER_M3_Y/2).toFixed(2)} mm.`;
+
+const m2EdgeX = TOP_L/2 - M2_PX/2 - M2_D/2;
+const m2EdgeY = TOP_W/2 - M2_PY/2 - M2_D/2;
+// M3 plate-edge clearance — X is asymmetric, take the worse side.
+const m3EdgeX = Math.min(TOP_L/2 - M3_LOCAL_X_PLUS, TOP_L/2 + M3_LOCAL_X_MINUS) - M3_CSK_D/2;
+const m3EdgeY = TOP_W/2 - FLYCATCHER_M3_Y/2 - M3_CSK_D/2;
+// M3 holes in Y side strips (±24.5), well outside CUT_W/2 = 11.5 — only Y matters.
+const m3CutY  = FLYCATCHER_M3_Y/2 - CUT_W/2 - M3_CSK_D/2;
+// Closest M2-to-M3 corner: M2 at (±M2_PX/2, ±M2_PY/2), M3 at (M3_LOCAL_X_MINUS, ±FLY_Y/2).
+const m2m3Gap = Math.hypot(M2_PX/2 - Math.abs(M3_LOCAL_X_MINUS),
+                            FLYCATCHER_M3_Y/2 - M2_PY/2)
+              - (M2_D/2 + M3_CSK_D/2);
+// +X boss edge vs +X cutout edge (the tight spot)
+const cutPlusX = CUT_CENTER_X + CUT_TOTAL_L/2;
+const bossYgap = M2_PY/2 - M2_BOSS_D/2 - CUT_W/2;
+
+const checks = [
+  { ok: m2EdgeX >= 0.8 && m2EdgeY >= 0.8,
+    msg: `M2 edge clearance: ${m2EdgeX.toFixed(2)} (X), ${m2EdgeY.toFixed(2)} (Y) mm` },
+  { ok: m3EdgeX >= 1.0 && m3EdgeY >= 1.0,
+    msg: `M3 csk edge clearance: ${m3EdgeX.toFixed(2)} (X), ${m3EdgeY.toFixed(2)} (Y) mm` },
+  { ok: m3CutY >= 1.0,
+    msg: `M3 csk → cutout (in side strip): ${m3CutY.toFixed(2)} mm material` },
+  { ok: m2m3Gap >= 1.0,
+    msg: `M2 ↔ M3 head clearance: ${m2m3Gap.toFixed(2)} mm` },
+  { ok: bossYgap >= 0.2,
+    msg: `M2 boss (+X corner) → cutout wall in Y: ${bossYgap.toFixed(2)} mm (tight: boss nearly meets extended cutout)` },
+  { ok: cutPlusX <= TOP_L/2 - 1.0,
+    msg: `+X cutout edge at ${cutPlusX.toFixed(2)} mm — ${(TOP_L/2 - cutPlusX).toFixed(2)} mm material to plate edge` },
+  { ok: TOP_T >= 3.0,
+    msg: `Plate thickness ${TOP_T} mm fits Ø${M3_CSK_D}×${M3_CSK_DEPTH} csk with ${(TOP_T - M3_CSK_DEPTH).toFixed(1)} mm material below` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

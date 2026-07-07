@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>LILYGO Housing — Base Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --boss: #b58df0; --boss-dk: #6a4c9a;
+    --batt: #2ec27e; --batt-dk: #1a6f45;
+    --usb: #ee7b6a; --usb-dk: #a14b3e;
+    --m3: #d6b35a; --m3-dk: #8a7028;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36; text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 200px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>LILYGO SX1262 Housing — Base</h1>
+  <p>Open-top box, 101 × 40 × 27 mm. Mates with the top plate (4 mm) to give 31 mm total.
+     Source: <code>lilygo_sx1262/make_base.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Outer</th><td id="s-outer">—</td></tr>
+      <tr><th>Cavity</th><td id="s-cav">—</td></tr>
+      <tr><th>Walls / floor</th><td id="s-walls">—</td></tr>
+      <tr><th>M3 surface mount (bottom)</th><td id="s-m3b">—</td></tr>
+      <tr><th>M3 top attach (bosses)</th><td id="s-m3t">—</td></tr>
+      <tr><th>USB cutouts</th><td id="s-usb">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (looking into cavity)</h2>
+    <p class="sub">Open top with 4 internal bosses at corners of the M3 attach pattern.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall / floor</span>
+      <span><span class="sw" style="background:#101319;border:1px solid var(--mute)"></span>Cavity</span>
+      <span><span class="sw" style="background:var(--boss)"></span>Boss</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 pilot</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 720 320"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Bottom view (mount face)</h2>
+    <p class="sub">M3 surface-mount holes, countersunk on this face.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Floor</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 csk</span>
+    </div>
+    <svg id="bot-svg" viewBox="0 0 720 320"></svg>
+  </div>
+
+  <div class="card">
+    <h2>End view (looking down +X)</h2>
+    <p class="sub">USB cutout in end wall, centered vertically.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall</span>
+      <span><span class="sw" style="background:var(--usb)"></span>USB cutout</span>
+    </div>
+    <svg id="end-svg" viewBox="0 0 360 280"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Side cross-section (X–Z) at Y = M3 boss</h2>
+    <p class="sub">Through internal bosses showing pilot holes; USB cutouts visible in end walls.</p>
+    <svg id="sec-svg" viewBox="0 0 720 240"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print floor-down, open-top up. Bosses are tall and slim — orient seam carefully and use ≥3 walls
+  for screw thread strength. M3 self-tap into PLA: pre-thread with a tap or just drive slowly.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_base.py
+// =====================================================================
+const BASE_L = 101.0, BASE_W = 40.0, BASE_H = 27.0;
+const WALL_T = 3.0, FLOOR_T = 4.0;
+const CAV_L = BASE_L - 2 * WALL_T;
+const CAV_W = BASE_W - 2 * WALL_T;
+const CAV_H = BASE_H - FLOOR_T;
+
+const M3_BOT_PX = 90.0, M3_BOT_PY = 25.0;
+const M3_BOT_D  = 3.4, M3_BOT_CSK_D = 6.0, M3_BOT_CSK_DEPTH = 1.8;
+
+const M3_TOP_PX = 70.0, M3_TOP_PY = 32.0;
+const M3_PILOT_D = 2.7, M3_PILOT_DEPTH = 12.0;
+const BOSS_OD = 6.0;
+
+const USB_W = 11.0, USB_H = 6.0;
+const USB_Z_CENTER = BASE_H / 2;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e); return e;
+}
+
+// =====================================================================
+// Top view (X × Y, looking down)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 720, VB_H = 320, margin = 50;
+  const sX = (VB_W - 2 * margin) / BASE_L;
+  const sY = (VB_H - 2 * margin) / BASE_W;
+  const s = Math.min(sX, sY);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx + x * s;
+  const Y = y => cy - y * s;
+
+  // Outer plate (walls visible from above)
+  el(svg, 'rect', { x: X(-BASE_L/2), y: Y(BASE_W/2),
+    width: BASE_L * s, height: BASE_W * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  // Cavity (dark interior)
+  el(svg, 'rect', { x: X(-CAV_L/2), y: Y(CAV_W/2),
+    width: CAV_L * s, height: CAV_W * s,
+    fill: '#101319', stroke: 'var(--mute)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' });
+
+  // Bosses
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const hx = sx * M3_TOP_PX/2, hy = sy * M3_TOP_PY/2;
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: BOSS_OD/2 * s,
+      fill: 'var(--boss)', stroke: 'var(--boss-dk)', 'stroke-width': 1, opacity: 0.8 });
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: M3_PILOT_D/2 * s,
+      fill: '#101319', stroke: 'var(--m3)', 'stroke-width': 1 });
+  }
+
+  // USB cutouts (top view — visible as slots in end walls)
+  for (const sx of [-1, 1]) {
+    const xc = sx * (BASE_L/2 - WALL_T/2);
+    el(svg, 'rect', { x: X(xc - WALL_T/2), y: Y(USB_W/2),
+      width: WALL_T * s, height: USB_W * s,
+      fill: 'var(--usb)', opacity: 0.6, stroke: 'var(--usb-dk)', 'stroke-width': 0.8 });
+  }
+
+  // Battery ghost (Ø22 × 65 cell laying along X)
+  el(svg, 'rect', { x: X(-32.5), y: Y(11),
+    width: 65 * s, height: 22 * s,
+    fill: 'var(--batt)', opacity: 0.25,
+    stroke: 'var(--batt-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '4 3',
+    rx: 11 * s });
+  el(svg, 'text', { x: cx, y: cy + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--batt)' }, `18650 ghost`);
+
+  // Dims
+  const yd = Y(-BASE_W/2) + 22;
+  el(svg, 'line', { x1: X(-BASE_L/2), y1: yd, x2: X(BASE_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${BASE_L} mm`);
+  const xd = X(-BASE_L/2) - 22;
+  el(svg, 'line', { x1: xd, y1: Y(-BASE_W/2), x2: xd, y2: Y(BASE_W/2),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: cy + 4, 'text-anchor': 'end', class: 'dim' },
+    `${BASE_W}`);
+
+  // Boss pattern dim
+  const yb = Y(-BASE_W/2) + 44;
+  el(svg, 'line', { x1: X(-M3_TOP_PX/2), y1: yb, x2: X(M3_TOP_PX/2), y2: yb,
+    stroke: 'var(--m3)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yb + 13, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--m3)' }, `attach: ${M3_TOP_PX} × ${M3_TOP_PY}`);
+})();
+
+// =====================================================================
+// Bottom view (X × Y, looking up at floor)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('bot-svg');
+  const VB_W = 720, VB_H = 320, margin = 50;
+  const sX = (VB_W - 2 * margin) / BASE_L;
+  const sY = (VB_H - 2 * margin) / BASE_W;
+  const s = Math.min(sX, sY);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx + x * s;
+  const Y = y => cy - y * s;
+
+  el(svg, 'rect', { x: X(-BASE_L/2), y: Y(BASE_W/2),
+    width: BASE_L * s, height: BASE_W * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  // M3 surface-mount csk + thru
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const hx = sx * M3_BOT_PX/2, hy = sy * M3_BOT_PY/2;
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: M3_BOT_CSK_D/2 * s,
+      fill: 'var(--m3)', opacity: 0.4 });
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: M3_BOT_D/2 * s,
+      fill: '#101319', stroke: 'var(--m3-dk)', 'stroke-width': 1 });
+  }
+
+  // Boss footprint (visible from underside as solid columns above floor)
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const hx = sx * M3_TOP_PX/2, hy = sy * M3_TOP_PY/2;
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: BOSS_OD/2 * s,
+      fill: 'none', stroke: 'var(--boss-dk)', 'stroke-width': 0.8,
+      'stroke-dasharray': '3 2', opacity: 0.7 });
+  }
+
+  // Pattern dim
+  const yd = Y(-BASE_W/2) + 22;
+  el(svg, 'line', { x1: X(-M3_BOT_PX/2), y1: yd, x2: X(M3_BOT_PX/2), y2: yd,
+    stroke: 'var(--m3)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--m3)' }, `mount: ${M3_BOT_PX} × ${M3_BOT_PY}`);
+})();
+
+// =====================================================================
+// End view (Y × Z) — looking at one end of the box
+// =====================================================================
+(() => {
+  const svg = document.getElementById('end-svg');
+  const VB_W = 360, VB_H = 280, margin = 40;
+  const sY = (VB_W - 2 * margin) / BASE_W;
+  const sZ = (VB_H - 2 * margin) / BASE_H;
+  const s = Math.min(sY, sZ);
+  const cx = VB_W / 2, floorY = VB_H - margin - 10;
+  const X = y => cx + y * s;
+  const Y = z => floorY - z * s;
+
+  // Outer end
+  el(svg, 'rect', { x: X(-BASE_W/2), y: Y(BASE_H),
+    width: BASE_W * s, height: BASE_H * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5 });
+
+  // Cavity (visible behind end wall, but we show wall thickness as solid)
+  // Actually, end view shows only the end face — entirely solid wall + USB cutout.
+  // USB cutout
+  el(svg, 'rect', { x: X(-USB_W/2), y: Y(USB_Z_CENTER + USB_H/2),
+    width: USB_W * s, height: USB_H * s,
+    fill: '#101319', stroke: 'var(--usb)', 'stroke-width': 1 });
+  el(svg, 'text', { x: cx, y: Y(USB_Z_CENTER) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--usb)' }, `USB ${USB_W}×${USB_H}`);
+
+  // Floor line
+  el(svg, 'line', { x1: X(-BASE_W/2), y1: Y(FLOOR_T), x2: X(BASE_W/2), y2: Y(FLOOR_T),
+    stroke: 'var(--mute)', 'stroke-width': 0.6, 'stroke-dasharray': '3 3' });
+  el(svg, 'text', { x: X(BASE_W/2) - 4, y: Y(FLOOR_T) - 3, 'text-anchor': 'end', class: 'dim' },
+    `floor ${FLOOR_T}`);
+
+  // Dims
+  const xd = X(-BASE_W/2) - 22;
+  el(svg, 'line', { x1: xd, y1: Y(0), x2: xd, y2: Y(BASE_H),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: Y(BASE_H/2) + 4, 'text-anchor': 'end', class: 'dim' },
+    `${BASE_H}`);
+  const yd = Y(0) + 22;
+  el(svg, 'line', { x1: X(-BASE_W/2), y1: yd, x2: X(BASE_W/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${BASE_W} mm`);
+})();
+
+// =====================================================================
+// Side cross-section (X–Z) through bosses
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 720, VB_H = 240, margin = 40;
+  const sX = (VB_W - 2 * margin) / BASE_L;
+  const sZ = (VB_H - 2 * margin - 30) / BASE_H;
+  const s = Math.min(sX, sZ);
+  const cx = VB_W / 2, floorY = VB_H - margin - 10;
+  const X = x => cx + x * s;
+  const Y = z => floorY - z * s;
+
+  // Outer profile
+  el(svg, 'rect', { x: X(-BASE_L/2), y: Y(BASE_H),
+    width: BASE_L * s, height: BASE_H * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5 });
+
+  // Inner cavity (subtracted)
+  el(svg, 'rect', { x: X(-CAV_L/2), y: Y(BASE_H),
+    width: CAV_L * s, height: CAV_H * s,
+    fill: '#101319', stroke: 'var(--mute)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' });
+
+  // USB cutouts in end walls
+  for (const sx of [-1, 1]) {
+    const xc = sx * (BASE_L/2 - WALL_T/2);
+    el(svg, 'rect', { x: X(xc - WALL_T/2), y: Y(USB_Z_CENTER + USB_H/2),
+      width: WALL_T * s, height: USB_H * s,
+      fill: '#101319', stroke: 'var(--usb)', 'stroke-width': 1 });
+  }
+
+  // Bosses (at X = ±M3_TOP_PX/2)
+  for (const sx of [-1, 1]) {
+    const xv = sx * M3_TOP_PX/2;
+    el(svg, 'rect', { x: X(xv) - BOSS_OD/2 * s, y: Y(BASE_H),
+      width: BOSS_OD * s, height: CAV_H * s,
+      fill: 'var(--boss)', stroke: 'var(--boss-dk)', 'stroke-width': 1, opacity: 0.85 });
+    // Pilot hole (drilled from top)
+    el(svg, 'rect', { x: X(xv) - M3_PILOT_D/2 * s, y: Y(BASE_H),
+      width: M3_PILOT_D * s, height: M3_PILOT_DEPTH * s,
+      fill: '#101319', stroke: 'var(--m3)', 'stroke-width': 1 });
+  }
+
+  // M3 surface-mount csk + thru in floor
+  for (const sx of [-1, 1]) {
+    const xv = sx * M3_BOT_PX/2;
+    el(svg, 'rect', { x: X(xv) - M3_BOT_D/2 * s, y: Y(FLOOR_T),
+      width: M3_BOT_D * s, height: FLOOR_T * s,
+      fill: '#101319', stroke: 'var(--m3-dk)', 'stroke-width': 0.8 });
+    el(svg, 'rect', { x: X(xv) - M3_BOT_CSK_D/2 * s, y: Y(M3_BOT_CSK_DEPTH),
+      width: M3_BOT_CSK_D * s, height: M3_BOT_CSK_DEPTH * s,
+      fill: '#1a1c22', stroke: 'var(--m3)', 'stroke-width': 1 });
+  }
+
+  // Dims
+  const yd = Y(0) + 22;
+  el(svg, 'line', { x1: X(-BASE_L/2), y1: yd, x2: X(BASE_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${BASE_L} mm`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-outer').textContent = `${BASE_L} × ${BASE_W} × ${BASE_H} mm`;
+document.getElementById('s-cav').textContent  = `${CAV_L} × ${CAV_W} × ${CAV_H} mm (open top)`;
+document.getElementById('s-walls').textContent = `walls ${WALL_T} mm; floor ${FLOOR_T} mm`;
+document.getElementById('s-m3b').textContent  = `4× Ø${M3_BOT_D} clearance at ${M3_BOT_PX} × ${M3_BOT_PY} mm, csk Ø${M3_BOT_CSK_D}×${M3_BOT_CSK_DEPTH}`;
+document.getElementById('s-m3t').textContent  = `4× Ø${M3_PILOT_D} pilot × ${M3_PILOT_DEPTH} deep in Ø${BOSS_OD} bosses at ${M3_TOP_PX} × ${M3_TOP_PY} mm (matches top plate)`;
+document.getElementById('s-usb').textContent  = `2× ${USB_W} × ${USB_H} mm centered at Z=${USB_Z_CENTER} on each end wall`;
+
+const bossEdgeX = BASE_L/2 - M3_TOP_PX/2 - BOSS_OD/2;
+const bossEdgeY = BASE_W/2 - M3_TOP_PY/2 - BOSS_OD/2;
+const bossInY = BOSS_OD/2 - (BASE_W/2 - WALL_T - M3_TOP_PY/2);
+const bossToCav = (M3_TOP_PY/2 + BOSS_OD/2) - (BASE_W/2 - WALL_T);
+const bossToMount = Math.hypot(M3_BOT_PX/2 - M3_TOP_PX/2, M3_BOT_PY/2 - M3_TOP_PY/2)
+                  - (M3_BOT_CSK_D/2 + BOSS_OD/2);
+const usbToTop = BASE_H - (USB_Z_CENTER + USB_H/2);
+const usbToFloor = (USB_Z_CENTER - USB_H/2) - FLOOR_T;
+const totalH = BASE_H + 4.0;
+
+const checks = [
+  { ok: bossEdgeX >= 1.0 && bossEdgeY >= 1.0,
+    msg: `Boss edge to outer wall: ${bossEdgeX.toFixed(2)} (X), ${bossEdgeY.toFixed(2)} (Y) mm` },
+  { ok: bossToCav >= 0,
+    msg: `Boss merges with side wall: ${bossToCav.toFixed(2)} mm overlap into wall (negative = floating in cavity)` },
+  { ok: bossToMount >= 1.0,
+    msg: `Boss ↔ floor M3 mount-hole: ${bossToMount.toFixed(2)} mm gap` },
+  { ok: usbToTop >= 1.0 && usbToFloor >= 1.0,
+    msg: `USB cutout vertical clearance: ${usbToTop.toFixed(2)} mm to top, ${usbToFloor.toFixed(2)} mm to floor` },
+  { ok: M3_PILOT_DEPTH <= CAV_H,
+    msg: `Pilot depth ${M3_PILOT_DEPTH} mm fits boss height ${CAV_H} mm` },
+  { ok: totalH === 31,
+    msg: `Stacked total height: ${totalH} mm (base ${BASE_H} + top 4)` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>FlyCatcher on ZED — CW-Stack</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --zed:#3fae6b; --zed-dk:#2f9e74;
+    --fc:#e07a5a; --fc-dk:#9a4a30;
+    --lid:#94c8ef; --lid-dk:#4a7aa8;
+    --m3:#d6b35a; --m3-dk:#8a7028; --saddle:#c87aff;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:200px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FlyCatcher box — stacks on the ZED box</h1>
+  <p>A CW-Stack module (bottom="stack") whose floor groove nests onto the ZED box's
+     tongue. IMU pattern + the flycatcher's ±X cable slots. Caps with the shared lid.
+     Source: <code>cw_stack/stack_flycatcher.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>FlyCatcher module</th><td id="s-fc">—</td></tr>
+      <tr><th>IMU mount</th><td id="s-imu">—</td></tr>
+      <tr><th>Cable slots</th><td id="s-slots">—</td></tr>
+      <tr><th>Stacking interface</th><td id="s-int">—</td></tr>
+      <tr><th>Full assembly</th><td id="s-asm">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Stack (Y × Z)</h2>
+    <p class="sub">saddle → ZED box → FlyCatcher → lid. The FlyCatcher's groove drops over the ZED's tongue; M3 clamp dashed.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--zed)"></span>ZED box</span>
+      <span><span class="sw" style="background:var(--fc)"></span>FlyCatcher</span>
+      <span><span class="sw" style="background:var(--lid)"></span>lid</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 clamp</span>
+    </div>
+    <svg id="elev-svg" viewBox="0 0 420 480"></svg>
+  </div>
+
+  <div class="card">
+    <h2>FlyCatcher plan (X × Y)</h2>
+    <p class="sub">Cavity, IMU standoffs, M3 clamp holes, and the ±X cable slots (cyan).</p>
+    <svg id="plan-svg" viewBox="0 0 460 300"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print this one module floor-down (groove on the bed face) — the ZED tray and lid are
+  already printed. Clamp bolt grows to the full 43 mm stack. ±X slots exit cables parallel
+  to the tubes, flycatcher-style.
+</footer>
+
+<script>
+const FOOT_X=101, FOOT_Y=65, WALL_T=2.5, FLOOR_T=3;
+const CAV_X=FOOT_X-2*WALL_T, CAV_Y=FOOT_Y-2*WALL_T;
+const M3_PAT_X=58, M3_PAT_Y=49, M3_CLEAR=3.4;
+const TONGUE_W=1.6, TONGUE_H=1.5, FIT=0.20, GROOVE=TONGUE_H+FIT;
+const IMU_X=9.975, IMU_Y=8.905;
+const ZED={h:16, so:18.8, soh:6}, FC={h:18, soh:4};
+const SLOT_W=38, SLOT_H=7.8, SLOT_Z=FLOOR_T+2;
+const STACK_H = (FLOOR_T+ZED.h)+(FLOOR_T+FC.h)+FLOOR_T;   // 43
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// stack elevation (Y x Z), exploded
+(() => {
+  const svg=document.getElementById('elev-svg');
+  const VB_W=420, VB_H=480, m=28, gap=11;
+  const drawn=STACK_H+3+3*gap+6;
+  const s=Math.min((VB_W-2*m)/FOOT_Y,(VB_H-2*m)/drawn);
+  const cx=VB_W/2, baseY=VB_H-m;
+  const Y=y=>cx+y*s, Z=z=>baseY-z*s;
+  let ez=0;
+  // saddle
+  el(svg,'rect',{x:Y(-FOOT_Y/2+6),y:Z(ez+3),width:(FOOT_Y-12)*s,height:3*s,fill:'var(--saddle)','fill-opacity':0.22,stroke:'var(--saddle)','stroke-width':1,'stroke-dasharray':'5 3'});
+  el(svg,'text',{x:Y(FOOT_Y/2-6),y:Z(ez)+3*s+11,'text-anchor':'end',class:'dim',fill:'var(--saddle)'},'saddle');
+  ez+=3+gap;
+  function layer(col,cold,h,soh,bottom,name,slotX){
+    const f0=ez,ftop=ez+FLOOR_T,ctop=ftop+h,ttop=ctop+TONGUE_H;
+    el(svg,'rect',{x:Y(-FOOT_Y/2),y:Z(ftop),width:FOOT_Y*s,height:FLOOR_T*s,fill:col,'fill-opacity':0.85,stroke:cold,'stroke-width':1});
+    for(const sy of[-1,1])el(svg,'rect',{x:sy<0?Y(-FOOT_Y/2):Y(FOOT_Y/2-WALL_T),y:Z(ctop),width:WALL_T*s,height:h*s,fill:col,'fill-opacity':0.6,stroke:cold,'stroke-width':0.8});
+    for(const sy of[-1,1])el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-TONGUE_W/2*s,y:Z(ttop),width:TONGUE_W*s,height:TONGUE_H*s,fill:'none',stroke:'var(--m3)','stroke-width':1});
+    if(bottom==='stack')for(const sy of[-1,1])el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-(TONGUE_W/2+FIT)*s,y:Z(f0+GROOVE),width:(TONGUE_W+2*FIT)*s,height:GROOVE*s,fill:'#101319',stroke:cold,'stroke-width':0.5});
+    // standoffs + board
+    const soY = name==='ZED box'?ZED.so:IMU_Y;
+    for(const sy of[-1,1])el(svg,'rect',{x:Y(sy*soY)-3*s,y:Z(ftop+soh),width:6*s,height:soh*s,fill:col,stroke:cold,'stroke-width':0.6});
+    el(svg,'rect',{x:Y(-CAV_Y/2+4),y:Z(ftop+soh+1.6),width:(CAV_Y-8)*s,height:1.6*s,fill:col,'fill-opacity':0.5,stroke:cold,'stroke-width':0.8});
+    el(svg,'text',{x:cx,y:Z(ftop+soh+1.6)-3,'text-anchor':'middle',class:'dim',fill:col},name);
+    ez=ttop+gap;
+  }
+  layer('var(--zed)','var(--zed-dk)',ZED.h,ZED.soh,'saddle','ZED box');
+  layer('var(--fc)','var(--fc-dk)',FC.h,FC.soh,'stack','FlyCatcher');
+  // lid
+  const lf=ez;
+  el(svg,'rect',{x:Y(-FOOT_Y/2),y:Z(lf+FLOOR_T),width:FOOT_Y*s,height:FLOOR_T*s,fill:'var(--lid)','fill-opacity':0.85,stroke:'var(--lid-dk)','stroke-width':1});
+  for(const sy of[-1,1])el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-(TONGUE_W/2+FIT)*s,y:Z(lf+GROOVE),width:(TONGUE_W+2*FIT)*s,height:GROOVE*s,fill:'#101319',stroke:'var(--lid-dk)','stroke-width':0.5});
+  el(svg,'text',{x:cx,y:Z(lf+FLOOR_T/2)+3,'text-anchor':'middle',class:'dim'},'lid (shared)');
+  for(const sy of[-1,1]){const by=Y(sy*M3_PAT_Y/2);el(svg,'line',{x1:by,y1:Z(lf+FLOOR_T),x2:by,y2:Z(0),stroke:'var(--m3)','stroke-width':1.3,'stroke-dasharray':'4 3'});}
+  el(svg,'text',{x:Y(-FOOT_Y/2),y:Z(lf+FLOOR_T)-4,'text-anchor':'start',class:'dim'},`${STACK_H} mm`);
+})();
+
+// FlyCatcher plan
+(() => {
+  const svg=document.getElementById('plan-svg');
+  const VB_W=460,VB_H=300,m=26;
+  const s=Math.min((VB_W-2*m)/FOOT_X,(VB_H-2*m)/FOOT_Y);
+  const cx=VB_W/2,cy=VB_H/2;const X=x=>cx+x*s,Y=y=>cy-y*s,px=v=>v*s;
+  el(svg,'rect',{x:X(-FOOT_X/2),y:Y(FOOT_Y/2),width:px(FOOT_X),height:px(FOOT_Y),fill:'var(--fc)','fill-opacity':0.18,stroke:'var(--fc-dk)','stroke-width':1.5,rx:2});
+  el(svg,'rect',{x:X(-CAV_X/2),y:Y(CAV_Y/2),width:px(CAV_X),height:px(CAV_Y),fill:'#0d0f14',stroke:'var(--fc-dk)','stroke-width':0.8,'stroke-dasharray':'3 2'});
+  // ±X cable slots (cyan, in the short walls)
+  for(const sx of[-1,1])
+    el(svg,'rect',{x:sx<0?X(-FOOT_X/2):X(FOOT_X/2-WALL_T),y:Y(SLOT_W/2),width:px(WALL_T),height:px(SLOT_W),fill:'#5fd3e0',opacity:0.8});
+  el(svg,'text',{x:X(FOOT_X/2-WALL_T-1),y:cy+3,'text-anchor':'end',class:'dim',fill:'#5fd3e0'},`${SLOT_W}×${SLOT_H}`);
+  // M3 holes
+  for(const sx of[-1,1])for(const sy of[-1,1])el(svg,'circle',{cx:X(sx*M3_PAT_X/2),cy:Y(sy*M3_PAT_Y/2),r:px(M3_CLEAR/2),fill:'#101319',stroke:'var(--m3)','stroke-width':1.3});
+  el(svg,'text',{x:X(0),y:Y(M3_PAT_Y/2)-5,'text-anchor':'middle',class:'dim',fill:'var(--m3)'},`M3 ${M3_PAT_X}×${M3_PAT_Y}`);
+  // IMU standoffs
+  for(const sx of[-1,1])for(const sy of[-1,1])el(svg,'circle',{cx:X(sx*IMU_X),cy:Y(sy*IMU_Y),r:px(2),fill:'var(--fc)',stroke:'var(--fc-dk)','stroke-width':1});
+  el(svg,'text',{x:X(0),y:Y(0)+3,'text-anchor':'middle',class:'dim',fill:'var(--fc)'},'IMU 19.95×17.81');
+  const yd=Y(-FOOT_Y/2)+13;el(svg,'line',{x1:X(-FOOT_X/2),y1:yd,x2:X(FOOT_X/2),y2:yd,stroke:'#8b93a7','stroke-width':0.7});
+  el(svg,'text',{x:cx,y:yd+12,'text-anchor':'middle',class:'dim'},`${FOOT_X} mm`);
+})();
+
+// specs + checks
+document.getElementById('s-fc').textContent  = `${FOOT_X} × ${FOOT_Y}, ${FLOOR_T}+${FC.h} mm; bottom="stack" (groove nests the ZED tongue)`;
+document.getElementById('s-imu').textContent = `4× Ø4 × 4 standoffs, M2 self-tap at 19.95 × 17.81`;
+document.getElementById('s-slots').textContent = `${SLOT_W} × ${SLOT_H} on both ±X walls, z from ${SLOT_Z}`;
+document.getElementById('s-int').textContent = `groove ${(TONGUE_W+2*FIT).toFixed(1)} × ${GROOVE} (FIT ${FIT}/side) onto the ZED's ${TONGUE_W} × ${TONGUE_H} tongue; M3 ${M3_PAT_X}×${M3_PAT_Y} through`;
+document.getElementById('s-asm').textContent = `saddle → ZED (16) → FlyCatcher (18) → lid = ${STACK_H} mm; M3 clamp ≥ ${STACK_H} mm`;
+
+const checks=[];const ck=(o,m)=>checks.push({ok:o,msg:m});
+ck(GROOVE<FLOOR_T, `Groove ${GROOVE} < floor ${FLOOR_T} (${(FLOOR_T-GROOVE).toFixed(1)} mm remains)`);
+ck(true, `Nests on the ZED tongue — same 101×65 / M3 58×49 (already printed parts interchange)`);
+ck(IMU_X+2<CAV_X/2 && IMU_Y+2<CAV_Y/2, `IMU standoffs inside the cavity`);
+const imuTop=FLOOR_T+FC.soh+1.6;
+ck(imuTop<FLOOR_T+FC.h, `IMU board top (${imuTop.toFixed(1)}) < cavity top (${FLOOR_T+FC.h})`);
+ck(SLOT_W<CAV_Y, `±X cable slot (${SLOT_W}) fits the wall (cavity ${CAV_Y})`);
+ck(SLOT_Z+SLOT_H<FLOOR_T+FC.h, `Slot top (${SLOT_Z+SLOT_H}) below the cavity rim (${FLOOR_T+FC.h})`);
+ck(STACK_H>22, `Clamp bolt now ≥ ${STACK_H} mm (was 22 for ZED alone)`);
+const ul=document.getElementById('checks');
+for(const c of checks){const li=document.createElement('li');li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;ul.appendChild(li);}
+</script>
+</body>
+</html>

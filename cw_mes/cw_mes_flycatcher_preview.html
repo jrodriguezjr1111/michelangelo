@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CW-MES — FlyCatcher box</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--ink:#e6e8ee;--mute:#8b93a7;--accent:#6ee7b7;--warn:#fca5a5;--line:#222836;--blue:#4f86c6;}
+  *{box-sizing:border-box;}
+  body{margin:0;font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:var(--bg);color:var(--ink);}
+  header{padding:20px 28px;border-bottom:1px solid var(--line);}
+  header h1{margin:0 0 4px;font-size:18px;font-weight:600;}
+  header p{margin:0;color:var(--mute);font-size:13px;max-width:900px;}
+  main{display:grid;gap:18px;padding:18px 28px 40px;grid-template-columns:1fr 1fr;}
+  @media (max-width:980px){main{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;}
+  .card.full{grid-column:1/-1;}
+  .card h2{margin:0 0 2px;font-size:15px;font-weight:600;}
+  .card .sub{margin:0 0 10px;color:var(--mute);font-size:12px;}
+  .gallery{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;align-items:start;}
+  .gallery img{width:100%;border-radius:8px;background:#1c1e16;display:block;}
+  .stack2{display:grid;gap:12px;}
+  table.specs{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.specs th,table.specs td{padding:6px 10px;border-bottom:1px solid #242a36;text-align:left;vertical-align:top;}
+  table.specs th{color:var(--mute);font-weight:600;width:150px;}
+  code{background:#101319;padding:1px 5px;border-radius:3px;color:#f6cd7b;}
+  ul.checks{margin:0;padding-left:18px;line-height:1.7;}
+  .pill{display:inline-block;font-size:11px;color:#0f1115;background:var(--blue);border-radius:20px;padding:2px 9px;font-weight:600;margin-left:6px;}
+  .confirm{color:#f6cd7b;}
+  footer{color:var(--mute);padding:0 28px 28px;font-size:12px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>CW-MES — Nooelec FlyCatcher box <span class="pill">OpenSCAD</span></h1>
+  <p>Same modular 6-panel bolted enclosure as the Jetson Nano box (shared
+     <code>cw_mes_lib.scad</code>) — only the parameters change. The FlyCatcher is two
+     radios; each radio's <b>SMA + USB</b> routes out <b>its own side wall</b> through a
+     CW-Link cable gland (4 bores total). Board sits on bottom-plate riser bosses.
+     Source: <code>cw_mes_flycatcher.scad</code>.</p>
+</header>
+
+<main>
+  <div class="card full">
+    <h2>Renders</h2>
+    <p class="sub">Assembled (vented top, bolted panels) + a side gland wall showing the two Ø18.4 bores clearing every tab / T-slot.</p>
+    <div class="gallery">
+      <img src="fly_hero.png" alt="assembled hero"/>
+      <div class="stack2">
+        <img src="fly_assembled.png" alt="assembled top"/>
+        <img src="fly_left.png" alt="gland side wall"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Specs</h2>
+    <table class="specs">
+      <tr><th>Box</th><td id="s-box">—</td></tr>
+      <tr><th>Construction</th><td id="s-con">—</td></tr>
+      <tr><th>Board + risers</th><td id="s-board">—</td></tr>
+      <tr><th>Gland bores</th><td id="s-gland">—</td></tr>
+      <tr><th>Cable routing</th><td id="s-route">—</td></tr>
+      <tr><th>Print set</th><td id="s-print">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+    <p class="sub" style="margin-top:10px"><span class="confirm">Confirm vs calipers:</span> board size, mount-hole pattern, gland heights, insert Ø (M3 vs M2.5).</p>
+  </div>
+</main>
+
+<footer>
+  Print each panel flat, no supports (PLA clr 0.10, coupon-verified). Glands are the
+  CW-Link parts — M18 here is generous; drop <code>GLAND_D</code> and the box shrinks
+  with it (the gland nut sets the X clearance). Panels interchange with the rest of the
+  CW-MES family (matching edge lengths + tab counts).
+</footer>
+
+<script>
+const FC=[73,54,1.6], GLAND_D=12.0, gx=15.5;
+const inner=[FC[0]+2*gx, FC[1]+12, 38];
+const t=3, rim=2.5;
+const BX=inner[0]+2*t+2*rim, BY=inner[1]+2*t+2*rim;
+const boss_h=14, gz=19, gy_usb=18, gy_sma=48, r=GLAND_D/2;
+const set=(id,x)=>document.getElementById(id).textContent=x;
+set('s-box',`inner ${inner[0]}×${inner[1]}×${inner[2]} mm; footprint ${BX}×${BY} (bed 305)`);
+set('s-con',`6 bolted panels, tongue-tab + T-slot square nuts (M3); PLA clr 0.10`);
+set('s-board',`FlyCatcher ${FC[0]}×${FC[1]} centered, on Ø8 × ${boss_h} riser bosses (M3 heat-set inserts)`);
+set('s-gland',`4× Ø${GLAND_D} (single-cable clamshell) — 2 per side wall, USB @ y${gy_usb} / SMA @ y${gy_sma}, centerline z${gz}`);
+set('s-route',`LEFT wall = ADS-B (SMA+USB); RIGHT wall = UAT (SMA+USB) — each radio out its own side`);
+set('s-print',`6 panels (bottom/top/front/back/left/right) + 4× CW-Link glands`);
+
+const C=[];const ck=(o,m)=>C.push({o,m});
+const jointBot=8, jointTop=inner[2]-8;
+ck(gz-r>jointBot && gz+r<jointTop, `Gland bore spans z ${(gz-r).toFixed(1)}..${(gz+r).toFixed(1)} — clears bottom joints (≤${jointBot}) and top (≥${jointTop})`);
+ck(gx>=13, `Wall↔board gap ${gx} ≥ gland-nut intrusion ~13 mm`);
+ck(gy_usb-r>8 && gy_sma+r<inner[1]-8, `Both bores fit the ${inner[1]} mm wall, clear of the end T-slots`);
+ck(boss_h>jointBot, `Riser ${boss_h} > bottom T-slot tips (${jointBot}) — board clears the joints`);
+ck(boss_h+FC[2]+12 < jointTop, `Board top + ~12 SMA stub (${(boss_h+FC[2]+12).toFixed(1)}) < top joint zone (${jointTop})`);
+ck(BX<305 && BY<305, `Footprint ${BX}×${BY} fits the Qidi X-Plus 4 bed`);
+ck(true, `Engine change is backward-compatible — Jetson/Orin still render (round cuts via is_undef guards)`);
+const ul=document.getElementById('checks');
+for(const c of C){const li=document.createElement('li');li.innerHTML=(c.o?'<span style="color:var(--accent)">✓</span> ':'<span style="color:var(--warn)">✗</span> ')+c.m;ul.appendChild(li);}
+</script>
+</body>
+</html>

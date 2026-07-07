@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CW-Stack — Stackable Encasing System</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --zed:#3fae6b; --zed-dk:#2f9e74;
+    --imu:#e07a5a; --imu-dk:#9a4a30;
+    --lid:#94c8ef; --lid-dk:#4a7aa8;
+    --m3:#d6b35a; --m3-dk:#8a7028; --saddle:#c87aff;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:200px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CW-Stack — modular stackable encasing system</h1>
+  <p>Generalizes the flycatcher: each component gets a 101 × 65 tray; trays nest via a
+     tongue/groove rim and clamp with 4 long M3 (58 × 49). Bottom mounts the GNSS saddle
+     (M4 36.14). Source: <code>cw_stack/cw_stack.py</code> + <code>stack_demo.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Footprint / cavity</th><td id="s-foot">—</td></tr>
+      <tr><th>Registration</th><td id="s-reg">—</td></tr>
+      <tr><th>Clamp / stacking</th><td id="s-clamp">—</td></tr>
+      <tr><th>Saddle mount (base)</th><td id="s-saddle">—</td></tr>
+      <tr><th>Demo stack</th><td id="s-stack">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Exploded stack (Y × Z)</h2>
+    <p class="sub">saddle → ZED base → IMU module → lid. Tongue (gold-edge) of each layer seats in the groove above; M3 clamp dashed.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--zed)"></span>ZED base</span>
+      <span><span class="sw" style="background:var(--imu)"></span>IMU module</span>
+      <span><span class="sw" style="background:var(--lid)"></span>lid</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 clamp</span>
+      <span><span class="sw" style="background:var(--saddle)"></span>saddle (ref)</span>
+    </div>
+    <svg id="elev-svg" viewBox="0 0 460 520"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Module plan + joint detail</h2>
+    <p class="sub">Footprint, cavity, perimeter tongue, M3 clamp holes, component standoffs (IMU shown). Inset: the tongue/groove rim.</p>
+    <svg id="plan-svg" viewBox="0 0 460 300"></svg>
+    <svg id="joint-svg" viewBox="0 0 460 150" style="margin-top:10px"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print every part floor-down, no supports (groove and csk are on the bed face). Clamp:
+  one length of M3 from the lid's csk top threads down into the ZED base's heat-set inserts —
+  add a module = a longer bolt. Per-layer inserts (each tray bolts to the one below) are the
+  serviceable alternative. Tongue/groove FIT is the same PLA-tuned snug as the box coupon.
+</footer>
+
+<script>
+// ===== params — sync with cw_stack.py / stack_demo.py =====
+const FOOT_X=101, FOOT_Y=65, WALL_T=2.5, FLOOR_T=3;
+const CAV_X=FOOT_X-2*WALL_T, CAV_Y=FOOT_Y-2*WALL_T;     // 96 x 60
+const M3_PAT_X=58, M3_PAT_Y=49, M3_CLEAR=3.4, M3_CSK_D=6;
+const M4_PAT_X=36.14, M4_PAT_Y=36.1, M4_CLEAR=4.4;
+const TONGUE_W=1.6, TONGUE_H=1.5, FIT=0.20, GROOVE_DEPTH=TONGUE_H+FIT;
+
+// demo modules (bottom -> top)
+const ZED={name:'ZED base', h:16, so:18.8, soh:6, board:1.6, col:'var(--zed)', cold:'var(--zed-dk)', bottom:'saddle', center:20};
+const IMU={name:'IMU', h:10, so:[9.975,8.905], soh:6, board:1.6, col:'var(--imu)', cold:'var(--imu-dk)', bottom:'stack'};
+const LAYERS=[ZED,IMU];
+const STACK_H=LAYERS.reduce((a,m)=>a+FLOOR_T+m.h,0)+FLOOR_T;   // 35
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// ===== exploded elevation (Y x Z) =====
+(() => {
+  const svg=document.getElementById('elev-svg');
+  const VB_W=460, VB_H=520, m=30, gap=10;
+  const drawnH=STACK_H + FLOOR_T + (LAYERS.length+1)*gap + 6;   // + saddle + gaps
+  const s=Math.min((VB_W-2*m)/FOOT_Y, (VB_H-2*m)/drawnH);
+  const cx=VB_W/2, baseY=VB_H-m;
+  const Y=y=>cx+y*s, Z=z=>baseY-z*s;
+  let z=0, ez=0;   // z = true assembled z; ez = exploded draw z (adds gaps)
+
+  // saddle ref
+  el(svg,'rect',{x:Y(-FOOT_Y/2+6),y:Z(ez+3),width:(FOOT_Y-12)*s,height:3*s,
+    fill:'var(--saddle)','fill-opacity':0.22,stroke:'var(--saddle)','stroke-width':1,'stroke-dasharray':'5 3'});
+  el(svg,'text',{x:Y(FOOT_Y/2-6),y:Z(ez)+(3*s)+11,'text-anchor':'end',class:'dim',fill:'var(--saddle)'},'GNSS saddle');
+  ez+=3+gap;
+
+  function layer(m){
+    const f0=ez, ftop=ez+FLOOR_T, ctop=ftop+m.h, ttop=ctop+TONGUE_H;
+    // floor
+    el(svg,'rect',{x:Y(-FOOT_Y/2),y:Z(ftop),width:FOOT_Y*s,height:FLOOR_T*s,
+      fill:m.col,'fill-opacity':0.85,stroke:m.cold,'stroke-width':1});
+    // walls
+    for(const sy of [-1,1])
+      el(svg,'rect',{x:sy<0?Y(-FOOT_Y/2):Y(FOOT_Y/2-WALL_T),y:Z(ctop),width:WALL_T*s,height:m.h*s,
+        fill:m.col,'fill-opacity':0.6,stroke:m.cold,'stroke-width':0.8});
+    // tongue (on wall tops)
+    for(const sy of [-1,1])
+      el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-TONGUE_W/2*s,y:Z(ttop),width:TONGUE_W*s,height:TONGUE_H*s,
+        fill:'none',stroke:'var(--m3)','stroke-width':1});
+    // groove on floor underside (stack bottoms)
+    if(m.bottom==='stack')
+      for(const sy of [-1,1])
+        el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-(TONGUE_W/2+FIT)*s,y:Z(f0+GROOVE_DEPTH),width:(TONGUE_W+2*FIT)*s,height:GROOVE_DEPTH*s,
+          fill:'#101319',stroke:m.cold,'stroke-width':0.5});
+    // M4 (saddle) in base floor
+    if(m.bottom==='saddle')
+      for(const sy of [-1,1])
+        el(svg,'rect',{x:Y(sy*M4_PAT_Y/2)-M4_CLEAR/2*s,y:Z(ftop),width:M4_CLEAR*s,height:FLOOR_T*s,fill:'#101319',stroke:'var(--saddle)','stroke-width':0.6});
+    // center hole
+    if(m.center)
+      el(svg,'rect',{x:Y(0)-m.center/2*s,y:Z(ftop),width:m.center*s,height:FLOOR_T*s,fill:'#101319',stroke:'var(--saddle)','stroke-width':0.5});
+    // standoffs + component
+    const sos = Array.isArray(m.so)? [m.so[1]] : [m.so];   // Y standoff positions
+    const soY = Array.isArray(m.so)? m.so[1] : m.so;
+    for(const sy of [-1,1])
+      el(svg,'rect',{x:Y(sy*soY)-3*s,y:Z(ftop+m.soh),width:6*s,height:m.soh*s,fill:m.col,stroke:m.cold,'stroke-width':0.6});
+    el(svg,'rect',{x:Y(-CAV_Y/2+4),y:Z(ftop+m.soh+m.board),width:(CAV_Y-8)*s,height:m.board*s,fill:m.col,'fill-opacity':0.5,stroke:m.cold,'stroke-width':0.8});
+    el(svg,'text',{x:cx,y:Z(ftop+m.soh+m.board)-3,'text-anchor':'middle',class:'dim',fill:m.col},m.name);
+    ez = ttop + gap;
+  }
+  LAYERS.forEach(layer);
+
+  // lid
+  const lf0=ez;
+  el(svg,'rect',{x:Y(-FOOT_Y/2),y:Z(lf0+FLOOR_T),width:FOOT_Y*s,height:FLOOR_T*s,
+    fill:'var(--lid)','fill-opacity':0.85,stroke:'var(--lid-dk)','stroke-width':1});
+  for(const sy of [-1,1])
+    el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-(TONGUE_W/2+FIT)*s,y:Z(lf0+GROOVE_DEPTH),width:(TONGUE_W+2*FIT)*s,height:GROOVE_DEPTH*s,fill:'#101319',stroke:'var(--lid-dk)','stroke-width':0.5});
+  el(svg,'text',{x:cx,y:Z(lf0+FLOOR_T/2)+3,'text-anchor':'middle',class:'dim'},'lid');
+
+  // M3 clamp lines through everything (Y=±24.5)
+  for(const sy of [-1,1]){
+    const by=Y(sy*M3_PAT_Y/2);
+    el(svg,'line',{x1:by,y1:Z(lf0+FLOOR_T),x2:by,y2:Z(0),stroke:'var(--m3)','stroke-width':1.3,'stroke-dasharray':'4 3'});
+  }
+  el(svg,'text',{x:Y(M3_PAT_Y/2)+5,y:Z(STACK_H*0.5),class:'dim',fill:'var(--m3)'},'M3 clamp');
+
+  // assembled height note
+  el(svg,'text',{x:Y(-FOOT_Y/2),y:Z(lf0+FLOOR_T)-4,'text-anchor':'start',class:'dim'},`assembled ${STACK_H} mm`);
+})();
+
+// ===== module plan (X x Y) =====
+(() => {
+  const svg=document.getElementById('plan-svg');
+  const VB_W=460, VB_H=300, m=26;
+  const s=Math.min((VB_W-2*m)/FOOT_X,(VB_H-2*m)/FOOT_Y);
+  const cx=VB_W/2, cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s, px=v=>v*s;
+  el(svg,'rect',{x:X(-FOOT_X/2),y:Y(FOOT_Y/2),width:px(FOOT_X),height:px(FOOT_Y),
+    fill:'var(--body)','fill-opacity':0.2,stroke:'var(--body-dk)','stroke-width':1.5,rx:2});
+  // tongue ring (centered on wall)
+  el(svg,'rect',{x:X(-(FOOT_X-(WALL_T-TONGUE_W))/2),y:Y((FOOT_Y-(WALL_T-TONGUE_W))/2),
+    width:px(FOOT_X-(WALL_T-TONGUE_W)),height:px(FOOT_Y-(WALL_T-TONGUE_W)),
+    fill:'none',stroke:'var(--m3)','stroke-width':1.2});
+  el(svg,'rect',{x:X(-CAV_X/2),y:Y(CAV_Y/2),width:px(CAV_X),height:px(CAV_Y),
+    fill:'#0d0f14',stroke:'var(--body-dk)','stroke-width':0.8,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:cx,y:Y(CAV_Y/2)-4,'text-anchor':'middle',class:'dim'},`cavity ${CAV_X} × ${CAV_Y}`);
+  // M3 clamp holes
+  for(const sx of [-1,1])for(const sy of [-1,1])
+    el(svg,'circle',{cx:X(sx*M3_PAT_X/2),cy:Y(sy*M3_PAT_Y/2),r:px(M3_CLEAR/2),fill:'#101319',stroke:'var(--m3)','stroke-width':1.3});
+  el(svg,'text',{x:X(0),y:Y(M3_PAT_Y/2)-5,'text-anchor':'middle',class:'dim',fill:'var(--m3)'},`M3 ${M3_PAT_X}×${M3_PAT_Y}`);
+  // IMU standoffs
+  for(const sx of [-1,1])for(const sy of [-1,1])
+    el(svg,'circle',{cx:X(sx*IMU.so[0]),cy:Y(sy*IMU.so[1]),r:px(3),fill:'var(--imu)',stroke:'var(--imu-dk)','stroke-width':1});
+  el(svg,'text',{x:X(0),y:Y(0)+3,'text-anchor':'middle',class:'dim',fill:'var(--imu)'},'IMU standoffs');
+  // dims
+  const yd=Y(-FOOT_Y/2)+13;
+  el(svg,'line',{x1:X(-FOOT_X/2),y1:yd,x2:X(FOOT_X/2),y2:yd,stroke:'#8b93a7','stroke-width':0.7});
+  el(svg,'text',{x:cx,y:yd+12,'text-anchor':'middle',class:'dim'},`${FOOT_X} mm`);
+})();
+
+// ===== joint detail (tongue in groove) =====
+(() => {
+  const svg=document.getElementById('joint-svg');
+  const VB_W=460, VB_H=150, s=14;
+  const cx=200, baseY=110;
+  const X=x=>cx+x*s, Z=z=>baseY-z*s;
+  el(svg,'text',{x:cx,y:16,'text-anchor':'middle',class:'dim'},'tongue / groove rim (×14)');
+  // lower wall top + tongue
+  el(svg,'rect',{x:X(-WALL_T/2-2),y:Z(0),width:(WALL_T/2+2)*s+(WALL_T)*s,height:3*s,fill:'var(--zed)','fill-opacity':0.6,stroke:'var(--zed-dk)','stroke-width':0.8});
+  el(svg,'rect',{x:X(-TONGUE_W/2),y:Z(3+TONGUE_H),width:TONGUE_W*s,height:TONGUE_H*s,fill:'var(--m3)','fill-opacity':0.7,stroke:'var(--m3-dk)','stroke-width':0.8});
+  el(svg,'text',{x:X(0),y:Z(3+TONGUE_H)-4,'text-anchor':'middle',class:'dim',fill:'var(--m3)'},`tongue ${TONGUE_W}×${TONGUE_H}`);
+  // upper floor with groove (offset up to show)
+  const fz=3+TONGUE_H+1.0;
+  el(svg,'g',{});
+  el(svg,'rect',{x:X(-WALL_T/2-2),y:Z(fz+FLOOR_T),width:((WALL_T/2+2)+WALL_T)*s,height:FLOOR_T*s,fill:'var(--imu)','fill-opacity':0.5,stroke:'var(--imu-dk)','stroke-width':0.8});
+  el(svg,'rect',{x:X(-(TONGUE_W/2+FIT)),y:Z(fz+GROOVE_DEPTH),width:(TONGUE_W+2*FIT)*s,height:GROOVE_DEPTH*s,fill:'#101319',stroke:'var(--imu-dk)','stroke-width':0.6});
+  el(svg,'text',{x:X(8),y:Z(fz+FLOOR_T/2),class:'dim',fill:'var(--imu)'},`groove ${(TONGUE_W+2*FIT).toFixed(1)}×${GROOVE_DEPTH} (FIT ${FIT}/side)`);
+  el(svg,'line',{x1:X(0),y1:Z(3+TONGUE_H)+2,x2:X(0),y2:Z(fz)-2,stroke:'#8b93a7','stroke-width':0.6,'stroke-dasharray':'2 2'});
+})();
+
+// ===== specs + checks =====
+document.getElementById('s-foot').textContent  = `${FOOT_X} × ${FOOT_Y} × (3 floor + cavity); cavity ${CAV_X} × ${CAV_Y}, walls ${WALL_T}`;
+document.getElementById('s-reg').textContent   = `${TONGUE_W} × ${TONGUE_H} wall-top tongue → ${(TONGUE_W+2*FIT).toFixed(1)} × ${GROOVE_DEPTH} floor groove (FIT ${FIT}/side, ${(FLOOR_T-GROOVE_DEPTH).toFixed(1)} mm floor remaining)`;
+document.getElementById('s-clamp').textContent = `4× M3 at ${M3_PAT_X} × ${M3_PAT_Y} — lid csk → module floors → base inserts`;
+document.getElementById('s-saddle').textContent= `base M4 ${M4_PAT_X} × ${M4_PAT_Y} (decoupled from the M3 clamp); Ø20 antenna passthrough`;
+document.getElementById('s-stack').textContent = `ZED (16) → IMU (10) → lid = ${STACK_H} mm; M3 clamp ≥ ${STACK_H} mm`;
+
+const checks=[];
+const ck=(ok,msg)=>checks.push({ok,msg});
+ck(GROOVE_DEPTH<FLOOR_T, `Groove ${GROOVE_DEPTH} < floor ${FLOOR_T} (${(FLOOR_T-GROOVE_DEPTH).toFixed(1)} mm remains)`);
+ck(true, `M3 58×49 identical on every layer — trays interchange`);
+ck(M3_PAT_X/2-M3_CLEAR/2 > ZED.center/2, `M3 clamp clears the Ø${ZED.center} center hole`);
+const zedTop=FLOOR_T+ZED.soh+ZED.board;
+ck(zedTop<FLOOR_T+ZED.h, `ZED board top (${zedTop}) < its cavity top (${FLOOR_T+ZED.h})`);
+const imuTop=FLOOR_T+IMU.soh+IMU.board;
+ck(imuTop<FLOOR_T+IMU.h, `IMU board top (${imuTop}) < its cavity top (${FLOOR_T+IMU.h})`);
+ck(ZED.so+3 < CAV_X/2 && ZED.so+3 < CAV_Y/2, `ZED standoffs inside the cavity`);
+ck(IMU.so[0]+3 < CAV_X/2 && IMU.so[1]+3 < CAV_Y/2, `IMU standoffs inside the cavity`);
+ck(M4_PAT_X===36.14, `Base M4 = saddle pattern (36.14 × 36.1)`);
+
+const ul=document.getElementById('checks');
+for(const c of checks){const li=document.createElement('li');li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;ul.appendChild(li);}
+</script>
+</body>
+</html>

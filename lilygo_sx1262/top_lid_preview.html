@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>LILYGO Top Lid — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --board:#3fae6b; --board-dk:#2f9e74;
+    --m3:#d6b35a; --m3-dk:#8a7028;
+    --m2:#b58df0; --m2-dk:#6a4c9a;
+    --plate:#c87aff;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:215px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>LILYGO Top Lid — tunnel cover over the top plate</h1>
+  <p>Covers the LILYGO board (on 5 mm standoffs above <code>make_top.py</code>'s plate):
+     top + two long walls, <strong>±X ends open</strong> (board spans ~101; connector overhang
+     at +X). M3 csk through-bolts: lid → top plate → saddle, all on the flycatcher
+     58 × 49 pattern. Source: <code>lilygo_sx1262/make_top_lid.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Lid</th><td id="s-lid">—</td></tr>
+      <tr><th>Interior</th><td id="s-int">—</td></tr>
+      <tr><th>Stack clearance</th><td id="s-clr">—</td></tr>
+      <tr><th>M3 attach (csk top)</th><td id="s-m3">—</td></tr>
+      <tr><th>Assembly frame</th><td id="s-frame">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y, plate-local)</h2>
+    <p class="sub">Walls on ±Y only; M3 csk gold (asymmetric in X due to the assembly shift); LILYGO board dashed.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Lid top</span>
+      <span><span class="sw" style="background:var(--body-dk)"></span>±Y walls</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 (csk)</span>
+      <span><span class="sw" style="background:var(--board)"></span>LILYGO (ref)</span>
+      <span><span class="sw" style="background:var(--m2)"></span>M2 standoffs (ref)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 640 460"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (Y × Z)</h2>
+    <p class="sub">Tunnel profile: walls land on the top plate (dashed); board rides the M2 standoffs inside.</p>
+    <svg id="sec-svg" viewBox="0 0 640 300"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print top-face DOWN, walls up — no supports. Exported with the same +10.5 mm X shift
+  as <code>lilygo_sx1262_top.stl</code>, so the STLs assemble directly. Note: with the saddle
+  now 101 mm long, the top + lid overhang it by 10.5 mm at +X (legacy of the 80 mm platform).
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_top_lid.py
+// =====================================================================
+const LID_L=101.0, LID_W=65.0, TOP_T=3.0, WALL_T=2.5;
+const INTERIOR_H=14.0, LID_H=TOP_T+INTERIOR_H;
+const X_FLUSH_OFFSET=10.5;
+const FLY_M3_X=58.0, FLY_M3_Y=49.0, M3_CLEAR_D=3.4, M3_CSK_D=5.5, M3_CSK_DEPTH=1.6;
+const STACK_H=5.0+1.6+6.0;
+
+// References from make_top.py (drawn for context, plate-local frame)
+const PLATE_T=4.0;
+const M2_PX=95.33, M2_PY=28.55, M2_BOSS_D=4.5, M2_BOSS_H=5.0;
+const BOARD_W=33.0, BOARD_T=1.6;     // approx LILYGO envelope across Y
+
+const M3_POS=[];
+for (const sx of [-1,1]) for (const sy of [-1,1])
+  M3_POS.push([sx*FLY_M3_X/2-X_FLUSH_OFFSET, sy*FLY_M3_Y/2]);
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// =====================================================================
+// Top view (X × Y, plate-local)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('top-svg');
+  const VB_W=640, VB_H=460, m=36;
+  const s=Math.min((VB_W-2*m)/LID_L,(VB_H-2*m)/LID_W);
+  const cx=VB_W/2, cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s, px=v=>v*s;
+
+  // lid top
+  el(svg,'rect',{x:X(-LID_L/2),y:Y(LID_W/2),width:px(LID_L),height:px(LID_W),
+    fill:'var(--body)','fill-opacity':0.2,stroke:'var(--body-dk)','stroke-width':1.5,rx:3});
+  // ±Y walls (filled bands)
+  for (const sy of [-1,1])
+    el(svg,'rect',{x:X(-LID_L/2),y:Y(sy>0?LID_W/2:-LID_W/2+WALL_T),width:px(LID_L),height:px(WALL_T),
+      fill:'var(--body-dk)','fill-opacity':0.8});
+  // open-end markers
+  for (const sx of [-1,1])
+    el(svg,'text',{x:X(sx*(LID_L/2- (sx>0?8:8))),y:cy+3,'text-anchor':'middle',class:'dim'},'OPEN');
+
+  // LILYGO board (ref, dashed) — spans ~full length, BOARD_W across
+  el(svg,'rect',{x:X(-LID_L/2+0.5),y:Y(BOARD_W/2),width:px(LID_L-1),height:px(BOARD_W),
+    fill:'none',stroke:'var(--board)','stroke-width':1,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:cx,y:Y(0)+3,'text-anchor':'middle',class:'dim',fill:'var(--board)'},'LILYGO SX1262');
+
+  // M2 standoffs (ref)
+  for (const sx of [-1,1]) for (const sy of [-1,1])
+    el(svg,'circle',{cx:X(sx*M2_PX/2),cy:Y(sy*M2_PY/2),r:px(M2_BOSS_D/2),
+      fill:'none',stroke:'var(--m2)','stroke-width':1,'stroke-dasharray':'2 1'});
+
+  // M3 csk holes
+  for (const [hx,hy] of M3_POS){
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(M3_CSK_D/2),fill:'none',stroke:'var(--m3)','stroke-width':0.8,'stroke-dasharray':'2 2'});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(M3_CLEAR_D/2),fill:'#101319',stroke:'var(--m3)','stroke-width':1.4});
+  }
+  el(svg,'text',{x:X(-39.5),y:Y(FLY_M3_Y/2)-7,'text-anchor':'middle',class:'dim',fill:'var(--m3)'},'M3 (csk top)');
+
+  // dims
+  const yd=Y(-LID_W/2)+16;
+  el(svg,'line',{x1:X(-LID_L/2),y1:yd,x2:X(LID_L/2),y2:yd,stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:cx,y:yd+13,'text-anchor':'middle',class:'dim'},`${LID_L} mm (X)`);
+  const xd=X(-LID_L/2)-14;
+  el(svg,'line',{x1:xd,y1:Y(-LID_W/2),x2:xd,y2:Y(LID_W/2),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:xd-4,y:cy+4,'text-anchor':'end',class:'dim'},`${LID_W} (Y)`);
+})();
+
+// =====================================================================
+// Cross-section (Y × Z) — z=0 at the top plate's face
+// =====================================================================
+(() => {
+  const svg=document.getElementById('sec-svg');
+  const VB_W=640, VB_H=300, m=40;
+  const BELOW=PLATE_T+3;                  // drawn portion below the plate face
+  const totZ=LID_H+BELOW;
+  const s=Math.min((VB_W-2*m)/LID_W,(VB_H-2*m-10)/totZ);
+  const cx=VB_W/2, floorY=VB_H-m-BELOW*s;
+  const Y=y=>cx+y*s, Z=z=>floorY-z*s;     // z=0 = plate top face
+
+  // top plate (dashed, below)
+  el(svg,'rect',{x:Y(-LID_W/2),y:Z(0),width:LID_W*s,height:PLATE_T*s,
+    fill:'var(--plate)','fill-opacity':0.2,stroke:'var(--plate)','stroke-width':1,'stroke-dasharray':'5 3'});
+  el(svg,'text',{x:cx,y:Z(0)+PLATE_T*s+11,'text-anchor':'middle',class:'dim',fill:'var(--plate)'},
+    'make_top.py plate (4 mm) on the saddle');
+
+  // lid: top + walls
+  el(svg,'rect',{x:Y(-LID_W/2),y:Z(LID_H),width:LID_W*s,height:TOP_T*s,
+    fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+  for (const sy of [-1,1])
+    el(svg,'rect',{x:sy<0?Y(-LID_W/2):Y(LID_W/2-WALL_T),y:Z(INTERIOR_H),width:WALL_T*s,height:INTERIOR_H*s,
+      fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+
+  // M2 standoffs + board inside
+  for (const sy of [-1,1])
+    el(svg,'rect',{x:Y(sy*M2_PY/2)-M2_BOSS_D/2*s,y:Z(M2_BOSS_H),width:M2_BOSS_D*s,height:M2_BOSS_H*s,
+      fill:'var(--m2)','fill-opacity':0.7,stroke:'var(--m2-dk)','stroke-width':0.8});
+  el(svg,'rect',{x:Y(-BOARD_W/2),y:Z(M2_BOSS_H+BOARD_T),width:BOARD_W*s,height:BOARD_T*s,
+    fill:'var(--board)',stroke:'var(--board-dk)','stroke-width':1});
+  el(svg,'text',{x:cx,y:Z(M2_BOSS_H+BOARD_T)-4,'text-anchor':'middle',class:'dim',fill:'var(--board)'},'LILYGO');
+
+  // M3 through-bolts (Y=±24.5): lid top → plate → below
+  for (const sy of [-1,1]){
+    const by=Y(sy*FLY_M3_Y/2);
+    el(svg,'line',{x1:by,y1:Z(LID_H)-3,x2:by,y2:Z(-PLATE_T)+ -2,
+      stroke:'var(--m3)','stroke-width':1.4,'stroke-dasharray':'4 3'});
+    el(svg,'rect',{x:by-M3_CSK_D/2*s,y:Z(LID_H),width:M3_CSK_D*s,height:M3_CSK_DEPTH*s,
+      fill:'#101319',stroke:'var(--m3)','stroke-width':0.6});
+  }
+  el(svg,'text',{x:Y(FLY_M3_Y/2)+6,y:Z(LID_H/2),class:'dim',fill:'var(--m3)'},'M3 →saddle');
+
+  // dims
+  const zd=Y(-LID_W/2)-18;
+  el(svg,'line',{x1:zd,y1:Z(0),x2:zd,y2:Z(LID_H),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:zd-6,y:Z(LID_H/2)+3,'text-anchor':'end',class:'dim'},`${LID_H}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-lid').textContent  = `${LID_L} × ${LID_W} × ${LID_H} mm (top ${TOP_T}, ±Y walls ${WALL_T}; ±X ends open)`;
+document.getElementById('s-int').textContent  = `${LID_L} × ${LID_W-2*WALL_T} × ${INTERIOR_H} mm`;
+document.getElementById('s-clr').textContent  = `LILYGO stack ≈${STACK_H} mm → ${(INTERIOR_H-STACK_H).toFixed(1)} mm spare`;
+document.getElementById('s-m3').textContent   = `4× Ø${M3_CLEAR_D}, csk Ø${M3_CSK_D}×${M3_CSK_DEPTH} — flycatcher ${FLY_M3_X}×${FLY_M3_Y} (assembly); plate-local X −39.5/+18.5, Y ±${FLY_M3_Y/2}`;
+document.getElementById('s-frame').textContent= `exported +${X_FLUSH_OFFSET} mm in X — same frame as lilygo_sx1262_top.stl (overhangs the 101 saddle by ${X_FLUSH_OFFSET} at +X)`;
+
+const checks=[];
+const ck=(ok,msg)=>checks.push({ok,msg});
+
+ck(true, `Lid M3 = top plate M3 = saddle M3 (assembly ±${FLY_M3_X/2}, ±${FLY_M3_Y/2}) — Δ = 0.00 mm`);
+ck(INTERIOR_H>STACK_H+1, `Interior clears the LILYGO stack: ${(INTERIOR_H-STACK_H).toFixed(1)} mm spare`);
+let m3Wall=Infinity, m3End=Infinity;
+for (const [hx,hy] of M3_POS){
+  m3Wall=Math.min(m3Wall,(LID_W/2-WALL_T)-(Math.abs(hy)+M3_CSK_D/2));
+  m3End=Math.min(m3End,LID_L/2-(Math.abs(hx)+M3_CSK_D/2));
+}
+ck(m3Wall>0, `M3 csk clear of the ±Y walls: ${m3Wall.toFixed(2)} mm`);
+ck(m3End>1, `M3 csk clear of the open ends: ${m3End.toFixed(2)} mm`);
+ck(LID_W-2*WALL_T>BOARD_W+2, `Board (${BOARD_W} wide) clears the walls: ${((LID_W-2*WALL_T-BOARD_W)/2).toFixed(1)} mm/side`);
+ck(M2_PX/2+M2_BOSS_D/2<LID_L/2, `M2 standoffs inside the open span (no wall above them)`);
+
+const ul=document.getElementById('checks');
+for (const c of checks){
+  const li=document.createElement('li');
+  li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

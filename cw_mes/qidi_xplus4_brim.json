@@ -1,0 +1,10 @@
+{
+    "type": "process",
+    "name": "0.20mm Standard @Qidi XPlus4 BRIM5",
+    "inherits": "0.20mm Standard @Qidi XPlus4",
+    "from": "User",
+    "compatible_printers": ["Qidi X-Plus 4 0.4 nozzle"],
+    "brim_type": "outer_only",
+    "brim_width": "5",
+    "brim_object_gap": "0.1"
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jetson Orin Nano Box — Preview</title>
+<style>
+  :root{
+    --bg:#0d0f14; --card:#161922; --mute:#8b93a7; --txt:#e6e9ef;
+    --body:#2a3142; --body-dk:#444c61; --hole:#f6cd7b; --board:#3fae6b;
+    --screw:#e0796b; --foot:#6aa0e0; --usb:#c08be0; --accent:#4fd28a; --warn:#e05a5a;
+  }
+  *{box-sizing:border-box;} body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+  header{padding:24px 28px 8px;} h1{margin:0;font-size:22px;}
+  header p{color:var(--mute);margin:6px 0 0;font-size:13px;}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px 28px;}
+  .card{background:var(--card);border-radius:10px;padding:16px 18px;}
+  .card.full{grid-column:1 / -1;}
+  h2{margin:0 0 4px;font-size:15px;} .sub{color:var(--mute);font-size:12px;margin:0 0 10px;}
+  svg{width:100%;height:auto;background:#0a0c11;border-radius:6px;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-bottom:8px;}
+  .sw{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:-1px;margin-right:5px;}
+  table.specs{width:100%;border-collapse:collapse;font-size:13px;}
+  table.specs td,table.specs th{padding:5px 8px;border-bottom:1px solid #222633;text-align:left;}
+  table.specs th{color:var(--mute);font-weight:600;width:230px;}
+  code{background:#101319;padding:1px 5px;border-radius:3px;color:#f6cd7b;}
+  .dim{fill:#8b93a7;font-size:10px;} ul.checks{margin:0;padding-left:18px;line-height:1.7;}
+  footer{color:var(--mute);padding:0 28px 28px;font-size:12px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Jetson Orin Nano — Stackable Sensor Box</h1>
+  <p>Base tray + lid. Bottom foot nests into the lid pocket of the box below.
+     Source: <code>orin_box/make_orin_box.py</code></p>
+</header>
+
+<main>
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Outer envelope</th><td id="s-outer">—</td></tr>
+      <tr><th>Interior</th><td id="s-inner">—</td></tr>
+      <tr><th>Nesting foot</th><td id="s-foot">—</td></tr>
+      <tr><th>Board / hole pattern</th><td id="s-board">—</td></tr>
+      <tr><th>Side screws</th><td id="s-screw">—</td></tr>
+      <tr><th>USB opening</th><td id="s-usb">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Looking down into the base. +Y end (top) has the USB cutout.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall</span>
+      <span><span class="sw" style="background:var(--foot)"></span>Foot outline</span>
+      <span><span class="sw" style="background:var(--board)"></span>Board / standoffs</span>
+      <span><span class="sw" style="background:var(--screw)"></span>M3 screw</span>
+      <span><span class="sw" style="background:var(--usb)"></span>USB</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 520 600"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (X × Z)</h2>
+    <p class="sub">Foot (bottom) drops into the lid pocket of the box below.</p>
+    <svg id="sec-svg" viewBox="0 0 520 360"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+</main>
+
+<footer>
+  Print base and lid flat. Board mounts on 4 standoffs (M2.5 self-tap). Lid joins
+  with 4× M3 side screws into base bosses. Foot-to-pocket fit clearance 0.4 mm/side.
+</footer>
+
+<script>
+// Parameters — sync with make_orin_box.py
+const BOARD_X=100.0, BOARD_Y=81.0, HOLE_X=92.0, HOLE_Y=58.0;
+const STANDOFF_D=6.0, STANDOFF_H=7.0, BOARD_Y_OFF=-12.0;
+const INNER_X=104.0, INNER_Y=142.0, INNER_H=40.0;
+const WALL=3.0, FLOOR_T=3.0, LID_T=3.0;
+const FOOT_STEP=6.0, FOOT_H=5.0, FIT_CLEAR=0.4;
+const SCREW_CLEAR_D=3.4, SCREW_BOSS_D=8.0, SCREW_Y=45.0;
+const USB_W=70.0, USB_H=22.0;
+
+const OUTER_X=INNER_X+2*WALL, OUTER_Y=INNER_Y+2*WALL;
+const FOOT_X=OUTER_X-2*FOOT_STEP, FOOT_Y=OUTER_Y-2*FOOT_STEP;
+const BODY_H=FLOOR_T+INNER_H, TOTAL_H=FOOT_H+BODY_H+LID_T;
+const SCREW_X=OUTER_X/2-WALL/2;
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// TOP VIEW — X horizontal, Y vertical (+Y up)
+(()=>{
+  const svg=document.getElementById('top-svg');
+  const VB_W=520,VB_H=600,m=40;
+  const s=Math.min((VB_W-2*m)/OUTER_X,(VB_H-2*m)/OUTER_Y);
+  const cx=VB_W/2,cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s;
+  el(svg,'rect',{x:X(-OUTER_X/2),y:Y(OUTER_Y/2),width:OUTER_X*s,height:OUTER_Y*s,fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.5,rx:4});
+  el(svg,'rect',{x:X(-INNER_X/2),y:Y(INNER_Y/2),width:INNER_X*s,height:INNER_Y*s,fill:'#0a0c11',stroke:'var(--body-dk)','stroke-width':1});
+  el(svg,'rect',{x:X(-FOOT_X/2),y:Y(FOOT_Y/2),width:FOOT_X*s,height:FOOT_Y*s,fill:'none',stroke:'var(--foot)','stroke-width':1,'stroke-dasharray':'4 3'});
+  // board outline + standoffs
+  el(svg,'rect',{x:X(-BOARD_X/2),y:Y(BOARD_Y/2+BOARD_Y_OFF),width:BOARD_X*s,height:BOARD_Y*s,fill:'none',stroke:'var(--board)','stroke-width':1,'stroke-dasharray':'2 2'});
+  for(const sx of[-1,1])for(const sy of[-1,1])
+    el(svg,'circle',{cx:X(sx*HOLE_X/2),cy:Y(sy*HOLE_Y/2+BOARD_Y_OFF),r:STANDOFF_D/2*s,fill:'none',stroke:'var(--board)','stroke-width':1.2});
+  // M3 side screws
+  for(const sx of[-1,1])for(const sy of[-1,1]){
+    el(svg,'circle',{cx:X(sx*SCREW_X),cy:Y(sy*SCREW_Y),r:SCREW_BOSS_D/2*s,fill:'none',stroke:'var(--screw)','stroke-width':0.8});
+    el(svg,'circle',{cx:X(sx*SCREW_X),cy:Y(sy*SCREW_Y),r:SCREW_CLEAR_D/2*s,fill:'#101319',stroke:'var(--screw)','stroke-width':1});
+  }
+  // USB on +Y end
+  el(svg,'rect',{x:X(-USB_W/2),y:Y(OUTER_Y/2),width:USB_W*s,height:WALL*s,fill:'var(--usb)',stroke:'none'});
+  el(svg,'text',{x:cx,y:Y(OUTER_Y/2)-6,'text-anchor':'middle',class:'dim'},`${OUTER_X} mm`);
+})();
+
+// CROSS-SECTION — X horizontal, Z vertical
+(()=>{
+  const svg=document.getElementById('sec-svg');
+  const VB_W=520,VB_H=360,m=40;
+  const s=Math.min((VB_W-2*m)/OUTER_X,(VB_H-2*m)/(TOTAL_H*1.4));
+  const cx=VB_W/2,floorY=VB_H-m;
+  const X=x=>cx+x*s, Z=z=>floorY-z*s;
+  // foot
+  el(svg,'rect',{x:X(-FOOT_X/2),y:Z(FOOT_H),width:FOOT_X*s,height:FOOT_H*s,fill:'var(--foot)',stroke:'var(--body-dk)','stroke-width':1});
+  // body walls
+  el(svg,'rect',{x:X(-OUTER_X/2),y:Z(FOOT_H+BODY_H),width:OUTER_X*s,height:BODY_H*s,fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+  // interior cavity
+  el(svg,'rect',{x:X(-INNER_X/2),y:Z(FOOT_H+BODY_H),width:INNER_X*s,height:INNER_H*s,fill:'#0a0c11'});
+  // standoffs
+  for(const sx of[-1,1])
+    el(svg,'rect',{x:X(sx*HOLE_X/2-STANDOFF_D/2),y:Z(FOOT_H+FLOOR_T+STANDOFF_H),width:STANDOFF_D*s,height:STANDOFF_H*s,fill:'var(--board)'});
+  // lid on top with pocket
+  const lidZ=FOOT_H+BODY_H;
+  el(svg,'rect',{x:X(-OUTER_X/2),y:Z(lidZ+LID_T),width:OUTER_X*s,height:LID_T*s,fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+  el(svg,'rect',{x:X(-(FOOT_X/2+FIT_CLEAR)),y:Z(lidZ+LID_T),width:(FOOT_X+2*FIT_CLEAR)*s,height:(FOOT_H+0.5)*s,fill:'none',stroke:'var(--foot)','stroke-width':1,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:X(OUTER_X/2)-4,y:Z(FOOT_H+BODY_H)-3,'text-anchor':'end',class:'dim'},`H ${TOTAL_H}`);
+})();
+
+// SPECS
+document.getElementById('s-outer').textContent=`${OUTER_X} × ${OUTER_Y} × ${TOTAL_H} mm`;
+document.getElementById('s-inner').textContent=`${INNER_X} × ${INNER_Y} × ${INNER_H} mm`;
+document.getElementById('s-foot').textContent=`${FOOT_X} × ${FOOT_Y} × ${FOOT_H} mm (inset ${FOOT_STEP}/side, ${FIT_CLEAR} clearance)`;
+document.getElementById('s-board').textContent=`board ${BOARD_X} × ${BOARD_Y}; standoffs ${STANDOFF_H} mm at ${HOLE_X} × ${HOLE_Y} (Y offset ${BOARD_Y_OFF})`;
+document.getElementById('s-screw').textContent=`4× M3 (2/side) at X=±${SCREW_X.toFixed(1)}, Y=±${SCREW_Y}`;
+document.getElementById('s-usb').textContent=`${USB_W} × ${USB_H} mm on +Y end`;
+
+// CHECKS
+const checks=[
+  {ok:BOARD_X+1<INNER_X, msg:`Board width fits interior: ${(INNER_X-BOARD_X).toFixed(1)} mm slack`},
+  {ok:BOARD_Y+1<INNER_Y, msg:`Board length fits (USB space): ${(INNER_Y-BOARD_Y).toFixed(1)} mm slack`},
+  {ok:(INNER_Y/2-(BOARD_Y/2+BOARD_Y_OFF))>0, msg:`USB cable gap at +Y end: ${(INNER_Y/2-(BOARD_Y/2+BOARD_Y_OFF)).toFixed(1)} mm`},
+  {ok:SCREW_Y+SCREW_BOSS_D/2<INNER_Y/2, msg:`Screw bosses inside interior in Y`},
+  {ok:USB_W+2<INNER_X, msg:`USB opening within interior width`},
+  {ok:FOOT_X>0&&FOOT_Y>0, msg:`Foot footprint valid: ${FOOT_X} × ${FOOT_Y}`},
+];
+const ul=document.getElementById('checks');
+for(const c of checks){const li=document.createElement('li');li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;ul.appendChild(li);}
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Minimal Jetson Nano Saddle — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --tube:#101319; --tube-dk:#8b93a7;
+    --h5:#d6b35a; --h5-dk:#8a7028;
+    --nano:#6ee7b7; --nano-dk:#2f9e74;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:220px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Minimal Jetson Nano Saddle — Ø20 mm tubes (top half)</h1>
+  <p>Stripped to the smallest footprint that mounts a Jetson Nano: tubes + Ø5 clamp
+     holes + Nano M3 mounts (Orin and #8-32 removed). The Nano cantilevers to −Y so
+     its rows clear both bores → <strong>asymmetric block</strong>. Source:
+     <code>nano_saddle/make_nano_saddle_nano.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Block (assembled)</th><td id="s-block">—</td></tr>
+      <tr><th>Tubes</th><td id="s-tube">—</td></tr>
+      <tr><th>Ø5 clamp holes (+ Ø9 c'bore)</th><td id="s-h5">—</td></tr>
+      <tr><th>Jetson Nano mounts (M3)</th><td id="s-nano">—</td></tr>
+      <tr><th>Footprint vs original</th><td id="s-cmp">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Tubes along X. Nano rows: one in the central bridge, one on the −Y wing. Dashed rings = counterbores.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Body</span>
+      <span><span class="sw" style="background:var(--tube);border:1px solid var(--tube-dk)"></span>Tube bore</span>
+      <span><span class="sw" style="background:var(--h5)"></span>Ø5 clamp</span>
+      <span><span class="sw" style="background:var(--nano)"></span>Nano M3</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 360 640"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (Y × Z)</h2>
+    <p class="sub">Half profile (asymmetric). Ø5 c'bore opens on the outer face; Nano M3 c'bore on the split face.</p>
+    <svg id="sec-svg" viewBox="0 0 640 240"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print outer face on bed, split face UP — no supports. Top half shown; the Ø5
+  (Ø9 head) holes clamp it to a matching bottom half around the tubes.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_nano_saddle_nano.py
+// =====================================================================
+const TUBE_OD = 20.0, TUBE_CENTER_SEP = 60.17, CLEARANCE = 0.4;
+const BLOCK_LEN = 99.0, BLOCK_HT = 28.0;
+const HOLE5_CLEAR_D = 5.0, HOLE5_HEAD_D = 9.0, HOLE5_HEAD_DEPTH = 5.0;
+const HOLE5_PAT_X = 84.84, HOLE5_PAT_Y = 17.73;
+const NANO_PATTERN_X = 58.25, NANO_PATTERN_Y = 86.14;
+const M3_CLEAR_D = 3.4, M3_HEAD_D = 5.34, M3_HEAD_DEPTH = 2.94;
+
+const HALF_HT = BLOCK_HT / 2;
+const R_IN = TUBE_OD / 2 + CLEARANCE / 2;
+const TUBE_Y = TUBE_CENTER_SEP / 2;
+const BRIDGE = TUBE_Y - R_IN;
+
+const NANO_INNER_Y = -9.17;
+const NANO_Y_CENTER = NANO_INNER_Y - NANO_PATTERN_Y / 2;   // -52.24
+const NANO_OUTER_Y = NANO_Y_CENTER - NANO_PATTERN_Y / 2;   // -95.31
+
+const WALL_OUTER = 4.0, NANO_EDGE = 1.5;
+const Y_TOP = TUBE_Y + R_IN + WALL_OUTER;                  // +44.285
+const Y_BOT = NANO_OUTER_Y - M3_HEAD_D / 2 - NANO_EDGE;    // -99.48
+const BLOCK_WID = Y_TOP - Y_BOT;                           // 143.77
+const BLOCK_Y_MID = (Y_TOP + Y_BOT) / 2;                   // -27.60
+
+const ORIG_LEN = 101.0, ORIG_WID = 197.0;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text){
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+
+function rectPattern(svg, X, Y, patX, patY, ycen, holeR, headR, col, colDk){
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+    const hx = sx*patX/2, hy = ycen + sy*patY/2;
+    if (headR) el(svg, 'circle', { cx:X(hx), cy:Y(hy), r:headR,
+      fill:'none', stroke:col, 'stroke-width':0.8, 'stroke-dasharray':'2 2' });
+    el(svg, 'circle', { cx:X(hx), cy:Y(hy), r:holeR,
+      fill:'#101319', stroke:colDk, 'stroke-width':1 });
+  }
+  el(svg, 'rect', { x:X(-patX/2), y:Y(ycen+patY/2), width:patX, height:patY,
+    fill:'none', stroke:col, 'stroke-width':0.5, 'stroke-dasharray':'4 3', opacity:0.5 });
+}
+
+// =====================================================================
+// Top view (X × Y) — asymmetric block centered on BLOCK_Y_MID
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 360, VB_H = 640, margin = 34;
+  const s = Math.min((VB_W - 2*margin)/BLOCK_LEN, (VB_H - 2*margin)/BLOCK_WID);
+  const cx = VB_W/2, cy = VB_H/2;
+  const X = x => cx + x*s;
+  const Y = y => cy - (y - BLOCK_Y_MID)*s;     // +Y up, centered on block mid
+  const px = v => v*s;
+
+  // Body
+  el(svg, 'rect', { x:X(-BLOCK_LEN/2), y:Y(Y_TOP),
+    width:px(BLOCK_LEN), height:px(BLOCK_WID),
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5, rx:3 });
+
+  // Tube bores (full-length along X), at Y = ±TUBE_Y
+  for (const sy of [-1,1]) {
+    el(svg, 'rect', { x:X(-BLOCK_LEN/2-0.1), y:Y(sy*TUBE_Y + R_IN),
+      width:px(BLOCK_LEN+0.2), height:px(2*R_IN),
+      fill:'var(--tube)', stroke:'var(--tube-dk)', 'stroke-width':0.8, 'stroke-dasharray':'3 3' });
+    el(svg, 'text', { x:cx, y:Y(sy*TUBE_Y)+3, 'text-anchor':'middle', class:'dim' },
+      `Ø${(2*R_IN).toFixed(1)} bore`);
+  }
+
+  // Ø5 clamp pattern (centered)
+  rectPattern(svg, X, Y, HOLE5_PAT_X, HOLE5_PAT_Y, 0,
+    px(HOLE5_CLEAR_D/2), px(HOLE5_HEAD_D/2), 'var(--h5)', 'var(--h5-dk)');
+  el(svg, 'text', { x:X(0), y:Y(0)-px(HOLE5_PAT_Y/2)-3, 'text-anchor':'middle', class:'dim', fill:'var(--h5)' },
+    `Ø5 clamp ${HOLE5_PAT_X}×${HOLE5_PAT_Y}`);
+
+  // Nano M3 pattern (offset to −Y)
+  rectPattern(svg, X, Y, NANO_PATTERN_X, NANO_PATTERN_Y, NANO_Y_CENTER,
+    px(M3_CLEAR_D/2), px(M3_HEAD_D/2), 'var(--nano)', 'var(--nano-dk)');
+  el(svg, 'text', { x:X(0), y:Y(NANO_Y_CENTER)+3, 'text-anchor':'middle', class:'dim', fill:'var(--nano)' },
+    `Jetson Nano ${NANO_PATTERN_X}×${NANO_PATTERN_Y}`);
+
+  // Dims
+  const xd = X(-BLOCK_LEN/2) - 16;
+  el(svg, 'line', { x1:xd, y1:Y(Y_TOP), x2:xd, y2:Y(Y_BOT), stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:xd-4, y:cy+4, 'text-anchor':'end', class:'dim' }, `${BLOCK_WID.toFixed(1)} (Y)`);
+  const yd = Y(Y_BOT) + 16;
+  el(svg, 'line', { x1:X(-BLOCK_LEN/2), y1:yd, x2:X(BLOCK_LEN/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${BLOCK_LEN} mm (X)`);
+})();
+
+// =====================================================================
+// Cross-section (Y × Z) — asymmetric half profile
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 640, VB_H = 240, margin = 40;
+  const s = Math.min((VB_W - 2*margin)/BLOCK_WID, (VB_H - 2*margin - 20)/HALF_HT);
+  const cx = VB_W/2, floorY = VB_H - margin - 10;
+  const Y = y => cx + (y - BLOCK_Y_MID)*s;    // Y horizontal, centered on block mid
+  const Z = z => floorY - z*s;
+
+  // Half profile
+  el(svg, 'rect', { x:Y(Y_BOT), y:Z(HALF_HT), width:BLOCK_WID*s, height:HALF_HT*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5 });
+
+  // Tube bores (half-circle scoops from split face)
+  for (const sy of [-1,1]) {
+    el(svg, 'path', {
+      d: `M ${Y(sy*TUBE_Y - R_IN)} ${Z(HALF_HT)} `
+       + `A ${R_IN*s} ${R_IN*s} 0 0 0 ${Y(sy*TUBE_Y + R_IN)} ${Z(HALF_HT)} Z`,
+      fill:'#101319', stroke:'var(--tube-dk)', 'stroke-width':1 });
+  }
+
+  // Ø5 holes (central) + c'bore on outer face (z=0)
+  for (const sy of [-1,1]) {
+    const yv = sy*HOLE5_PAT_Y/2;
+    el(svg, 'rect', { x:Y(yv)-HOLE5_CLEAR_D/2*s, y:Z(HALF_HT), width:HOLE5_CLEAR_D*s, height:HALF_HT*s,
+      fill:'#101319', stroke:'var(--h5)', 'stroke-width':1 });
+    el(svg, 'rect', { x:Y(yv)-HOLE5_HEAD_D/2*s, y:Z(HOLE5_HEAD_DEPTH), width:HOLE5_HEAD_D*s, height:HOLE5_HEAD_DEPTH*s,
+      fill:'#1a1c22', stroke:'var(--h5)', 'stroke-width':1 });
+  }
+
+  // Nano M3 rows (projected) + c'bore on split face (z=HALF_HT)
+  for (const yv of [NANO_INNER_Y, NANO_OUTER_Y]) {
+    el(svg, 'rect', { x:Y(yv)-M3_CLEAR_D/2*s, y:Z(HALF_HT), width:M3_CLEAR_D*s, height:HALF_HT*s,
+      fill:'#101319', stroke:'var(--nano)', 'stroke-width':1 });
+    el(svg, 'rect', { x:Y(yv)-M3_HEAD_D/2*s, y:Z(HALF_HT), width:M3_HEAD_D*s, height:M3_HEAD_DEPTH*s,
+      fill:'#16221c', stroke:'var(--nano)', 'stroke-width':1 });
+  }
+
+  // Dims
+  const yd = Z(0) + 22;
+  el(svg, 'line', { x1:Y(Y_BOT), y1:yd, x2:Y(Y_TOP), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${BLOCK_WID.toFixed(1)} mm (Y, asymmetric)`);
+  el(svg, 'text', { x:Y(Y_TOP)-4, y:Z(HALF_HT)-3, 'text-anchor':'end', class:'dim' }, `half ${HALF_HT}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-block').textContent = `${BLOCK_LEN} × ${BLOCK_WID.toFixed(2)} × ${BLOCK_HT} mm (Y center ${BLOCK_Y_MID.toFixed(2)})`;
+document.getElementById('s-tube').textContent  = `Ø${TUBE_OD} at Y = ±${TUBE_Y.toFixed(2)} (bore Ø${(2*R_IN).toFixed(2)}, ${CLEARANCE} clr)`;
+document.getElementById('s-h5').textContent  = `4× Ø${HOLE5_CLEAR_D} at (±${(HOLE5_PAT_X/2).toFixed(2)}, ±${(HOLE5_PAT_Y/2).toFixed(2)}) — ${HOLE5_PAT_X}×${HOLE5_PAT_Y}; head Ø${HOLE5_HEAD_D}×${HOLE5_HEAD_DEPTH} (outer)`;
+document.getElementById('s-nano').textContent = `4× Ø${M3_CLEAR_D} at (±${(NANO_PATTERN_X/2).toFixed(2)}, ${NANO_Y_CENTER.toFixed(2)}±${(NANO_PATTERN_Y/2).toFixed(2)}) — rows Y=${NANO_INNER_Y}, ${NANO_OUTER_Y.toFixed(2)}`;
+document.getElementById('s-cmp').textContent =
+  `${BLOCK_LEN}×${BLOCK_WID.toFixed(1)} vs ${ORIG_LEN}×${ORIG_WID} — area ${(100*(BLOCK_LEN*BLOCK_WID)/(ORIG_LEN*ORIG_WID)).toFixed(0)}% of original`;
+
+const h5EdgeX = BLOCK_LEN/2 - HOLE5_PAT_X/2 - HOLE5_HEAD_D/2;
+const h5Bridge = BRIDGE - (HOLE5_PAT_Y/2 + HOLE5_CLEAR_D/2);
+const nanoEdgeX = BLOCK_LEN/2 - NANO_PATTERN_X/2 - M3_HEAD_D/2;
+const nanoInnerBore = BRIDGE - (Math.abs(NANO_INNER_Y) + M3_HEAD_D/2);
+const nanoOuterBore = (Math.abs(NANO_OUTER_Y) - (TUBE_Y + R_IN)) - M3_HEAD_D/2;
+const nanoEdgeY = (Math.abs(Y_BOT) - Math.abs(NANO_OUTER_Y)) - M3_HEAD_D/2;
+const topWall = Y_TOP - (TUBE_Y + R_IN);
+
+const checks = [
+  { ok: h5EdgeX >= 0.5, msg: `Ø5 head → X edge: ${h5EdgeX.toFixed(2)} mm` },
+  { ok: h5Bridge >= 0.5, msg: `Ø5 hole → tube bore (bridge): ${h5Bridge.toFixed(2)} mm` },
+  { ok: nanoEdgeX >= 0.5, msg: `Nano head → X edge: ${nanoEdgeX.toFixed(2)} mm` },
+  { ok: nanoInnerBore >= 0.5, msg: `Nano inner row → +bore: ${nanoInnerBore.toFixed(2)} mm` },
+  { ok: nanoOuterBore >= 0.5, msg: `Nano outer row → −bore: ${nanoOuterBore.toFixed(2)} mm (outboard)` },
+  { ok: nanoEdgeY >= 0.4, msg: `Nano outer head → −Y edge: ${nanoEdgeY.toFixed(2)} mm` },
+  { ok: topWall >= 2.0, msg: `+Y wall past tube bore: ${topWall.toFixed(2)} mm` },
+  { ok: HOLE5_HEAD_DEPTH + 1.0 < HALF_HT, msg: `Ø5 c'bore depth ${HOLE5_HEAD_DEPTH} < half ${HALF_HT} mm` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

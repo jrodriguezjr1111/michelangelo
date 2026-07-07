@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Stack Base Layer — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --nano:#3fae6b; --nano-dk:#2f9e74;
+    --post:#d6b35a; --post-dk:#8a7028; --m4:#e07a5a;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:210px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Stack — Base Layer (bottom)</h1>
+  <p>Solid floor that bolts to the GNSS saddle (M4 ±18) and carries the Jetson Nano
+     on 4 standoffs, with 4 corner posts for the deck above. No passthrough.
+     Source: <code>gnss_saddle/make_nano_orin_stack.py</code> → <code>stack_base.stl</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Floor plate</th><td id="s-floor">—</td></tr>
+      <tr><th>Nano standoffs</th><td id="s-stand">—</td></tr>
+      <tr><th>Corner posts</th><td id="s-post">—</td></tr>
+      <tr><th>Saddle mounts (M4)</th><td id="s-m4">—</td></tr>
+      <tr><th>Compartment above</th><td id="s-comp">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Solid floor. Nano standoffs (green), M4 saddle holes (orange), corner posts (gold).</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Floor</span>
+      <span><span class="sw" style="background:var(--nano)"></span>Nano standoff</span>
+      <span><span class="sw" style="background:var(--m4)"></span>M4 (saddle)</span>
+      <span><span class="sw" style="background:var(--post)"></span>Corner post</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 380 480"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (Y × Z)</h2>
+    <p class="sub">Floor on the saddle; Nano on standoffs clears the M4 heads; corner posts carry the middle deck.</p>
+    <svg id="sec-svg" viewBox="0 0 560 280"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print floor-down, no supports. Mount with 4× longer M4 screws through the floor +
+  both saddle halves (nut in the saddle's bottom counterbore). Middle deck bolts to the 4 posts.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_nano_orin_stack.py (base layer)
+// =====================================================================
+const NANO_HX=58.25, NANO_HY=86.14;
+const STANDOFF_OD=6.0, STANDOFF_H=8.0, STANDOFF_PILOT=2.5;
+const DECK_X=100.0, DECK_Y=128.0, DECK_T=3.0;
+const POST_X=41.0, POST_Y=58.0, POST_OD=8.0, POST_BORE=3.4;
+const NANO_GAP=34.0;
+const M4_PAT=18.0, M4_CLEAR_D=4.4;
+const BOARD_HY=50.0, BOARD_T=1.6, M4_HEAD_H=4.0;
+
+const ns='http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text){
+  const e=document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text!=null) e.textContent=text;
+  parent.appendChild(e); return e;
+}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('top-svg');
+  const VB_W=380, VB_H=480, m=24;
+  const s=Math.min((VB_W-2*m)/DECK_X, (VB_H-2*m)/DECK_Y);
+  const cx=VB_W/2, cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s, px=v=>v*s;
+
+  el(svg,'rect',{x:X(-DECK_X/2),y:Y(DECK_Y/2),width:px(DECK_X),height:px(DECK_Y),
+    fill:'var(--body)','fill-opacity':0.2,stroke:'var(--body-dk)','stroke-width':1.5,rx:3});
+
+  // corner posts
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*POST_X),cy:Y(sy*POST_Y),r:px(POST_OD/2),fill:'var(--post)',stroke:'var(--post-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(sx*POST_X),cy:Y(sy*POST_Y),r:px(POST_BORE/2),fill:'#101319'});
+  }
+  // M4 saddle holes
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*M4_PAT),cy:Y(sy*M4_PAT),r:px(M4_CLEAR_D/2),fill:'#101319',stroke:'var(--m4)','stroke-width':1.3});
+    el(svg,'text',{x:X(sx*M4_PAT),y:Y(sy*M4_PAT)-px(M4_CLEAR_D/2)-2,'text-anchor':'middle',fill:'var(--m4)','font-size':8,'font-weight':700},'M4');
+  }
+  // Nano standoffs
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*NANO_HX/2),cy:Y(sy*NANO_HY/2),r:px(STANDOFF_OD/2),fill:'var(--nano)',stroke:'var(--nano-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(sx*NANO_HX/2),cy:Y(sy*NANO_HY/2),r:px(STANDOFF_PILOT/2),fill:'#101319'});
+  }
+  // board outline
+  el(svg,'rect',{x:X(-40),y:Y(BOARD_HY),width:px(80),height:px(2*BOARD_HY),
+    fill:'none',stroke:'var(--nano)','stroke-width':0.8,'stroke-dasharray':'2 2'});
+
+  // dims
+  const yd=Y(-DECK_Y/2)+14;
+  el(svg,'line',{x1:X(-DECK_X/2),y1:yd,x2:X(DECK_X/2),y2:yd,stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:cx,y:yd+12,'text-anchor':'middle',class:'dim'},`${DECK_X} mm (X)`);
+  const xd=X(-DECK_X/2)-12;
+  el(svg,'line',{x1:xd,y1:Y(-DECK_Y/2),x2:xd,y2:Y(DECK_Y/2),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:xd-4,y:cy+4,'text-anchor':'end',class:'dim'},`${DECK_Y} (Y)`);
+})();
+
+// =====================================================================
+// Cross-section (Y × Z)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('sec-svg');
+  const VB_W=560, VB_H=280, m=40;
+  const topZ=DECK_T+NANO_GAP;
+  const s=Math.min((VB_W-2*m)/DECK_Y, (VB_H-2*m-10)/topZ);
+  const cx=VB_W/2, floorY=VB_H-m;
+  const Y=y=>cx+y*s, Z=z=>floorY-z*s;
+
+  // floor
+  el(svg,'rect',{x:Y(-DECK_Y/2),y:Z(DECK_T),width:DECK_Y*s,height:DECK_T*s,
+    fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+  // corner posts (Y=±POST_Y), hollow (M3 bore)
+  for (const sy of [-1,1]){
+    el(svg,'rect',{x:Y(sy*POST_Y)-POST_OD/2*s,y:Z(DECK_T+NANO_GAP),width:POST_OD*s,height:NANO_GAP*s,
+      fill:'var(--post)',stroke:'var(--post-dk)','stroke-width':1});
+    el(svg,'rect',{x:Y(sy*POST_Y)-POST_BORE/2*s,y:Z(DECK_T+NANO_GAP),width:POST_BORE*s,height:NANO_GAP*s,
+      fill:'#101319'});
+  }
+  // Nano standoffs (Y=±NANO_HY/2) + board
+  for (const sy of [-1,1])
+    el(svg,'rect',{x:Y(sy*NANO_HY/2)-STANDOFF_OD/2*s,y:Z(DECK_T+STANDOFF_H),width:STANDOFF_OD*s,height:STANDOFF_H*s,
+      fill:'var(--nano)',stroke:'var(--nano-dk)','stroke-width':0.8});
+  el(svg,'rect',{x:Y(-BOARD_HY),y:Z(DECK_T+STANDOFF_H+BOARD_T),width:2*BOARD_HY*s,height:BOARD_T*s,
+    fill:'var(--nano)',stroke:'var(--nano-dk)','stroke-width':1});
+  el(svg,'text',{x:cx,y:Z(DECK_T+STANDOFF_H+BOARD_T)-4,'text-anchor':'middle',class:'dim',fill:'var(--nano)'},'Jetson Nano');
+
+  // M4 holes (Y=±M4_PAT) through floor + head on floor
+  for (const sy of [-1,1]){
+    el(svg,'rect',{x:Y(sy*M4_PAT)-M4_CLEAR_D/2*s,y:Z(DECK_T),width:M4_CLEAR_D*s,height:DECK_T*s,
+      fill:'#101319',stroke:'var(--m4)','stroke-width':1});
+    el(svg,'rect',{x:Y(sy*M4_PAT)-7/2*s,y:Z(DECK_T+M4_HEAD_H),width:7*s,height:M4_HEAD_H*s,
+      fill:'#9a4a30',stroke:'var(--m4)','stroke-width':0.8});
+  }
+
+  // saddle reference
+  el(svg,'line',{x1:Y(-DECK_Y/2),y1:Z(0),x2:Y(DECK_Y/2),y2:Z(0),stroke:'#8b93a7','stroke-dasharray':'5 4','stroke-width':1});
+  el(svg,'text',{x:Y(DECK_Y/2)+4,y:Z(0)+3,class:'dim'},'saddle top');
+  // top-of-post (middle deck) reference
+  el(svg,'line',{x1:Y(-DECK_Y/2),y1:Z(topZ),x2:Y(DECK_Y/2),y2:Z(topZ),stroke:'#3a6fa0','stroke-dasharray':'4 3','stroke-width':1});
+  el(svg,'text',{x:Y(DECK_Y/2)+4,y:Z(topZ)+3,class:'dim'},'middle deck');
+
+  // Z dim
+  const zd=Y(DECK_Y/2)+26;
+  el(svg,'line',{x1:zd,y1:Z(0),x2:zd,y2:Z(topZ),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:zd+6,y:Z(topZ/2)+3,class:'dim',transform:`rotate(-90 ${zd+6} ${Z(topZ/2)+3})`},`${topZ} mm`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-floor').textContent = `${DECK_X} × ${DECK_Y} × ${DECK_T} mm (solid, no passthrough)`;
+document.getElementById('s-stand').textContent = `4× ⌀${STANDOFF_OD} × ${STANDOFF_H} mm, ${STANDOFF_PILOT} pilot (M3 self-tap) at (±${(NANO_HX/2).toFixed(2)}, ±${(NANO_HY/2).toFixed(2)})`;
+document.getElementById('s-post').textContent  = `4× Ø${POST_OD} × ${NANO_GAP} mm, M3 bore at (±${POST_X}, ±${POST_Y})`;
+document.getElementById('s-m4').textContent    = `4× Ø${M4_CLEAR_D} at (±${M4_PAT}, ±${M4_PAT}) — matches the saddle bolt pattern`;
+document.getElementById('s-comp').textContent  = `${NANO_GAP} mm (board + heatsink) to the middle deck`;
+
+const postEdgeX = DECK_X/2 - POST_X - POST_OD/2;
+const postEdgeY = DECK_Y/2 - POST_Y - POST_OD/2;
+const standPost = POST_Y - (NANO_HY/2 + STANDOFF_OD/2);
+const standM4 = Math.hypot(NANO_HX/2 - M4_PAT, NANO_HY/2 - M4_PAT) - STANDOFF_OD/2 - M4_CLEAR_D/2;
+const headClr = STANDOFF_H - M4_HEAD_H;
+const compClr = NANO_GAP - STANDOFF_H - BOARD_T;
+const checks=[
+  { ok: M4_PAT===18.0, msg:`M4 mounts at ±18 match the saddle bolt pattern` },
+  { ok: postEdgeX>=1 && postEdgeY>=1, msg:`Corner post → deck edge: X=${postEdgeX.toFixed(1)}, Y=${postEdgeY.toFixed(1)} mm` },
+  { ok: standPost>=2, msg:`Nano standoff → corner post: ${standPost.toFixed(1)} mm` },
+  { ok: standM4>=1, msg:`Nano standoff → M4 hole: ${standM4.toFixed(1)} mm` },
+  { ok: headClr>=1, msg:`Board clears M4 cap head: ${headClr.toFixed(1)} mm (standoff ${STANDOFF_H} − head ${M4_HEAD_H})` },
+  { ok: compClr>=10, msg:`Headroom above board to middle deck: ${compClr.toFixed(1)} mm (for the heatsink)` },
+];
+const ul=document.getElementById('checks');
+for (const c of checks){
+  const li=document.createElement('li');
+  li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

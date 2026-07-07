@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>ZED-F9P Lid — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --pcb:  #2a8f5a; --pcb-dk: #1d6b42;
+    --usb:  #e0a74e; --usb-dk: #a77420;
+    --bolt: #d6b35a;
+    --slot: #c87aff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                                   text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 180px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  .controls { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 12px; background: #101319;
+              border-radius: 6px; margin-bottom: 10px; }
+  .controls label { display: flex; flex-direction: column; font-size: 11px; color: var(--mute);
+                    min-width: 110px; }
+  .controls input, .controls select { background: #1a1f2a; color: var(--ink); border: 1px solid #2a3140;
+                                      border-radius: 4px; padding: 4px 6px; font: inherit; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ZED-F9P Lid — Recessed Cover</h1>
+  <p>60 × 60 mm lid mating with the platform. Adjustable USB cutout on any wall.
+     Source: <code>zed_f9p_platform/make_lid.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <h2>USB cutout controls</h2>
+    <div class="controls">
+      <label>Wall
+        <select id="ctl-wall">
+          <option value="-X">-X (left)</option>
+          <option value="+X">+X (right)</option>
+          <option value="-Y">-Y (bottom)</option>
+          <option value="+Y">+Y (top)</option>
+        </select>
+      </label>
+      <label>Offset from near edge (mm)
+        <input id="ctl-edge" type="number" value="32" step="0.5" min="0"/>
+      </label>
+      <label>Cutout width (mm)
+        <input id="ctl-width" type="number" value="10" step="0.5" min="1"/>
+      </label>
+      <label>Cutout height (mm)
+        <input id="ctl-height" type="number" value="8" step="0.5" min="1"/>
+      </label>
+    </div>
+    <table class="specs">
+      <tr><th>Lid footprint</th><td id="spec-foot">—</td></tr>
+      <tr><th>Top plate</th><td id="spec-top">—</td></tr>
+      <tr><th>Recess</th><td id="spec-recess">—</td></tr>
+      <tr><th>M3 mount pattern</th><td id="spec-m3">—</td></tr>
+      <tr><th>USB cutout</th><td id="spec-usb">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (mount face)</h2>
+    <p class="sub">Countersunk M3 holes face up. USB cutout location indicated on the outer wall.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Lid body</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 countersunk</span>
+      <span><span class="sw" style="background:var(--usb)"></span>USB cutout</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 360 360"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Bottom view (recess)</h2>
+    <p class="sub">Looking up. The PCB sits inside the 55×55 recess. USB cutout aligns with connector.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall</span>
+      <span><span class="sw" style="background:var(--pcb);opacity:0.4"></span>ZED-F9P board (ghost)</span>
+      <span><span class="sw" style="background:var(--usb)"></span>USB cutout</span>
+    </div>
+    <svg id="bot-svg" viewBox="0 0 360 360"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Side cross-section through USB cutout</h2>
+    <p class="sub">Section taken through the USB cutout axis. Board ghosted inside the recess.</p>
+    <svg id="section-svg" viewBox="0 0 680 300"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print top-face DOWN on the bed. Recess faces up during print — no supports needed. PLA, ~25 min.
+</footer>
+
+<script>
+// =====================================================================
+// Fixed parameters
+// =====================================================================
+const LID_L = 60.0;
+const LID_W = 60.0;
+const LID_H = 11.0;
+const TOP_T = 3.0;
+const WALL_T = 2.5;
+
+const M3_PATTERN = 37.6;
+const M3_CLEAR_D = 3.4;
+const M3_CSK_D   = 6.2;
+const M3_CSK_DEPTH = 1.8;
+
+const RECESS_L = LID_L - 2 * WALL_T;
+const RECESS_W = LID_W - 2 * WALL_T;
+const RECESS_H = LID_H - TOP_T; // 8 mm
+
+const PCB_SIZE = 40.0;
+
+// =====================================================================
+// SVG helpers
+// =====================================================================
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+
+// =====================================================================
+// USB cutout model — wall + offset from the near edge (along that wall)
+// =====================================================================
+function usbCutoutRect(wall, edgeOffset, w) {
+  // Returns {x0, y0, x1, y1} in model coords (mm)
+  // "edgeOffset" = distance from the wall's +end to the NEAR edge of the cutout.
+  // For -X or +X walls, the cutout spans in Y; the "+end" is +Y.
+  // For -Y or +Y walls, the cutout spans in X; the "+end" is +X.
+  const halfL = LID_L / 2, halfW = LID_W / 2;
+  if (wall === '-X' || wall === '+X') {
+    const yNear = halfW - edgeOffset;  // near edge (toward +Y)
+    const yFar  = yNear - w;
+    const xEdge = wall === '+X' ? halfL : -halfL;
+    const xIn   = wall === '+X' ? halfL - WALL_T : -halfL + WALL_T;
+    return {
+      x0: Math.min(xEdge, xIn), x1: Math.max(xEdge, xIn),
+      y0: yFar, y1: yNear,
+      axis: 'x'
+    };
+  } else {
+    const xNear = halfL - edgeOffset;
+    const xFar  = xNear - w;
+    const yEdge = wall === '+Y' ? halfW : -halfW;
+    const yIn   = wall === '+Y' ? halfW - WALL_T : -halfW + WALL_T;
+    return {
+      x0: xFar, x1: xNear,
+      y0: Math.min(yEdge, yIn), y1: Math.max(yEdge, yIn),
+      axis: 'y'
+    };
+  }
+}
+
+// =====================================================================
+// Render all views
+// =====================================================================
+function render() {
+  const wall = document.getElementById('ctl-wall').value;
+  const edge = parseFloat(document.getElementById('ctl-edge').value);
+  const w    = parseFloat(document.getElementById('ctl-width').value);
+  const h    = parseFloat(document.getElementById('ctl-height').value);
+
+  // Specs
+  document.getElementById('spec-foot').textContent = `${LID_L} × ${LID_W} × ${LID_H} mm`;
+  document.getElementById('spec-top').textContent = `${TOP_T} mm thick`;
+  document.getElementById('spec-recess').textContent =
+    `${RECESS_L} × ${RECESS_W} × ${RECESS_H} mm (board/component clearance)`;
+  document.getElementById('spec-m3').textContent =
+    `4× Ø${M3_CLEAR_D} in ${M3_PATTERN} mm square, countersunk Ø${M3_CSK_D}×${M3_CSK_DEPTH} on top`;
+  document.getElementById('spec-usb').textContent =
+    `${w} × ${h} mm on ${wall} wall, ${edge} mm from near edge`;
+
+  const cut = usbCutoutRect(wall, edge, w);
+
+  // ============ Top view ============
+  (() => {
+    const svg = document.getElementById('top-svg');
+    clear(svg);
+    const VB = 360, margin = 50;
+    const scale = (VB - 2 * margin) / LID_L;
+    const c = VB / 2;
+    const X = x => c + x * scale;
+    const Y = y => c - y * scale;
+
+    // Lid body
+    el(svg, 'rect', { x: X(-LID_L/2), y: Y(LID_W/2),
+      width: LID_L * scale, height: LID_W * scale,
+      fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+    // M3 holes
+    const half = M3_PATTERN / 2;
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+      const cx = sx * half, cy = sy * half;
+      el(svg, 'circle', { cx: X(cx), cy: Y(cy), r: M3_CSK_D/2 * scale,
+        fill: 'var(--bolt)', opacity: 0.4 });
+      el(svg, 'circle', { cx: X(cx), cy: Y(cy), r: M3_CLEAR_D/2 * scale,
+        fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1 });
+    }
+
+    // USB cutout (show as opening in the wall)
+    el(svg, 'rect', {
+      x: X(cut.x0), y: Y(cut.y1),
+      width: (cut.x1 - cut.x0) * scale, height: (cut.y1 - cut.y0) * scale,
+      fill: 'var(--usb)', opacity: 0.85, stroke: 'var(--usb-dk)', 'stroke-width': 1
+    });
+
+    // Label
+    const mx = (cut.x0 + cut.x1) / 2, my = (cut.y0 + cut.y1) / 2;
+    el(svg, 'text', { x: X(mx), y: Y(my) + 3, 'text-anchor': 'middle', class: 'dim',
+      fill: '#000' }, 'USB');
+
+    // Dims
+    const yd = Y(-LID_W/2) + 22;
+    el(svg, 'line', { x1: X(-LID_L/2), y1: yd, x2: X(LID_L/2), y2: yd,
+      stroke: '#8b93a7', 'stroke-width': 0.8 });
+    el(svg, 'text', { x: c, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+      `${LID_L} mm`);
+
+    // +Y label to orient user
+    el(svg, 'text', { x: c, y: Y(LID_W/2) - 6, 'text-anchor': 'middle', class: 'dim',
+      fill: 'var(--info)' }, '+Y');
+    el(svg, 'text', { x: X(LID_L/2) + 8, y: c + 4, class: 'dim',
+      fill: 'var(--info)' }, '+X');
+  })();
+
+  // ============ Bottom view ============
+  (() => {
+    const svg = document.getElementById('bot-svg');
+    clear(svg);
+    const VB = 360, margin = 50;
+    const scale = (VB - 2 * margin) / LID_L;
+    const c = VB / 2;
+    const X = x => c + x * scale;
+    const Y = y => c - y * scale;
+
+    // Outer
+    el(svg, 'rect', { x: X(-LID_L/2), y: Y(LID_W/2),
+      width: LID_L * scale, height: LID_W * scale,
+      fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+    // Recess
+    el(svg, 'rect', { x: X(-RECESS_L/2), y: Y(RECESS_W/2),
+      width: RECESS_L * scale, height: RECESS_W * scale,
+      fill: '#101319', stroke: 'var(--body-dk)', 'stroke-width': 0.8 });
+
+    // PCB ghost
+    el(svg, 'rect', { x: X(-PCB_SIZE/2), y: Y(PCB_SIZE/2),
+      width: PCB_SIZE * scale, height: PCB_SIZE * scale,
+      fill: 'var(--pcb)', opacity: 0.35,
+      stroke: 'var(--pcb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' });
+    el(svg, 'text', { x: c, y: c + 4, 'text-anchor': 'middle', class: 'dim',
+      fill: 'var(--pcb)' }, 'ZED-F9P');
+
+    // USB cutout
+    el(svg, 'rect', {
+      x: X(cut.x0), y: Y(cut.y1),
+      width: (cut.x1 - cut.x0) * scale, height: (cut.y1 - cut.y0) * scale,
+      fill: 'var(--usb)', opacity: 0.85, stroke: 'var(--usb-dk)', 'stroke-width': 1
+    });
+
+    // Edge offset dim (from wall's +Y corner along the near edge)
+    if (cut.axis === 'x') {
+      // Vertical dim line at outer edge, from +Y corner to near edge
+      const xLine = (cut.x0 < 0 ? X(-LID_L/2) - 18 : X(LID_L/2) + 18);
+      el(svg, 'line', { x1: xLine, y1: Y(LID_W/2), x2: xLine, y2: Y(cut.y1),
+        stroke: 'var(--usb)', 'stroke-width': 0.8 });
+      el(svg, 'text', { x: xLine + (cut.x0 < 0 ? -4 : 4), y: Y((LID_W/2 + cut.y1)/2) + 4,
+        'text-anchor': cut.x0 < 0 ? 'end' : 'start', class: 'dim',
+        fill: 'var(--usb)' }, `${edge} mm`);
+    } else {
+      const yLine = (cut.y0 < 0 ? Y(-LID_W/2) + 22 : Y(LID_W/2) - 18);
+      el(svg, 'line', { x1: X(LID_L/2), y1: yLine, x2: X(cut.x1), y2: yLine,
+        stroke: 'var(--usb)', 'stroke-width': 0.8 });
+      el(svg, 'text', { x: X((LID_L/2 + cut.x1)/2), y: yLine + (cut.y0 < 0 ? 12 : -4),
+        'text-anchor': 'middle', class: 'dim', fill: 'var(--usb)' }, `${edge} mm`);
+    }
+  })();
+
+  // ============ Cross-section ============
+  (() => {
+    const svg = document.getElementById('section-svg');
+    clear(svg);
+    const VB_W = 680, VB_H = 300;
+    const scale = 6; // px/mm
+    const cx = VB_W / 2, floorY = VB_H - 70;
+    const X = x => cx + x * scale;
+    const Y = z => floorY - z * scale;
+
+    // Determine section axis based on wall
+    // Axis perpendicular to the wall:
+    //   -X/+X walls → section along X (shown from the side, X horizontal)
+    //   -Y/+Y walls → section along Y (shown from the "end", Y horizontal)
+    const sectionAxis = (wall === '-X' || wall === '+X') ? 'X' : 'Y';
+    const sectionLen = sectionAxis === 'X' ? LID_L : LID_W;
+    const pL = -sectionLen/2, pR = sectionLen/2;
+
+    // Draw lid as: top plate (full) + two side walls, with USB cutout on one side
+    const ceilZ = RECESS_H;
+
+    // Top plate
+    el(svg, 'rect', { x: X(pL), y: Y(LID_H),
+      width: (pR - pL) * scale, height: TOP_T * scale,
+      fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+
+    // Left wall
+    el(svg, 'rect', { x: X(pL), y: Y(ceilZ),
+      width: WALL_T * scale, height: ceilZ * scale,
+      fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+    // Right wall
+    el(svg, 'rect', { x: X(pR - WALL_T), y: Y(ceilZ),
+      width: WALL_T * scale, height: ceilZ * scale,
+      fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+
+    // USB cutout overlay on the corresponding wall (if section plane passes through it)
+    const cutSide = (wall === '+X' || wall === '+Y') ? '+' : '-';
+    const cutX = cutSide === '+' ? (pR - WALL_T) : pL;
+    el(svg, 'rect', { x: X(cutX), y: Y(h),
+      width: WALL_T * scale, height: h * scale,
+      fill: 'var(--usb)', opacity: 0.5, stroke: 'var(--usb)', 'stroke-width': 1,
+      'stroke-dasharray': '2 2' });
+
+    // Board ghost inside recess (centered, floats at 1mm below ceiling for viz)
+    const boardZ = 1.0; // floor-to-board
+    const boardT = 1.6;
+    el(svg, 'rect', { x: X(-PCB_SIZE/2), y: Y(boardZ + boardT),
+      width: PCB_SIZE * scale, height: boardT * scale,
+      fill: 'var(--pcb)', opacity: 0.55, stroke: 'var(--pcb-dk)', 'stroke-width': 0.8 });
+
+    // USB connector protruding through cutout (shown at board level)
+    const usbConnT = 5.5;
+    const usbZ = boardZ + boardT;
+    const usbStart = cutSide === '+' ? (PCB_SIZE/2 - 6) : (-PCB_SIZE/2);
+    const usbW = cutSide === '+' ? 8 : 8;
+    const usbXstart = cutSide === '+' ? (PCB_SIZE/2 - 6) : (-PCB_SIZE/2 - 2);
+    el(svg, 'rect', { x: X(usbXstart), y: Y(usbZ + usbConnT),
+      width: (cutSide === '+' ? (pR - usbXstart) : (usbXstart + usbW - (pL))) * scale,
+      height: usbConnT * scale,
+      fill: 'var(--usb)', opacity: 0.5 });
+
+    // Bed line
+    el(svg, 'line', { x1: X(pL) - 20, y1: Y(0), x2: X(pR) + 20, y2: Y(0),
+      stroke: '#8b93a7', 'stroke-width': 0.8, 'stroke-dasharray': '4 3' });
+    el(svg, 'text', { x: X(pR) + 24, y: Y(0) + 4, class: 'dim' }, 'open');
+
+    // Dims
+    const xd = X(pL) - 24;
+    el(svg, 'line', { x1: xd, y1: Y(0), x2: xd, y2: Y(LID_H),
+      stroke: '#8b93a7', 'stroke-width': 0.8 });
+    el(svg, 'text', { x: xd - 4, y: Y(LID_H/2) + 4, 'text-anchor': 'end', class: 'dim' },
+      `${LID_H} mm`);
+
+    const yd = Y(0) + 28;
+    el(svg, 'line', { x1: X(pL), y1: yd, x2: X(pR), y2: yd,
+      stroke: '#8b93a7', 'stroke-width': 0.8 });
+    el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+      `${sectionLen} mm (${sectionAxis})`);
+
+    // USB height dim
+    const xh = X(pR) + 10;
+    el(svg, 'line', { x1: xh, y1: Y(0), x2: xh, y2: Y(h),
+      stroke: 'var(--usb)', 'stroke-width': 0.8 });
+    el(svg, 'text', { x: xh + 5, y: Y(h/2) + 4, class: 'dim', fill: 'var(--usb)' },
+      `USB h=${h}`);
+  })();
+
+  // ============ Design checks ============
+  const checks = [];
+  function chk(ok, msg) { checks.push({ ok, msg }); }
+
+  const wallLen = (cut.axis === 'x') ? LID_W : LID_L;
+  const nearClr = (wallLen / 2) - ((cut.axis === 'x' ? cut.y1 : cut.x1));
+  const farClr  = ((cut.axis === 'x' ? cut.y0 : cut.x0)) - (-wallLen / 2);
+  chk(nearClr >= 1.0, `Near-edge wall remaining: ${nearClr.toFixed(1)} mm (${nearClr >= 2 ? 'good' : 'tight'})`);
+  chk(farClr >= 1.0,  `Far-edge wall remaining: ${farClr.toFixed(1)} mm`);
+  chk(h <= RECESS_H + 0.01, `Cutout height ${h} mm ≤ recess ${RECESS_H} mm (stays inside wall)`);
+  chk(h >= 5.0, `Cutout height ${h} mm fits USB connector (≥5 mm typical)`);
+  chk(w >= 8.0, `Cutout width ${w} mm fits USB connector (≥8 mm for micro/type-C)`);
+
+  const edgeToHole = LID_L/2 - M3_PATTERN/2 - M3_CSK_D/2;
+  chk(edgeToHole >= 1.0, `M3 hole to edge: ${edgeToHole.toFixed(2)} mm`);
+
+  // Check the cutout doesn't intersect an M3 hole
+  let hitsBolt = false;
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const hx = sx * M3_PATTERN/2, hy = sy * M3_PATTERN/2;
+    const r = M3_CSK_D/2 + 0.5;
+    if (hx + r > cut.x0 && hx - r < cut.x1 &&
+        hy + r > cut.y0 && hy - r < cut.y1) hitsBolt = true;
+  }
+  chk(!hitsBolt, `Cutout does not intersect any M3 countersink`);
+
+  const ul = document.getElementById('fit-checks');
+  ul.innerHTML = '';
+  for (const c of checks) {
+    const li = document.createElement('li');
+    li.innerHTML = c.ok
+      ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+      : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+    ul.appendChild(li);
+  }
+}
+
+['ctl-wall', 'ctl-edge', 'ctl-width', 'ctl-height'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+  document.getElementById(id).addEventListener('change', render);
+});
+render();
+</script>
+</body>
+</html>

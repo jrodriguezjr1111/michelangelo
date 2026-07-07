@@ -1,0 +1,8 @@
+# slicer output — regenerable from STL, huge (450MB+)
+*.gcode
+# python env / caches
+.venv/
+__pycache__/
+*.pyc
+# macOS
+.DS_Store

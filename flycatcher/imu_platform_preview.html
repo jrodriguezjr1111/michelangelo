@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>BNO085 IMU Platform — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --setA: #d6b35a; --setA-dk: #8a7028;
+    --setB: #b58df0; --setB-dk: #6a4c9a;
+    --imu:  #2a8f5a; --imu-dk: #1d6b42;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr; }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36; text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 200px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BNO085 IMU Platform</h1>
+  <p>78.9 × 29 × 3 mm flat plate with two 4-hole patterns rotated 90° from each other.
+     Source: <code>flycatcher/make_imu_platform.py</code></p>
+</header>
+
+<main>
+
+  <div class="card">
+    <table class="specs">
+      <tr><th>Plate</th><td id="s-plate">—</td></tr>
+      <tr><th>Set A (gold)</th><td id="s-a">—</td></tr>
+      <tr><th>Set B (purple, 90° rotated)</th><td id="s-b">—</td></tr>
+      <tr><th>Centerline M3 mount</th><td id="s-m3">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view</h2>
+    <p class="sub">Two IMU mount patterns. Choose either set; ghost outlines show the IMU footprint in each orientation.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Plate</span>
+      <span><span class="sw" style="background:var(--setA)"></span>Set A holes</span>
+      <span><span class="sw" style="background:var(--setB)"></span>Set B holes</span>
+      <span><span class="sw" style="background:var(--imu);opacity:0.3"></span>IMU footprint ghost</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 720 320"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<script>
+const PLATE_L = 78.9, PLATE_W = 29.0, PLATE_T = 3.0;
+const PAT_A = 20.41, PAT_B = 18.04;
+const HOLE_D = 2.7;
+const M3_SPACING = 58.0, M3_D = 3.4;
+const SET_A_CX = -PLATE_L / 4;
+const SET_B_CX = +PLATE_L / 4;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e); return e;
+}
+
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 720, VB_H = 320, margin = 50;
+  const sX = (VB_W - 2 * margin) / PLATE_L;
+  const sY = (VB_H - 2 * margin) / PLATE_W;
+  const s = Math.min(sX, sY);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx + x * s;
+  const Y = y => cy - y * s;
+
+  // Plate
+  el(svg, 'rect', { x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+    width: PLATE_L * s, height: PLATE_W * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  function drawSet(cxv, dx, dy, color, colorDk, label) {
+    // IMU ghost (slightly larger than hole pattern)
+    const gx = dx + 6, gy = dy + 6;
+    el(svg, 'rect', { x: X(cxv - gx/2), y: Y(gy/2),
+      width: gx * s, height: gy * s,
+      fill: 'var(--imu)', opacity: 0.25,
+      stroke: 'var(--imu-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '4 3', rx: 1 });
+    // Holes
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+      const hx = cxv + sx * dx/2, hy = sy * dy/2;
+      el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: HOLE_D/2 * s,
+        fill: '#101319', stroke: color, 'stroke-width': 1.4 });
+    }
+    // Pattern dim line (X)
+    const yd = Y(-PLATE_W/2) + 22;
+    el(svg, 'line', { x1: X(cxv - dx/2), y1: yd, x2: X(cxv + dx/2), y2: yd,
+      stroke: color, 'stroke-width': 0.8 });
+    el(svg, 'text', { x: X(cxv), y: yd + 13, 'text-anchor': 'middle', class: 'dim',
+      fill: color }, `${label}: ${dx} × ${dy}`);
+    // Pattern dim line (Y)
+    const xd = X(cxv) + dx/2 * s + 8;
+    el(svg, 'line', { x1: xd, y1: Y(-dy/2), x2: xd, y2: Y(dy/2),
+      stroke: color, 'stroke-width': 0.8 });
+    el(svg, 'text', { x: xd + 4, y: cy + 4, class: 'dim',
+      fill: color }, `${dy}`);
+  }
+
+  drawSet(SET_A_CX, PAT_A, PAT_B, 'var(--setA)', 'var(--setA-dk)', 'A');
+  drawSet(SET_B_CX, PAT_B, PAT_A, 'var(--setB)', 'var(--setB-dk)', 'B');
+
+  // Centerline M3 mount holes
+  for (const sx of [-1, 1]) {
+    el(svg, 'circle', { cx: X(sx * M3_SPACING/2), cy: Y(0), r: M3_D/2 * s,
+      fill: '#101319', stroke: '#fca5a5', 'stroke-width': 1.6 });
+  }
+  // Centerline reference
+  el(svg, 'line', { x1: X(-PLATE_L/2 + 2), y1: Y(0), x2: X(PLATE_L/2 - 2), y2: Y(0),
+    stroke: '#fca5a5', 'stroke-width': 0.5, 'stroke-dasharray': '2 4', opacity: 0.5 });
+  // M3 spacing dim
+  const ydM = Y(0) - 28;
+  el(svg, 'line', { x1: X(-M3_SPACING/2), y1: ydM, x2: X(M3_SPACING/2), y2: ydM,
+    stroke: '#fca5a5', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: ydM - 4, 'text-anchor': 'middle', class: 'dim',
+    fill: '#fca5a5' }, `M3 mount: ${M3_SPACING} mm apart, Ø${M3_D}`);
+
+  // Plate dims
+  const ydL = Y(-PLATE_W/2) + 44;
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: ydL, x2: X(PLATE_L/2), y2: ydL,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: ydL + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L} mm`);
+  const xdW = X(-PLATE_L/2) - 22;
+  el(svg, 'line', { x1: xdW, y1: Y(-PLATE_W/2), x2: xdW, y2: Y(PLATE_W/2),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xdW - 4, y: cy + 4, 'text-anchor': 'end', class: 'dim' },
+    `${PLATE_W}`);
+})();
+
+// Specs + checks
+document.getElementById('s-plate').textContent = `${PLATE_L} × ${PLATE_W} × ${PLATE_T} mm`;
+document.getElementById('s-a').textContent = `4× Ø${HOLE_D} at ${PAT_A} × ${PAT_B} mm, center X=${SET_A_CX}`;
+document.getElementById('s-b').textContent = `4× Ø${HOLE_D} at ${PAT_B} × ${PAT_A} mm, center X=${SET_B_CX}`;
+document.getElementById('s-m3').textContent = `2× Ø${M3_D} on Y=0, ${M3_SPACING} mm apart (X=±${M3_SPACING/2})`;
+
+const aMaxX = Math.abs(SET_A_CX) + PAT_A/2;
+const aMaxY = PAT_B/2;
+const bMaxX = Math.abs(SET_B_CX) + PAT_B/2;
+const bMaxY = PAT_A/2;
+const aEdgeX = PLATE_L/2 - aMaxX - HOLE_D/2;
+const aEdgeY = PLATE_W/2 - aMaxY - HOLE_D/2;
+const bEdgeX = PLATE_L/2 - bMaxX - HOLE_D/2;
+const bEdgeY = PLATE_W/2 - bMaxY - HOLE_D/2;
+// Inner gap between the two patterns (closest holes)
+const aInnerX = SET_A_CX + PAT_A/2;
+const bInnerX = SET_B_CX - PAT_B/2;
+const interX  = bInnerX - aInnerX - HOLE_D;
+
+// M3 ↔ nearest IMU hole clearance
+function nearest(M3x, M3y, holes) {
+  return Math.min(...holes.map(([x,y]) => Math.hypot(M3x-x, M3y-y)));
+}
+const setAholes = [];
+for (const sx of [-1,1]) for (const sy of [-1,1])
+  setAholes.push([SET_A_CX + sx*PAT_A/2, sy*PAT_B/2]);
+const setBholes = [];
+for (const sx of [-1,1]) for (const sy of [-1,1])
+  setBholes.push([SET_B_CX + sx*PAT_B/2, sy*PAT_A/2]);
+const m3xL = -M3_SPACING/2, m3xR = +M3_SPACING/2;
+const m3ToA = nearest(m3xL, 0, setAholes) - (M3_D/2 + HOLE_D/2);
+const m3ToB = nearest(m3xR, 0, setBholes) - (M3_D/2 + HOLE_D/2);
+const m3EdgeX = PLATE_L/2 - M3_SPACING/2 - M3_D/2;
+const m3EdgeY = PLATE_W/2 - M3_D/2;
+
+const checks = [
+  { ok: aEdgeX >= 1.0 && aEdgeY >= 1.0,
+    msg: `Set A edge clearance: ${aEdgeX.toFixed(2)} (X), ${aEdgeY.toFixed(2)} (Y) mm` },
+  { ok: bEdgeX >= 1.0 && bEdgeY >= 1.0,
+    msg: `Set B edge clearance: ${bEdgeX.toFixed(2)} (X), ${bEdgeY.toFixed(2)} (Y) mm` },
+  { ok: interX >= 2.0,
+    msg: `Gap between Set A and Set B (inner holes): ${interX.toFixed(2)} mm` },
+  { ok: m3EdgeX >= 1.0 && m3EdgeY >= 1.0,
+    msg: `M3 edge clearance: ${m3EdgeX.toFixed(2)} (X), ${m3EdgeY.toFixed(2)} (Y) mm` },
+  { ok: m3ToA >= 1.0 && m3ToB >= 1.0,
+    msg: `M3 ↔ nearest IMU hole: ${m3ToA.toFixed(2)} (Set A), ${m3ToB.toFixed(2)} (Set B) mm` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

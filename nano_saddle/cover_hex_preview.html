@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Nano Saddle — Hex-Lattice Top Cover Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --frame: #6ec1c8; --boss: #d6b35a; --bolt: #f6cd7b;
+    --hex-fill: #101319; --hex-stroke: #2f3a4d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr; }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px;
+            color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                                   text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 200px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Nano Saddle — Hex-Lattice Top Cover</h1>
+  <p>Open honeycomb canopy from <code>nano_saddle/make_nano_cover_hex.py</code>. Replaces the
+     perforated plate with a uniform hex lattice across the entire footprint for full-area airflow
+     over both the Orin fan and the Nano heatsink.</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>Specs</h2>
+    <table class="specs">
+      <tr><th>Footprint</th><td id="spec-foot">—</td></tr>
+      <tr><th>Frame</th><td id="spec-frame">—</td></tr>
+      <tr><th>Hex cell</th><td id="spec-hex">—</td></tr>
+      <tr><th>Lattice pitch</th><td id="spec-pitch">—</td></tr>
+      <tr><th>Mount</th><td id="spec-mount">—</td></tr>
+      <tr><th>Bosses</th><td id="spec-boss">—</td></tr>
+      <tr><th>Open area</th><td id="spec-open">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view — lattice up</h2>
+    <p class="sub">Long axis horizontal. Frame + bosses are solid; every hex cell is an open vent.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--frame)"></span>Frame (solid)</span>
+      <span><span class="sw" style="background:var(--body)"></span>Hex wall (solid)</span>
+      <span><span class="sw" style="background:var(--hex-fill);border:1px solid #555"></span>Open hex cell</span>
+      <span><span class="sw" style="background:var(--boss)"></span>Boss (M3 pad)</span>
+      <span><span class="sw" style="background:var(--bolt);border-radius:50%"></span>M3 hole</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 1080 380"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print flat on the bed, lattice-up. <strong>Use a 5–8 mm brim</strong> — the frame is the brim's
+  anchor and the lattice rides on top. Hardware: 8× M3 screws + 8× M3 standoffs (≈30 mm) between
+  each board top and the cover.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — mirror nano_saddle/make_nano_cover_hex.py
+// =====================================================================
+const BLOCK_LEN = 70.0;     // X
+const BLOCK_WID = 197.0;    // Y
+const PLATE_T   = 3.0;
+const CLEAR_H   = 30.0;
+
+const NANO_PATTERN_Y = 86.14, NANO_PATTERN_X = 58.25;
+const ORIN_PATTERN_Y = 92.12, ORIN_PATTERN_X = 57.59;
+const M3_CLEAR_D = 3.4, M3_CB_D = 5.3, M3_CB_DEPTH = 1.6;
+
+const ORIN_Y_CENTER =  BLOCK_WID / 4;                                 // +49.25
+const NANO_Y_CENTER = -(BLOCK_WID / 2 - NANO_PATTERN_Y / 2 - 3.19);   // −52.24
+
+const FRAME_W    = 3.5;
+const BOSS_D     = 9.0;
+const HEX_CELL_R = 5.0;
+const HEX_WALL   = 1.6;
+const CLEARANCE  = 1.0;
+
+const HEX_F   = HEX_CELL_R * Math.sqrt(3);                  // flat-to-flat
+const PITCH_X = HEX_F + HEX_WALL;
+const PITCH_Y = 1.5 * HEX_CELL_R + HEX_WALL * Math.sqrt(3) / 2;
+const HEX_DX  = HEX_F / 2;
+const HEX_DY  = HEX_CELL_R;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e);
+  return e;
+}
+
+// 8 board-mount centers (x, y) in model frame
+function bossCenters() {
+  const out = [];
+  for (const [py, px, yc] of [[NANO_PATTERN_Y, NANO_PATTERN_X, NANO_Y_CENTER],
+                              [ORIN_PATTERN_Y, ORIN_PATTERN_X, ORIN_Y_CENTER]])
+    for (const sx of [-1, 1]) for (const sy of [-1, 1])
+      out.push([sx * px / 2, yc + sy * py / 2]);
+  return out;
+}
+const BOSSES = bossCenters();
+const BOSS_KEEPOUT_R = BOSS_D / 2 + CLEARANCE;
+const inner_hx = BLOCK_LEN / 2 - FRAME_W - CLEARANCE;
+const inner_hy = BLOCK_WID / 2 - FRAME_W - CLEARANCE;
+
+// Hex cells kept (subtracted from plate). Same logic as the Python builder.
+function hexCells() {
+  const cells = [];
+  const n_rows = Math.ceil(inner_hy / PITCH_Y) + 1;
+  const n_cols = Math.ceil(inner_hx / PITCH_X) + 1;
+  for (let j = -n_rows; j <= n_rows; j++) {
+    const cy = j * PITCH_Y;
+    const off = (j % 2) ? PITCH_X / 2 : 0;
+    for (let i = -n_cols; i <= n_cols; i++) {
+      const cx = i * PITCH_X + off;
+      if (Math.abs(cx) + HEX_DX > inner_hx) continue;
+      if (Math.abs(cy) + HEX_DY > inner_hy) continue;
+      let nearBoss = false;
+      for (const [bx, by] of BOSSES)
+        if ((cx - bx) ** 2 + (cy - by) ** 2 < BOSS_KEEPOUT_R ** 2) { nearBoss = true; break; }
+      if (nearBoss) continue;
+      cells.push([cx, cy]);
+    }
+  }
+  return cells;
+}
+const CELLS = hexCells();
+
+// =====================================================================
+// Specs
+// =====================================================================
+const hex_area_one = (3 * Math.sqrt(3) / 2) * HEX_CELL_R * HEX_CELL_R;
+const open_area = CELLS.length * hex_area_one;
+const total_area = BLOCK_LEN * BLOCK_WID;
+const open_pct = 100 * open_area / total_area;
+
+document.getElementById('spec-foot').textContent =
+  `${BLOCK_LEN} × ${BLOCK_WID} × ${PLATE_T} mm`;
+document.getElementById('spec-frame').textContent =
+  `${FRAME_W} mm solid perimeter border`;
+document.getElementById('spec-hex').textContent =
+  `R=${HEX_CELL_R} mm (flat-to-flat ${HEX_F.toFixed(2)} mm), wall ${HEX_WALL} mm, ${CELLS.length} open cells`;
+document.getElementById('spec-pitch').textContent =
+  `X = ${PITCH_X.toFixed(2)} mm, Y = ${PITCH_Y.toFixed(2)} mm (offset rows)`;
+document.getElementById('spec-mount').textContent =
+  `8× Ø${M3_CLEAR_D} M3 (Nano ${NANO_PATTERN_X}×${NANO_PATTERN_Y}, Orin ${ORIN_PATTERN_X}×${ORIN_PATTERN_Y}), Ø${M3_CB_D}×${M3_CB_DEPTH} c'bore on top`;
+document.getElementById('spec-boss').textContent =
+  `Ø${BOSS_D} solid pad at each M3 (outer holes use frame band)`;
+document.getElementById('spec-open').textContent =
+  `≈ ${open_pct.toFixed(1)}% of footprint (${(open_area/100).toFixed(1)} cm²)`;
+
+// =====================================================================
+// Top-view rendering
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 1080, VB_H = 380, margin = 30;
+  const scale = Math.min((VB_W - 2*margin) / BLOCK_WID, (VB_H - 2*margin) / BLOCK_LEN);
+  const cx_s = VB_W / 2, cy_s = VB_H / 2;
+  // screen-x ← model +Y;  screen-y ← model +X
+  const SX = y => cx_s + y * scale;
+  const SY = x => cy_s - x * scale;
+
+  // Outer plate (frame is the solid band; lattice is the interior)
+  el(svg, 'rect', { x: SX(-BLOCK_WID/2), y: SY(BLOCK_LEN/2),
+    width: BLOCK_WID*scale, height: BLOCK_LEN*scale,
+    fill: 'var(--frame)', stroke: '#2f4d52', 'stroke-width': 1.2, rx: 2 });
+
+  // Inner lattice rectangle filled with hex-wall material
+  const inLx = inner_hx + CLEARANCE;   // back out the safety to show frame edge
+  const inLy = inner_hy + CLEARANCE;
+  el(svg, 'rect', { x: SX(-inLy), y: SY(inLx),
+    width: 2*inLy*scale, height: 2*inLx*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 0.6 });
+
+  // Punch out the open hex cells (draw as polygons filled with bg)
+  function hexPoints(cx_m, cy_m) {
+    // pointy-top hexagon in model coords → screen coords
+    // angles: 90°, 150°, 210°, 270°, 330°, 30°
+    const pts = [];
+    for (let k = 0; k < 6; k++) {
+      const a = Math.PI / 6 + k * Math.PI / 3;   // first vertex at 30° → flat sides on horizontal
+      // Actually for pointy-top (vertex up): vertices at 90, 150, 210, 270, 330, 30
+      const ang = Math.PI/2 + k * Math.PI / 3;
+      const mx = cx_m + HEX_CELL_R * Math.cos(ang);
+      const my = cy_m + HEX_CELL_R * Math.sin(ang);
+      pts.push(`${SX(my)},${SY(mx)}`);
+    }
+    return pts.join(' ');
+  }
+  for (const [cx_m, cy_m] of CELLS) {
+    el(svg, 'polygon', { points: hexPoints(cx_m, cy_m),
+      fill: 'var(--hex-fill)', stroke: 'var(--hex-stroke)', 'stroke-width': 0.4 });
+  }
+
+  // Solid bosses (drawn over lattice where they intersect)
+  for (const [bx, by] of BOSSES) {
+    el(svg, 'circle', { cx: SX(by), cy: SY(bx),
+      r: BOSS_D / 2 * scale,
+      fill: 'var(--boss)', opacity: 0.85,
+      stroke: '#7a6324', 'stroke-width': 0.6 });
+    // M3 hole
+    el(svg, 'circle', { cx: SX(by), cy: SY(bx),
+      r: M3_CLEAR_D / 2 * scale,
+      fill: '#000', stroke: 'var(--bolt)', 'stroke-width': 1.2 });
+  }
+
+  // Axes labels
+  el(svg, 'text', { x: SX(BLOCK_WID/2) + 10, y: cy_s + 4, class: 'dim',
+    fill: 'var(--info)' }, '+Y');
+  el(svg, 'text', { x: SX(-BLOCK_WID/2) - 10, y: cy_s + 4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--info)' }, '−Y');
+  el(svg, 'text', { x: cx_s, y: SY(BLOCK_LEN/2) - 8, 'text-anchor': 'middle',
+    class: 'dim', fill: 'var(--info)' }, '+X');
+  el(svg, 'text', { x: cx_s, y: SY(-BLOCK_LEN/2) + 16, 'text-anchor': 'middle',
+    class: 'dim', fill: 'var(--info)' }, '−X');
+
+  // Y dim line
+  const yd = SY(-BLOCK_LEN/2) + 22;
+  el(svg, 'line', { x1: SX(-BLOCK_WID/2), y1: yd, x2: SX(BLOCK_WID/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx_s, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${BLOCK_WID} mm (Y)`);
+})();
+
+// =====================================================================
+// Design checks
+// =====================================================================
+const checks = [];
+function chk(ok, msg) { checks.push({ ok, msg }); }
+
+chk(HEX_WALL >= 1.0, `Hex wall ${HEX_WALL} mm printable as ~${(HEX_WALL/0.4).toFixed(1)}-line wall (0.4 mm nozzle)`);
+chk(HEX_CELL_R >= 3.0, `Hex cell ${HEX_CELL_R} mm circumradius — open airflow path`);
+chk(FRAME_W >= 2.5, `Frame ${FRAME_W} mm — brim anchor + outer-hole material`);
+chk(BOSS_D >= M3_CB_D + 2, `Boss Ø${BOSS_D} mm leaves ≥1 mm wall around Ø${M3_CB_D} c'bore`);
+chk(CELLS.length >= 50, `${CELLS.length} open hex cells across the lattice`);
+
+const allHolesYok = BOSSES.every(([bx, by]) =>
+  Math.abs(by) + M3_CB_D / 2 + 0.4 < BLOCK_WID / 2);
+chk(allHolesYok, `All 8 M3 c'bores fit within plate Y edge`);
+
+// Outer holes in frame band
+const outerInFrame = BOSSES.some(([bx, by]) =>
+  BLOCK_WID / 2 - Math.abs(by) < FRAME_W + 1.0);
+chk(outerInFrame, `Outer (4) M3 holes use solid frame band for material (no separate boss needed)`);
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

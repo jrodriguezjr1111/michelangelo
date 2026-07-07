@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CyberWing Saddle Clamp — Component Preview</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --ink: #e6e8ee;
+    --mute: #8b93a7;
+    --accent: #6ee7b7;
+    --warn: #fca5a5;
+    --plastic: #f2b84b;
+    --plastic-dk: #b07a1c;
+    --tube: #8aa0b8;
+    --bed: #2a2f3a;
+    --grid: #242a36;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif;
+    background: var(--bg); color: var(--ink);
+  }
+  header {
+    padding: 20px 28px; border-bottom: 1px solid #222836;
+  }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; letter-spacing: .2px; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main {
+    display: grid; gap: 18px; padding: 18px 28px 40px;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+  .card {
+    background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+    padding: 16px 16px 8px;
+  }
+  .card.wide { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    margin: 6px 0 10px; color: var(--mute); font-size: 12px;
+  }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .label { fill: var(--ink); font: 600 11px ui-sans-serif, sans-serif; }
+  .dim   { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  .axis  { stroke: var(--mute); stroke-width: .75; fill: none; }
+  .bed   { fill: var(--bed); }
+  .grid  { stroke: var(--grid); stroke-width: .5; }
+  .plastic-fill { fill: var(--plastic); }
+  .plastic-stroke { stroke: var(--plastic-dk); stroke-width: 1; fill: var(--plastic); }
+  .plastic-light { fill: #f6cd7b; stroke: var(--plastic-dk); stroke-width: 1; }
+  .hole   { fill: var(--panel); stroke: var(--plastic-dk); stroke-width: 1; }
+  .tube   { fill: var(--tube); stroke: #556577; stroke-width: 1; }
+  .midair-hatch { fill: url(#hatchWarn); stroke: var(--warn); stroke-width: 1; stroke-dasharray: 3 2; }
+  .callout { fill: var(--warn); font: 700 11px sans-serif; }
+  .ok      { fill: var(--accent); font: 700 11px sans-serif; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CyberWing Canary — WT901 IMU Saddle Clamp</h1>
+  <p>Schematic preview of two-piece clamp. Tube OD 19.05 mm (¾"). All dims in mm.</p>
+  <p style="margin:6px 0 0;color:var(--mute);font-size:12px">
+    <a href="#v3" style="color:var(--accent)">Jump to v3 (rectangular block)</a> ·
+    <a href="#v2" style="color:var(--mute)">v2 (half-pipe, problematic)</a>
+  </p>
+</header>
+
+<a id="v2"></a>
+
+<main>
+
+  <!-- ============================================================= -->
+  <!-- LEGEND + SHARED DEFS                                           -->
+  <!-- ============================================================= -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <pattern id="hatchWarn" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="6" height="6" fill="#2a1414"/>
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#fca5a5" stroke-width="1"/>
+      </pattern>
+      <pattern id="hatchBed" width="8" height="8" patternUnits="userSpaceOnUse">
+        <rect width="8" height="8" fill="#20242e"/>
+        <path d="M0 8 L8 0" stroke="#2f3542" stroke-width="1"/>
+      </pattern>
+    </defs>
+  </svg>
+
+  <!-- ============================================================= -->
+  <!-- LOWER HALF — front (end-on) cross-section                      -->
+  <!-- ============================================================= -->
+  <div class="card">
+    <h2>Lower half — front view (looking along tube)</h2>
+    <p class="sub">Print orientation: split face on the bed. Self-supporting arch.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>PLA body</span>
+      <span><span class="sw" style="background:var(--tube)"></span>Tube (reference)</span>
+      <span><span class="sw" style="background:var(--bed)"></span>Build plate</span>
+    </div>
+    <!-- 1 mm ~ 3 px. Bed at y=190. Center saddle at x=250. -->
+    <svg viewBox="0 0 500 230">
+      <!-- bed -->
+      <rect x="0" y="190" width="500" height="40" fill="url(#hatchBed)"/>
+      <line x1="0" y1="190" x2="500" y2="190" stroke="#4a5366" stroke-width="1"/>
+
+      <!-- saddle lower: upper half of an annulus, on the bed -->
+      <!-- Outer R = 15.225 * 3 ≈ 45.7 px ; Inner R = 9.725 * 3 ≈ 29.2 px -->
+      <path d="
+        M 204.3 190
+        A 45.7 45.7 0 0 1 295.7 190
+        L 279.2 190
+        A 29.2 29.2 0 0 0 220.8 190
+        Z" class="plastic-stroke"/>
+
+      <!-- flanges: 16x12 in cross-section shows as 12(Y) x 8(Z) box; wait this is front view along X, so we see saddle cross-section. Flange is 12 wide (Y) x 8 tall (Z) -->
+      <!-- +Y flange: from y-outer=R_OUT (45.7px) to +12mm (36px). Bottom on bed. -->
+      <rect x="295.7" y="166" width="36" height="24" class="plastic-light"/>
+      <rect x="168.3" y="166" width="36" height="24" class="plastic-light"/>
+
+      <!-- screw holes through flanges (hidden in this view, shown as dashed circles centered vertically in flange) -->
+      <circle cx="313.7" cy="178" r="8.1" class="hole"/>
+      <circle cx="186.3" cy="178" r="8.1" class="hole"/>
+
+      <!-- tube reference (dashed, not present in print) -->
+      <circle cx="250" cy="161" r="28.6" fill="none" stroke="var(--tube)" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="250" y="158" text-anchor="middle" class="dim">tube Ø19.05</text>
+
+      <!-- dims -->
+      <text x="250" y="215" text-anchor="middle" class="dim">outer Ø 30.45 · wall 5.5 · flange 12 × 8</text>
+      <text x="250" y="18"  text-anchor="middle" class="label">LOWER HALF</text>
+
+      <!-- axes -->
+      <g class="axis">
+        <line x1="430" y1="200" x2="470" y2="200"/>
+        <line x1="430" y1="200" x2="430" y2="160"/>
+      </g>
+      <text x="472" y="204" class="dim">Y</text>
+      <text x="424" y="158" class="dim">Z</text>
+    </svg>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- UPPER HALF — front (end-on) cross-section                      -->
+  <!-- ============================================================= -->
+  <div class="card">
+    <h2>Upper half — front view (with sensor pad)</h2>
+    <p class="sub">Same arch plus a pad on top to seat the WT901 IMU.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>Arch + flanges</span>
+      <span><span class="sw" style="background:#f6cd7b"></span>Sensor pad</span>
+      <span><span class="sw" style="background:#2a1414;border:1px solid #fca5a5"></span>Unsupported (midair)</span>
+    </div>
+    <svg viewBox="0 0 500 230">
+      <rect x="0" y="190" width="500" height="40" fill="url(#hatchBed)"/>
+      <line x1="0" y1="190" x2="500" y2="190" stroke="#4a5366" stroke-width="1"/>
+
+      <!-- midair hatch: everything under the pad that the arch doesn't fill -->
+      <!-- Pad width (Y) = 44.1 mm = 132 px, centered x=250 -> 184..316. Pad top at z=20.225 -> 190 - 61 = 129. Pad bottom at z=15.225 -> 190 - 46 = 144. -->
+      <!-- Arch narrows to point (0 wide) at z=R_OUT=15.225 so directly below the pad from y=-R_OUT to y=R_OUT is "empty", supported only at the very center line. -->
+      <path d="
+        M 184 144 L 316 144
+        L 316 190
+        L 295.7 190
+        A 45.7 45.7 0 0 0 250 144.3
+        A 45.7 45.7 0 0 0 204.3 190
+        L 184 190 Z" class="midair-hatch"/>
+
+      <!-- arch -->
+      <path d="
+        M 204.3 190
+        A 45.7 45.7 0 0 1 295.7 190
+        L 279.2 190
+        A 29.2 29.2 0 0 0 220.8 190
+        Z" class="plastic-stroke"/>
+
+      <!-- flanges -->
+      <rect x="295.7" y="166" width="36" height="24" class="plastic-light"/>
+      <rect x="168.3" y="166" width="36" height="24" class="plastic-light"/>
+      <!-- hex nut pockets visible on top of flanges -->
+      <polygon points="305.7,166 317.7,166 323.7,170 317.7,174 305.7,174 299.7,170" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <polygon points="178.3,166 190.3,166 196.3,170 190.3,174 178.3,174 172.3,170" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <circle cx="313.7" cy="178" r="8.1" class="hole"/>
+      <circle cx="186.3" cy="178" r="8.1" class="hole"/>
+
+      <!-- sensor pad (pad_wid=44.1 -> 132 px, thickness=5 -> 15 px) -->
+      <rect x="184" y="129" width="132" height="15" class="plastic-light"/>
+      <!-- sensor pocket on top of pad: 36.1 Y x 2 Z -->
+      <rect x="195.8" y="129" width="108.4" height="6" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <text x="250" y="118" text-anchor="middle" class="label">sensor pocket (WT901)</text>
+
+      <!-- callout: midair -->
+      <text x="370" y="142" class="callout">⚠ pad bottom</text>
+      <text x="370" y="154" class="callout">  hangs over bore</text>
+      <line x1="368" y1="148" x2="320" y2="148" stroke="var(--warn)" stroke-width="1"/>
+
+      <!-- ok callout: flanges -->
+      <text x="70" y="150" class="ok">✓ flanges sit</text>
+      <text x="70" y="162" class="ok">  flat on bed</text>
+      <line x1="130" y1="158" x2="170" y2="172" stroke="var(--accent)" stroke-width="1"/>
+
+      <text x="250" y="215" text-anchor="middle" class="dim">pad 59.5 × 44.1 × 5 · pocket 51.5 × 36.1 × 2</text>
+      <text x="250" y="18"  text-anchor="middle" class="label">UPPER HALF</text>
+    </svg>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- ASSEMBLED — front cross-section                                -->
+  <!-- ============================================================= -->
+  <div class="card wide">
+    <h2>Assembled clamp — front section</h2>
+    <p class="sub">Both halves around the tube, M5 bolts through flanges, WT901 seated in pad.</p>
+    <svg viewBox="0 0 900 300">
+      <!-- tube -->
+      <circle cx="450" cy="160" r="28.6" class="tube"/>
+      <text x="450" y="164" text-anchor="middle" class="dim" fill="#e6e8ee">tube Ø19.05</text>
+
+      <!-- LOWER half (flipped upside-down vs print orientation) -->
+      <!-- Lower now has split face on TOP (y=160), arch opens downward -->
+      <path d="
+        M 404.3 160
+        A 45.7 45.7 0 0 0 495.7 160
+        L 479.2 160
+        A 29.2 29.2 0 0 1 420.8 160
+        Z" class="plastic-stroke"/>
+      <!-- lower flanges: extend horizontally from OD, sit below split plane -->
+      <rect x="495.7" y="160" width="36" height="24" class="plastic-light"/>
+      <rect x="368.3" y="160" width="36" height="24" class="plastic-light"/>
+
+      <!-- UPPER half: same as before -->
+      <path d="
+        M 404.3 160
+        A 45.7 45.7 0 0 1 495.7 160
+        L 479.2 160
+        A 29.2 29.2 0 0 0 420.8 160
+        Z" class="plastic-stroke"/>
+      <rect x="495.7" y="136" width="36" height="24" class="plastic-light"/>
+      <rect x="368.3" y="136" width="36" height="24" class="plastic-light"/>
+      <!-- sensor pad -->
+      <rect x="384" y="99" width="132" height="15" class="plastic-light"/>
+      <!-- IMU module -->
+      <rect x="396" y="89" width="108" height="10" fill="#2b3b5a" stroke="#4a6a9a"/>
+      <text x="450" y="86" text-anchor="middle" class="label">WT901SDCL-BT50</text>
+
+      <!-- M5 bolts (simplified) through both flanges -->
+      <!-- right bolt -->
+      <rect x="510" y="136" width="8" height="48" fill="#cfd7e4" stroke="#6b7788"/>
+      <polygon points="506,132 522,132 522,138 506,138" fill="#cfd7e4" stroke="#6b7788"/>
+      <polygon points="508,184 520,184 518,192 510,192" fill="#2a2f3a" stroke="#6b7788"/>
+      <!-- left bolt -->
+      <rect x="382" y="136" width="8" height="48" fill="#cfd7e4" stroke="#6b7788"/>
+      <polygon points="378,132 394,132 394,138 378,138" fill="#cfd7e4" stroke="#6b7788"/>
+      <polygon points="380,184 392,184 390,192 382,192" fill="#2a2f3a" stroke="#6b7788"/>
+
+      <!-- callouts -->
+      <text x="560" y="110" class="label" fill="#e6e8ee">M5 hex nut (pocket in upper)</text>
+      <line x1="520" y1="137" x2="556" y2="108" stroke="var(--mute)"/>
+      <text x="560" y="195" class="label" fill="#e6e8ee">M5 socket cap (from below)</text>
+      <line x1="520" y1="188" x2="556" y2="193" stroke="var(--mute)"/>
+      <text x="270" y="160" class="label" fill="#e6e8ee">split plane</text>
+      <line x1="318" y1="160" x2="368" y2="160" stroke="var(--mute)" stroke-dasharray="3 3"/>
+
+      <!-- overall dim -->
+      <text x="450" y="280" text-anchor="middle" class="dim">overall ≈ 55 L × 78.5 W × 35.5 H mm</text>
+    </svg>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- TOP VIEW — upper half (looking down -Z)                        -->
+  <!-- ============================================================= -->
+  <div class="card">
+    <h2>Upper half — top view</h2>
+    <p class="sub">Looking down at the sensor pad. X is along tube axis.</p>
+    <svg viewBox="0 0 500 300">
+      <!-- saddle outline (top of arch, narrows to line) — show full footprint at bed = two wall strips of length 55 -->
+      <!-- Center at (250, 150). X (tube axis) horizontal. Length 55 -> 165 px. Width outer = 2*R_OUT=30.45 -> 91.4 px -->
+      <!-- saddle outer rect (ghost of footprint) -->
+      <rect x="167.5" y="104" width="165" height="92" fill="none" stroke="var(--mute)" stroke-dasharray="3 3"/>
+      <text x="167.5" y="100" class="dim">saddle footprint 55 × 30.5</text>
+
+      <!-- pad (top) 59.5 x 44.1 -->
+      <rect x="160.75" y="83.85" width="178.5" height="132.3" class="plastic-light"/>
+      <!-- sensor pocket 51.5 x 36.1 -->
+      <rect x="172.75" y="95.85" width="154.5" height="108.3" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <text x="250" y="152" text-anchor="middle" class="label">sensor pocket</text>
+      <text x="250" y="167" text-anchor="middle" class="dim">51.5 × 36.1 × 2</text>
+
+      <!-- strap slots: 4 x 12, placed ±(SENSOR_LEN/2 + STRAP_INSET + STRAP_SLOT_W/2) from center in X -->
+      <!-- = ±(25.75 + 4 + 2) = ±31.75 mm -> ±95.25 px from center -->
+      <rect x="338.5" y="132" width="12" height="36" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <rect x="149.5" y="132" width="12" height="36" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <text x="344.5" y="125" text-anchor="middle" class="dim">strap slot</text>
+      <text x="155.5" y="125" text-anchor="middle" class="dim">strap slot</text>
+
+      <!-- flanges (extend ±Y beyond saddle footprint; width 16 along X, extend 12 in Y from OD=15.225 to 27.225) -->
+      <!-- flange along X: 16 -> 48 px, centered x=250 -> 226..274 -->
+      <!-- +Y flange Y range (image): 196..232 (36 px = 12 mm) -->
+      <rect x="226" y="196" width="48" height="36" class="plastic-light"/>
+      <rect x="226" y="68"  width="48" height="36" class="plastic-light"/>
+      <!-- bolt holes + hex nut pockets -->
+      <polygon points="240,206 260,206 270,214 260,222 240,222 230,214" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <circle cx="250" cy="214" r="8.1" class="hole"/>
+      <polygon points="240,78  260,78  270,86  260,94  240,94  230,86"  fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <circle cx="250" cy="86" r="8.1" class="hole"/>
+
+      <!-- axes -->
+      <g class="axis">
+        <line x1="40" y1="260" x2="100" y2="260"/>
+        <line x1="40" y1="260" x2="40"  y2="220"/>
+      </g>
+      <text x="104" y="263" class="dim">X (tube axis)</text>
+      <text x="32"  y="218" class="dim">Y</text>
+
+      <text x="250" y="22"  text-anchor="middle" class="label">UPPER HALF — TOP</text>
+      <text x="250" y="290" text-anchor="middle" class="dim">pad 59.5 × 44.1 · strap 4 × 12 · flange 16 × 12</text>
+    </svg>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- SIDE VIEW — upper half (looking along Y)                       -->
+  <!-- ============================================================= -->
+  <div class="card">
+    <h2>Upper half — side view (along Y)</h2>
+    <p class="sub">Tube axis horizontal. Shows pad on top of arch.</p>
+    <svg viewBox="0 0 500 260">
+      <rect x="0" y="220" width="500" height="40" fill="url(#hatchBed)"/>
+      <line x1="0" y1="220" x2="500" y2="220" stroke="#4a5366"/>
+
+      <!-- arch side profile: rectangle saddle_length x R_OUT (55 x 15.225) -->
+      <!-- 55 -> 165 px; R_OUT -> 45.7 px; center x=250, bottom=220 -->
+      <rect x="167.5" y="174.3" width="165" height="45.7" class="plastic-stroke"/>
+      <!-- flanges along X: at ±SADDLE_LENGTH/2, but flange width is 16 centered at x=0, so flange is in middle. Hmm actually flange is 16 wide along X centered at x=0. In side view (looking -Y), flange is visible overlapping the arch. -->
+      <rect x="226" y="188" width="48" height="24" class="plastic-light" opacity="0.85"/>
+      <text x="250" y="204" text-anchor="middle" class="dim">flange (behind)</text>
+
+      <!-- pad on top: 59.5 x 5 in this view -->
+      <rect x="160.75" y="159.3" width="178.5" height="15" class="plastic-light"/>
+      <!-- pocket top -->
+      <rect x="172.75" y="159.3" width="154.5" height="6" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+
+      <!-- dimension: SADDLE_LENGTH -->
+      <line x1="167.5" y1="236" x2="332.5" y2="236" stroke="var(--mute)"/>
+      <line x1="167.5" y1="232" x2="167.5" y2="240" stroke="var(--mute)"/>
+      <line x1="332.5" y1="232" x2="332.5" y2="240" stroke="var(--mute)"/>
+      <text x="250" y="250" text-anchor="middle" class="dim">55.0 (tube axis)</text>
+
+      <!-- dimension: height -->
+      <line x1="360" y1="159.3" x2="360" y2="220" stroke="var(--mute)"/>
+      <line x1="356" y1="159.3" x2="364" y2="159.3" stroke="var(--mute)"/>
+      <line x1="356" y1="220"   x2="364" y2="220"   stroke="var(--mute)"/>
+      <text x="366" y="192" class="dim">20.2</text>
+
+      <text x="250" y="22" text-anchor="middle" class="label">UPPER HALF — SIDE</text>
+    </svg>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- PRINT FAILURE DIAGRAM                                          -->
+  <!-- ============================================================= -->
+  <div class="card wide">
+    <h2>Why it printed in midair</h2>
+    <p class="sub">Layer-by-layer view of the upper half in its current print orientation.</p>
+    <svg viewBox="0 0 900 260">
+      <rect x="0" y="220" width="900" height="40" fill="url(#hatchBed)"/>
+      <line x1="0" y1="220" x2="900" y2="220" stroke="#4a5366"/>
+
+      <!-- scale: same front view scaled up, centered x=220 -->
+      <g transform="translate(-30,30)">
+        <!-- midair region -->
+        <path d="
+          M 184 144 L 316 144
+          L 316 190
+          L 295.7 190
+          A 45.7 45.7 0 0 0 250 144.3
+          A 45.7 45.7 0 0 0 204.3 190
+          L 184 190 Z" class="midair-hatch"/>
+        <!-- arch -->
+        <path d="
+          M 204.3 190
+          A 45.7 45.7 0 0 1 295.7 190
+          L 279.2 190
+          A 29.2 29.2 0 0 0 220.8 190
+          Z" class="plastic-stroke"/>
+        <!-- flanges -->
+        <rect x="295.7" y="166" width="36" height="24" class="plastic-light"/>
+        <rect x="168.3" y="166" width="36" height="24" class="plastic-light"/>
+        <!-- pad -->
+        <rect x="184" y="129" width="132" height="15" class="plastic-light"/>
+      </g>
+
+      <!-- annotations -->
+      <g transform="translate(440,40)">
+        <text x="0" y="0"  class="label">Layer 1 – 40  (z = 0 … 13 mm)</text>
+        <text x="0" y="18" class="dim">Walls and flanges print fine. Bore closes as an arch,</text>
+        <text x="0" y="32" class="dim">inner surface overhangs inward — borderline steep but printable.</text>
+
+        <text x="0" y="64" class="label">Layer 41 – 75  (z = 13 … 15.2 mm)</text>
+        <text x="0" y="82" class="callout">Arch narrows to a point; inside surface becomes ~horizontal.</text>
+        <text x="0" y="96" class="dim">Slicer must bridge the closing bore. Usually OK, small span.</text>
+
+        <text x="0" y="128" class="label">Layer 76+  (z &gt; 15.2 mm) — the pad</text>
+        <text x="0" y="146" class="callout">⚠ Pad starts here: 59.5 × 44.1 mm flat platform.</text>
+        <text x="0" y="160" class="callout">The arch has tapered to a thin strip at center line,</text>
+        <text x="0" y="174" class="callout">so most of the pad underside is printing over air.</text>
+        <text x="0" y="194" class="ok">Fix A: enable supports under the pad (tree or normal).</text>
+        <text x="0" y="208" class="ok">Fix B: re-orient — print pad-face-down on the bed.</text>
+        <text x="0" y="222" class="ok">Fix C: add gussets from pad edges down to the arch wall.</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- V3 — Rectangular block design                                  -->
+  <!-- ============================================================= -->
+  <div class="card wide" id="v3" style="border-color:#2c5d4a">
+    <h2 style="color:var(--accent)">v3 — Rectangular block (recommended)</h2>
+    <p class="sub">Two bricks with a half-cylinder scooped out of the split face. Prints flat-side down, no supports, no overhangs.</p>
+  </div>
+
+  <!-- v3 front section (assembled) -->
+  <div class="card wide">
+    <h2>v3 — Assembled front section</h2>
+    <p class="sub">Both halves clamped around the tube, M5 bolts through Z. Block 55 × 44 × 30 mm.</p>
+    <!-- scale 1mm = 4 px. Block 44w x 30h -> 176 x 120. Center at (450, 150). -->
+    <svg viewBox="0 0 900 300">
+      <!-- UPPER half (model z=0 .. 15 = outer face up in assembled use) -->
+      <!-- assembled: upper occupies y 90..210 (top 120..210 ??). Let's place: upper from z_view=30 to 150, lower from 150 to 270. Bore centered at 150. -->
+      <!-- Actually block assembled: total height 30mm = 120 px. Split at middle. Center y=150. Top y=90, bottom y=210. -->
+
+      <!-- Upper half: from y=90 to y=150 (outer face at top) -->
+      <rect x="362" y="90" width="176" height="60" class="plastic-stroke"/>
+      <!-- bore half-circle (upper half of bore, open downward in upper block) -->
+      <path d="M 411.1 150 A 38.9 38.9 0 0 1 488.9 150 Z" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <!-- sensor pocket on top face of upper: 44.1 wide, 2 deep -->
+      <rect x="361.8" y="90" width="144.4" height="8" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <text x="450" y="85" text-anchor="middle" class="label">WT901 pocket (51.5 × 36.1 × 2)</text>
+      <!-- nut pocket on top face (upper) at ±16mm = ±64px from center -->
+      <polygon points="380,90 396,90 404,98 396,106 380,106 372,98" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <polygon points="504,90 520,90 528,98 520,106 504,106 496,98" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+
+      <!-- Lower half: y=150 to y=210 -->
+      <rect x="362" y="150" width="176" height="60" class="plastic-stroke"/>
+      <!-- bore lower half (open upward in lower block) -->
+      <path d="M 411.1 150 A 38.9 38.9 0 0 0 488.9 150 Z" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+
+      <!-- tube -->
+      <circle cx="450" cy="150" r="38.1" class="tube" opacity="0.85"/>
+      <text x="450" y="154" text-anchor="middle" class="dim" fill="#e6e8ee">tube Ø19.05</text>
+
+      <!-- M5 bolts -->
+      <g stroke="#6b7788">
+        <rect x="386" y="104" width="10" height="96" fill="#cfd7e4"/>
+        <polygon points="382,200 400,200 398,212 384,212" fill="#2a2f3a"/>
+        <rect x="504" y="104" width="10" height="96" fill="#cfd7e4"/>
+        <polygon points="500,200 518,200 516,212 502,212" fill="#2a2f3a"/>
+      </g>
+
+      <!-- dim lines -->
+      <line x1="362" y1="240" x2="538" y2="240" stroke="var(--mute)"/>
+      <line x1="362" y1="236" x2="362" y2="244" stroke="var(--mute)"/>
+      <line x1="538" y1="236" x2="538" y2="244" stroke="var(--mute)"/>
+      <text x="450" y="254" text-anchor="middle" class="dim">44.0 block width</text>
+
+      <line x1="560" y1="90" x2="560" y2="210" stroke="var(--mute)"/>
+      <line x1="556" y1="90" x2="564" y2="90"  stroke="var(--mute)"/>
+      <line x1="556" y1="210" x2="564" y2="210" stroke="var(--mute)"/>
+      <text x="568" y="154" class="dim">30.0</text>
+
+      <!-- callouts -->
+      <text x="600" y="110" class="ok">✓ flat top face = easy sensor mount</text>
+      <text x="600" y="128" class="ok">✓ two M5 bolts clamp directly</text>
+      <text x="600" y="146" class="ok">✓ nut captive in upper outer face</text>
+      <text x="600" y="164" class="ok">✓ full split face = stiff joint</text>
+      <text x="600" y="192" class="label">Assembled dims: 55 × 44 × 30 mm</text>
+      <text x="600" y="208" class="dim">(L along tube × W across × H total)</text>
+
+      <text x="450" y="20" text-anchor="middle" class="label">v3 ASSEMBLED — FRONT SECTION</text>
+    </svg>
+  </div>
+
+  <!-- v3 printability -->
+  <div class="card">
+    <h2>v3 — Print orientation (either half)</h2>
+    <p class="sub">Outer face on bed, split face UP. Same orientation for both halves.</p>
+    <svg viewBox="0 0 500 260">
+      <rect x="0" y="220" width="500" height="40" fill="url(#hatchBed)"/>
+      <line x1="0" y1="220" x2="500" y2="220" stroke="#4a5366"/>
+
+      <!-- half block: 44 wide x 15 tall = 176 x 60 px. Center x=250. Bottom on bed y=220. -->
+      <rect x="162" y="160" width="176" height="60" class="plastic-stroke"/>
+      <!-- half bore opening at TOP of block (split face): radius 9.725 = 38.9 px -->
+      <path d="M 211.1 160 A 38.9 38.9 0 0 0 288.9 160 Z" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+
+      <!-- arrow showing layer growth -->
+      <g stroke="var(--accent)" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+        <line x1="370" y1="215" x2="370" y2="165"/>
+      </g>
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 Z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+      <text x="385" y="195" class="ok">print direction</text>
+
+      <!-- callouts -->
+      <text x="60" y="180" class="ok">✓ bore widens</text>
+      <text x="60" y="194" class="ok">  upward —</text>
+      <text x="60" y="208" class="ok">  no overhangs</text>
+
+      <text x="250" y="244" text-anchor="middle" class="dim">bed contact = full 55 × 44 rectangle</text>
+      <text x="250" y="18" text-anchor="middle" class="label">v3 PRINT — FRONT VIEW</text>
+    </svg>
+  </div>
+
+  <!-- v3 top view of upper -->
+  <div class="card">
+    <h2>v3 — Upper half top view</h2>
+    <p class="sub">Sensor pocket + strap slots + bolt holes. Outer face (shown here) sits on the bed during print.</p>
+    <svg viewBox="0 0 500 300">
+      <!-- block 55 x 44 -> 220 x 176. Center at (250, 150). -->
+      <rect x="140" y="62" width="220" height="176" class="plastic-stroke"/>
+
+      <!-- sensor pocket 51.5 x 36.1 -> 206 x 144.4 -->
+      <rect x="147" y="77.8" width="206" height="144.4" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <text x="250" y="152" text-anchor="middle" class="label">sensor pocket</text>
+      <text x="250" y="167" text-anchor="middle" class="dim">51.5 × 36.1 × 2</text>
+
+      <!-- strap slots at X = ±31.75 mm (from v2 calc) = ±127 px. But block X half = 110, so slot center 127 is OUTSIDE block. Disabled in v3 by default. -->
+      <!-- Put strap slots inside block: at X = ±(block_len/2 - 5) = ±22.5 mm = ±90 px -->
+      <!-- Actually these would overlap pocket. Skip strap slots in this view with a note. -->
+
+      <!-- bolt holes at Y = ±16 mm = ±64 px from center, centered X -->
+      <!-- Hex nut pockets visible on outer face -->
+      <polygon points="232,76 268,76 286,86 268,96 232,96 214,86" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <circle cx="250" cy="86" r="10.8" class="hole"/>
+      <polygon points="232,204 268,204 286,214 268,224 232,224 214,214" fill="var(--panel)" stroke="var(--plastic-dk)"/>
+      <circle cx="250" cy="214" r="10.8" class="hole"/>
+      <text x="300" y="89" class="dim">M5 nut pocket + through-hole</text>
+      <text x="300" y="217" class="dim">M5 nut pocket + through-hole</text>
+
+      <!-- axes -->
+      <g class="axis">
+        <line x1="40" y1="270" x2="100" y2="270"/>
+        <line x1="40" y1="270" x2="40"  y2="230"/>
+      </g>
+      <text x="104" y="273" class="dim">X (tube axis)</text>
+      <text x="32"  y="228" class="dim">Y</text>
+
+      <text x="250" y="22" text-anchor="middle" class="label">v3 UPPER — TOP (outer face)</text>
+      <text x="250" y="290" text-anchor="middle" class="dim">block 55 × 44 · bolts ± 16 · pocket 51.5 × 36.1</text>
+    </svg>
+  </div>
+
+</main>
+
+<footer>
+  Source of truth: <code>make_saddle_v3.py</code> (current) and <code>make_saddle_v2.py</code> (legacy).
+  v3 params: TUBE_OD=19.05, BLOCK 55×44×30, BOLT_Y_OFFSET=16, pocket 51.5×36.1×2, M5 hardware.
+</footer>
+
+</body>
+</html>

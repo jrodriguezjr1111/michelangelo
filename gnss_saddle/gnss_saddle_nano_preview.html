@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>GNSS-derived Jetson Nano Saddle — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --tube:#101319; --tube-dk:#8b93a7;
+    --gnss:#c87aff; --bolt:#d6b35a; --bolt-dk:#8a7028;
+    --nano:#6ee7b7; --nano-dk:#2f9e74;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:220px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Jetson Nano Saddle — from GNSS dual-tube saddle</h1>
+  <p>Ø15.39 tube clamp (central GNSS hole + 4× M4 bolts) grown <strong>+X both ways</strong>
+     (50→110). The Jetson Nano is centered <strong>over the GNSS hole</strong>: its 86 mm
+     hole span runs across the tubes (rows straddle the bores), keeping Y symmetric (~101.5).
+     Source: <code>gnss_saddle/make_gnss_saddle_nano.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Block (assembled)</th><td id="s-block">—</td></tr>
+      <tr><th>Tubes</th><td id="s-tube">—</td></tr>
+      <tr><th>GNSS through-hole</th><td id="s-gnss">—</td></tr>
+      <tr><th>M4 clamp bolts</th><td id="s-bolt">—</td></tr>
+      <tr><th>Jetson Nano mounts (M3)</th><td id="s-nano">—</td></tr>
+      <tr><th>Footprint change</th><td id="s-cmp">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Tubes along X. Clamp region near −Y; Nano shelf extends to +Y. Dashed rings = counterbores.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Body</span>
+      <span><span class="sw" style="background:var(--tube);border:1px solid var(--tube-dk)"></span>Tube bore</span>
+      <span><span class="sw" style="background:var(--gnss)"></span>GNSS</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M4 clamp</span>
+      <span><span class="sw" style="background:var(--nano)"></span>Nano M3</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 470 600"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (Y × Z)</h2>
+    <p class="sub">Symmetric half profile. Tube scoops, central GNSS + M4; Nano holes straddle the bores.</p>
+    <svg id="sec-svg" viewBox="0 0 700 200"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print outer face on bed, split face UP — no supports. Two identical halves clamp
+  the tubes; the Jetson Nano bolts to the +Y shelf of the top half.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_gnss_saddle_nano.py
+// =====================================================================
+const TUBE_OD = 15.39, TUBE_CENTER_SEP = 60.17, CLEARANCE = 0.4;
+const GNSS_HOLE_D = 30.0;
+const BLOCK_LEN = 110.0, BLOCK_HT = 28.0;
+const BOLT_X_OFFSET = 18.0, BOLT_Y_OFFSET = 18.0;
+const SCREW_CLEAR_D = 4.4, SCREW_HEAD_D = 8.0, SCREW_HEAD_DEPTH = 4.5;
+const NANO_PAT_X = 58.25, NANO_PAT_Y = 86.14, M3_CLEAR_D = 3.4;
+const EDGE_Y = 6.0;
+
+const HALF_HT = BLOCK_HT / 2;
+const R_IN = TUBE_OD / 2 + CLEARANCE / 2;
+const TUBE_Y = TUBE_CENTER_SEP / 2;
+const GNSS_R = GNSS_HOLE_D / 2;
+
+const NANO_Y_CENTER = 0.0;
+const NANO_ROW = NANO_PAT_Y / 2;
+const NANO_Y_INNER = NANO_ROW, NANO_Y_OUTER = NANO_ROW;  // symmetric rows at ±NANO_ROW
+const Y_HALF = NANO_ROW + M3_CLEAR_D / 2 + EDGE_Y;
+const Y_POS = Y_HALF, Y_NEG = -Y_HALF;
+const BLOCK_WID = 2 * Y_HALF;
+const BLOCK_Y_MID = 0.0;
+
+const ORIG_LEN = 50.0, ORIG_WID = 90.0;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text){
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+function rectPattern(svg, X, Y, patX, patY, ycen, holeR, headR, col, colDk){
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+    const hx = sx*patX/2, hy = ycen + sy*patY/2;
+    if (headR) el(svg, 'circle', { cx:X(hx), cy:Y(hy), r:headR,
+      fill:'none', stroke:col, 'stroke-width':0.8, 'stroke-dasharray':'2 2' });
+    el(svg, 'circle', { cx:X(hx), cy:Y(hy), r:holeR,
+      fill:'#101319', stroke:colDk, 'stroke-width':1 });
+  }
+  el(svg, 'rect', { x:X(-patX/2), y:Y(ycen+patY/2), width:patX, height:patY,
+    fill:'none', stroke:col, 'stroke-width':0.5, 'stroke-dasharray':'4 3', opacity:0.5 });
+}
+
+// =====================================================================
+// Top view (X × Y) — asymmetric block centered on BLOCK_Y_MID
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 470, VB_H = 600, margin = 36;
+  const s = Math.min((VB_W - 2*margin)/BLOCK_LEN, (VB_H - 2*margin)/BLOCK_WID);
+  const cx = VB_W/2, cy = VB_H/2;
+  const X = x => cx + x*s;
+  const Y = y => cy - (y - BLOCK_Y_MID)*s;
+  const px = v => v*s;
+
+  // Body
+  el(svg, 'rect', { x:X(-BLOCK_LEN/2), y:Y(Y_POS),
+    width:px(BLOCK_LEN), height:px(BLOCK_WID),
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5, rx:3 });
+
+  // Tube bores (full-length along X)
+  for (const sy of [-1,1]) {
+    el(svg, 'rect', { x:X(-BLOCK_LEN/2-0.1), y:Y(sy*TUBE_Y + R_IN),
+      width:px(BLOCK_LEN+0.2), height:px(2*R_IN),
+      fill:'var(--tube)', stroke:'var(--tube-dk)', 'stroke-width':0.8, 'stroke-dasharray':'3 3' });
+    el(svg, 'text', { x:cx, y:Y(sy*TUBE_Y)+3, 'text-anchor':'middle', class:'dim' }, `Ø${(2*R_IN).toFixed(1)}`);
+  }
+
+  // GNSS hole (center)
+  el(svg, 'circle', { cx:X(0), cy:Y(0), r:px(GNSS_R), fill:'#101319', stroke:'var(--gnss)', 'stroke-width':1.5 });
+  el(svg, 'text', { x:X(0), y:Y(0)+3, 'text-anchor':'middle', fill:'var(--gnss)', 'font-size':10, 'font-weight':700 }, `Ø${GNSS_HOLE_D}`);
+
+  // M4 clamp bolts
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+    el(svg, 'circle', { cx:X(sx*BOLT_X_OFFSET), cy:Y(sy*BOLT_Y_OFFSET), r:px(SCREW_HEAD_D/2),
+      fill:'none', stroke:'var(--bolt)', 'stroke-width':0.8, 'stroke-dasharray':'2 2', opacity:0.6 });
+    el(svg, 'circle', { cx:X(sx*BOLT_X_OFFSET), cy:Y(sy*BOLT_Y_OFFSET), r:px(SCREW_CLEAR_D/2),
+      fill:'#101319', stroke:'var(--bolt-dk)', 'stroke-width':1 });
+  }
+
+  // Nano M3 pattern on +Y shelf
+  rectPattern(svg, X, Y, NANO_PAT_X, NANO_PAT_Y, NANO_Y_CENTER,
+    px(M3_CLEAR_D/2), 0, 'var(--nano)', 'var(--nano-dk)');
+  el(svg, 'text', { x:X(0), y:Y(GNSS_R + 6), 'text-anchor':'middle', class:'dim', fill:'var(--nano)' },
+    `Jetson Nano ${NANO_PAT_X}×${NANO_PAT_Y}`);
+
+  // Dims
+  const xd = X(-BLOCK_LEN/2) - 16;
+  el(svg, 'line', { x1:xd, y1:Y(Y_POS), x2:xd, y2:Y(Y_NEG), stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:xd-4, y:cy+4, 'text-anchor':'end', class:'dim' }, `${BLOCK_WID.toFixed(1)} (Y)`);
+  const yd = Y(Y_NEG) + 16;
+  el(svg, 'line', { x1:X(-BLOCK_LEN/2), y1:yd, x2:X(BLOCK_LEN/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${BLOCK_LEN} mm (X)`);
+})();
+
+// =====================================================================
+// Cross-section (Y × Z) — asymmetric half profile
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 700, VB_H = 200, margin = 40;
+  const s = Math.min((VB_W - 2*margin)/BLOCK_WID, (VB_H - 2*margin - 20)/HALF_HT);
+  const cx = VB_W/2, floorY = VB_H - margin - 10;
+  const Y = y => cx + (y - BLOCK_Y_MID)*s;
+  const Z = z => floorY - z*s;
+
+  // Half profile
+  el(svg, 'rect', { x:Y(Y_NEG), y:Z(HALF_HT), width:BLOCK_WID*s, height:HALF_HT*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5 });
+
+  // Tube scoops
+  for (const sy of [-1,1]) {
+    el(svg, 'path', {
+      d: `M ${Y(sy*TUBE_Y - R_IN)} ${Z(HALF_HT)} `
+       + `A ${R_IN*s} ${R_IN*s} 0 0 0 ${Y(sy*TUBE_Y + R_IN)} ${Z(HALF_HT)} Z`,
+      fill:'#101319', stroke:'var(--tube-dk)', 'stroke-width':1 });
+  }
+
+  // GNSS hole (center)
+  el(svg, 'rect', { x:Y(0)-GNSS_R*s, y:Z(HALF_HT), width:GNSS_R*2*s, height:HALF_HT*s,
+    fill:'#101319', stroke:'var(--gnss)', 'stroke-width':1 });
+
+  // M4 holes + outer-face c'bore
+  for (const sy of [-1,1]) {
+    const yv = sy*BOLT_Y_OFFSET;
+    el(svg, 'rect', { x:Y(yv)-SCREW_CLEAR_D/2*s, y:Z(HALF_HT), width:SCREW_CLEAR_D*s, height:HALF_HT*s,
+      fill:'#101319', stroke:'var(--bolt)', 'stroke-width':1 });
+    el(svg, 'rect', { x:Y(yv)-SCREW_HEAD_D/2*s, y:Z(SCREW_HEAD_DEPTH), width:SCREW_HEAD_D*s, height:SCREW_HEAD_DEPTH*s,
+      fill:'#1a1c22', stroke:'var(--bolt)', 'stroke-width':1 });
+  }
+
+  // Nano rows (projected) straddling the bores
+  for (const yv of [NANO_Y_CENTER - NANO_ROW, NANO_Y_CENTER + NANO_ROW]) {
+    el(svg, 'rect', { x:Y(yv)-M3_CLEAR_D/2*s, y:Z(HALF_HT), width:M3_CLEAR_D*s, height:HALF_HT*s,
+      fill:'#101319', stroke:'var(--nano)', 'stroke-width':1 });
+  }
+
+  // Dims
+  const yd = Z(0) + 22;
+  el(svg, 'line', { x1:Y(Y_NEG), y1:yd, x2:Y(Y_POS), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${BLOCK_WID.toFixed(1)} mm (Y, asymmetric)`);
+  el(svg, 'text', { x:Y(Y_POS)-4, y:Z(HALF_HT)-3, 'text-anchor':'end', class:'dim' }, `half ${HALF_HT}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-block').textContent = `${BLOCK_LEN} × ${BLOCK_WID.toFixed(2)} × ${BLOCK_HT} mm (Y center ${BLOCK_Y_MID.toFixed(2)})`;
+document.getElementById('s-tube').textContent  = `2× Ø${TUBE_OD} at Y = ±${TUBE_Y.toFixed(2)} (bore Ø${(2*R_IN).toFixed(2)}, ${CLEARANCE} clr)`;
+document.getElementById('s-gnss').textContent  = `Ø${GNSS_HOLE_D} centered (kept from GNSS saddle)`;
+document.getElementById('s-bolt').textContent  = `4× M4 at (±${BOLT_X_OFFSET}, ±${BOLT_Y_OFFSET}) — Ø${SCREW_CLEAR_D} clr, Ø${SCREW_HEAD_D}×${SCREW_HEAD_DEPTH} c'bore`;
+document.getElementById('s-nano').textContent  = `4× Ø${M3_CLEAR_D} at (±${(NANO_PAT_X/2).toFixed(2)}, ±${NANO_ROW.toFixed(2)}) — centered over the GNSS hole (rows straddle the bores)`;
+document.getElementById('s-cmp').textContent   = `${BLOCK_LEN}×${BLOCK_WID.toFixed(1)} vs original ${ORIG_LEN}×${ORIG_WID} — +X both ways; Y symmetric, Nano over GNSS`;
+
+const nanoBore = (NANO_ROW - M3_CLEAR_D/2) - (TUBE_Y + R_IN);
+const nanoEdgeX = BLOCK_LEN/2 - NANO_PAT_X/2 - M3_CLEAR_D/2;
+const nanoEdgeY = Y_HALF - NANO_ROW - M3_CLEAR_D/2;
+const boreWall = Y_HALF - (TUBE_Y + R_IN);
+const m4Bore = (TUBE_Y - R_IN) - (BOLT_Y_OFFSET + SCREW_CLEAR_D/2);
+const m4Gnss = Math.hypot(BOLT_X_OFFSET, BOLT_Y_OFFSET) - GNSS_R - SCREW_CLEAR_D/2;
+const coversGnss = (NANO_PAT_Y/2 > GNSS_R) && (NANO_PAT_X/2 > GNSS_R);
+
+const checks = [
+  { ok: nanoBore >= 0.5, msg: `Nano row → tube bore (straddle): ${nanoBore.toFixed(2)} mm` },
+  { ok: nanoEdgeX >= 0.5, msg: `Nano hole → X edge: ${nanoEdgeX.toFixed(2)} mm` },
+  { ok: nanoEdgeY >= 0.5, msg: `Nano row → ±Y edge: ${nanoEdgeY.toFixed(2)} mm` },
+  { ok: boreWall >= 2.0, msg: `Tube bore → ±Y edge wall: ${boreWall.toFixed(2)} mm` },
+  { ok: coversGnss, msg: `Nano footprint spans the Ø${GNSS_HOLE_D} cutout (sits over it)` },
+  { ok: m4Bore >= 1.0, msg: `M4 bolt → tube bore: ${m4Bore.toFixed(2)} mm` },
+  { ok: m4Gnss >= 1.0, msg: `M4 bolt → GNSS hole: ${m4Gnss.toFixed(2)} mm` },
+  { ok: HALF_HT - R_IN >= 2.0, msg: `Half-height clears bore: ${(HALF_HT - R_IN).toFixed(2)} mm` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

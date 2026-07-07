@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CyberWing — Orin platform preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --plastic: #f2b84b; --plastic-dk: #b07a1c;
+    --pcb-orin: #4a6a9a; --rail: #c87aff; --bolt: #d6b35a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr; }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.bom { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.bom th, table.bom td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                               text-align: left; vertical-align: top; }
+  table.bom th { color: var(--mute); font-weight: 600; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CyberWing — Jetson Orin platform on SlimRig railblocks</h1>
+  <p>Rendered from the same parameters as
+     <code>orin_platform/make_platform.py</code>. Two SlimRig 15 mm railblocks
+     under the −X half (purple), Jetson Orin Nano on the +X end (blue).</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>Specifications</h2>
+    <table class="bom">
+      <tr><th>Plate</th><td id="spec-plate">—</td></tr>
+      <tr><th>Jetson Orin</th><td id="spec-orin">—</td></tr>
+      <tr><th>Railblocks</th><td id="spec-rail">—</td></tr>
+      <tr><th>Counterbores</th><td id="spec-csk">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (1:1 scale relative to viewport)</h2>
+    <p class="sub">PCB outline shown for visual fit; not part of the STL.
+       1/4" counterbores drawn as solid purple disks (TOP-face recess),
+       M3 counterbores as dashed amber rings (BOTTOM-face recess).</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>PLA plate</span>
+      <span><span class="sw" style="background:var(--pcb-orin);opacity:0.5"></span>Jetson Orin Nano dev kit</span>
+      <span><span class="sw" style="background:var(--rail)"></span>1/4" railblock screw (top counterbore)</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 Orin screw (bottom counterbore)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 880 420"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Fit-check assertions</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL source of truth: <code>orin_platform/make_platform.py</code>. Both railblocks live in the −X half so the 1/4" pattern (54.52 mm wide) can't collide with the Orin's 57.59 mm M3 pattern.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_platform.py
+// =====================================================================
+const INCH = 25.4;
+const PLATE_L = 8.75 * INCH;     // X
+const PLATE_W = 4.25 * INCH;     // Y
+const PLATE_T = 4.0;
+
+// Orin rotated 90°: long axis along platform Y, short axis along platform X.
+const ORIN_ROTATED = true;
+const _ORIN_PCB_LONG  = 100.0, _ORIN_PCB_SHORT = 78.79;
+const _ORIN_PAT_LONG  = 92.12, _ORIN_PAT_SHORT = 57.59;
+const ORIN_PCB = {
+  X: ORIN_ROTATED ? _ORIN_PCB_SHORT : _ORIN_PCB_LONG,
+  Y: ORIN_ROTATED ? _ORIN_PCB_LONG  : _ORIN_PCB_SHORT,
+};
+const ORIN_PAT = {
+  X: ORIN_ROTATED ? _ORIN_PAT_SHORT : _ORIN_PAT_LONG,
+  Y: ORIN_ROTATED ? _ORIN_PAT_LONG  : _ORIN_PAT_SHORT,
+};
+const M3_CLEAR_D   = 3.4;
+const M3_CSK_D     = 6.0;
+const M3_CSK_DEPTH = 2.5;
+
+const ORIN_END_MARGIN = 5.0;
+
+const RAIL_PAT_L = 36.33;        // X (lengthwise)
+const RAIL_PAT_W = 54.52;        // Y (widthwise)
+const QUARTER_CLEAR_D    = 6.8;
+const QUARTER_CSK_D      = 11.0;
+const QUARTER_CSK_DEPTH  = 3.0;
+
+const RAIL_CENTER_X  = 0.0;
+const RAIL_CENTER_Y  = 0.0;
+
+const MIN_HOLE_EDGE_CLR = 5.0;
+const MIN_HOLE_HOLE_CLR = 3.0;
+
+// =====================================================================
+// Derived
+// =====================================================================
+const orinCx = +PLATE_L / 2 - ORIN_END_MARGIN - ORIN_PCB.X / 2;
+const orinCy = 0.0;
+
+const orinHoles = [];
+for (const sx of [-1, 1]) for (const sy of [-1, 1])
+  orinHoles.push({
+    x: orinCx + sx * ORIN_PAT.X / 2,
+    y: orinCy + sy * ORIN_PAT.Y / 2,
+    r: M3_CLEAR_D / 2, csk: M3_CSK_D / 2, tag: "Orin M3"
+  });
+
+const railHoles = [];
+for (const sx of [-1, 1]) for (const sy of [-1, 1])
+  railHoles.push({
+    x: RAIL_CENTER_X + sx * RAIL_PAT_L / 2,
+    y: RAIL_CENTER_Y + sy * RAIL_PAT_W / 2,
+    r: QUARTER_CLEAR_D / 2, csk: QUARTER_CSK_D / 2,
+    tag: "1/4\" rail"
+  });
+
+const allHoles = [...orinHoles, ...railHoles];
+
+// =====================================================================
+// SVG helpers
+// =====================================================================
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, name, attrs, text) {
+  const e = document.createElementNS(ns, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// TOP VIEW
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 880, VB_H = 420;
+  const scale = Math.min((VB_W - 80) / PLATE_L, (VB_H - 100) / PLATE_W);
+  const ox = VB_W / 2, oy = VB_H / 2;
+  const X = x => ox + x * scale;
+  const Y = y => oy - y * scale;     // flip Y: +Y up
+
+  // Plate
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+    width: PLATE_L * scale, height: PLATE_W * scale,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5,
+    rx: 2
+  });
+
+  // Orin PCB outline (reference, rotated)
+  el(svg, 'rect', {
+    x: X(orinCx - ORIN_PCB.X/2), y: Y(orinCy + ORIN_PCB.Y/2),
+    width: ORIN_PCB.X * scale, height: ORIN_PCB.Y * scale,
+    fill: '#4a6a9a', opacity: 0.32,
+    stroke: '#4a6a9a', 'stroke-width': 1
+  });
+  el(svg, 'text', {
+    x: X(orinCx), y: Y(orinCy) + 4, 'text-anchor': 'middle',
+    fill: '#cfdcef', 'font-size': 12, 'font-weight': 600,
+    transform: `rotate(-90 ${X(orinCx)} ${Y(orinCy) + 4})`
+  }, 'Jetson Orin Nano (rotated 90°)');
+
+  // Railblock footprint (single, centered)
+  el(svg, 'rect', {
+    x: X(RAIL_CENTER_X - RAIL_PAT_L/2 - 6),
+    y: Y(RAIL_CENTER_Y + RAIL_PAT_W/2 + 6),
+    width: (RAIL_PAT_L + 12) * scale, height: (RAIL_PAT_W + 12) * scale,
+    fill: '#c87aff', opacity: 0.10,
+    stroke: '#c87aff', 'stroke-width': 0.8, 'stroke-dasharray': '4 3'
+  });
+  el(svg, 'text', {
+    x: X(RAIL_CENTER_X), y: Y(RAIL_CENTER_Y - RAIL_PAT_W/2 - 6) + 14,
+    'text-anchor': 'middle',
+    fill: '#c87aff', 'font-size': 11, 'font-weight': 700
+  }, 'SlimRig railblock');
+
+  // Orin M3 holes (counterbore on BOTTOM → dashed ring)
+  for (const h of orinHoles) {
+    // Counterbore (dashed)
+    el(svg, 'circle', {
+      cx: X(h.x), cy: Y(h.y), r: h.csk * scale,
+      fill: 'none', stroke: '#d6b35a', 'stroke-width': 1,
+      'stroke-dasharray': '2 2', opacity: 0.6
+    });
+    // Through hole
+    el(svg, 'circle', {
+      cx: X(h.x), cy: Y(h.y), r: h.r * scale,
+      fill: '#101319', stroke: '#d6b35a', 'stroke-width': 1
+    });
+  }
+
+  // Railblock 1/4" holes (counterbore on TOP → solid disk)
+  for (const h of railHoles) {
+    el(svg, 'circle', {
+      cx: X(h.x), cy: Y(h.y), r: h.csk * scale,
+      fill: '#c87aff', opacity: 0.35
+    });
+    el(svg, 'circle', {
+      cx: X(h.x), cy: Y(h.y), r: h.r * scale,
+      fill: '#101319', stroke: '#c87aff', 'stroke-width': 1.2
+    });
+  }
+
+  // Plate outline on top of pattern
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+    width: PLATE_L * scale, height: PLATE_W * scale,
+    fill: 'none', stroke: '#b07a1c', 'stroke-width': 1.5
+  });
+
+  // Dimensions
+  // X dim along bottom
+  const yd = Y(-PLATE_W/2) + 28;
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: yd, x2: X(PLATE_L/2), y2: yd, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: yd-4, x2: X(-PLATE_L/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X( PLATE_L/2), y1: yd-4, x2: X( PLATE_L/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'text', { x: X(0), y: yd+14, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L.toFixed(2)} mm  (8.75")`);
+
+  // Y dim on right
+  const xd = X(PLATE_L/2) + 24;
+  el(svg, 'line', { x1: xd, y1: Y(-PLATE_W/2), x2: xd, y2: Y(PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: Y(-PLATE_W/2), x2: xd+4, y2: Y(-PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: Y( PLATE_W/2), x2: xd+4, y2: Y( PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'text', {
+    x: xd+8, y: Y(0)+4, class: 'dim',
+    transform: `rotate(-90 ${xd+8} ${Y(0)+4})`
+  }, `${PLATE_W.toFixed(2)} mm  (4.25")`);
+
+  // Origin marker
+  el(svg, 'circle', { cx: X(0), cy: Y(0), r: 2, fill: '#fff' });
+})();
+
+// =====================================================================
+// Specs
+// =====================================================================
+document.getElementById('spec-plate').textContent =
+  `${PLATE_L.toFixed(2)} × ${PLATE_W.toFixed(2)} × ${PLATE_T} mm  (8.75 × 4.25 in)`;
+document.getElementById('spec-orin').textContent =
+  `rotated 90° — PCB ${ORIN_PCB.X} (X) × ${ORIN_PCB.Y} (Y), holes ${ORIN_PAT.X} × ${ORIN_PAT.Y} M3, center X = ${orinCx.toFixed(2)} mm`;
+document.getElementById('spec-rail').textContent =
+  `1× SlimRig block centered at origin; pattern ${RAIL_PAT_L} (X) × ${RAIL_PAT_W} (Y) mm (1/4" Ø${QUARTER_CLEAR_D} clearance)`;
+document.getElementById('spec-csk').textContent =
+  `M3: BOTTOM Ø${M3_CSK_D}×${M3_CSK_DEPTH} · 1/4": TOP Ø${QUARTER_CSK_D}×${QUARTER_CSK_DEPTH}`;
+
+// =====================================================================
+// Fit checks
+// =====================================================================
+const checks = [];
+function check(ok, msg) { checks.push({ ok, msg }); }
+
+// Edge clearances
+let minEdge = Infinity, minEdgeTag = '';
+for (const h of allHoles) {
+  const ec = Math.min(PLATE_L/2 - Math.abs(h.x), PLATE_W/2 - Math.abs(h.y)) - h.r;
+  if (ec < minEdge) { minEdge = ec; minEdgeTag = h.tag; }
+}
+check(minEdge >= MIN_HOLE_EDGE_CLR,
+  `Min hole-to-edge clearance: ${minEdge.toFixed(2)} mm (${minEdgeTag}) — required ≥ ${MIN_HOLE_EDGE_CLR}`);
+
+// Hole-hole
+let minPair = Infinity, minPairTag = '';
+for (let i = 0; i < allHoles.length; i++)
+  for (let j = i+1; j < allHoles.length; j++) {
+    const a = allHoles[i], b = allHoles[j];
+    const d = Math.hypot(a.x - b.x, a.y - b.y) - (a.r + b.r);
+    if (d < minPair) { minPair = d; minPairTag = `${a.tag} ↔ ${b.tag}`; }
+  }
+check(minPair >= MIN_HOLE_HOLE_CLR,
+  `Min hole-to-hole clearance: ${minPair.toFixed(2)} mm (${minPairTag}) — required ≥ ${MIN_HOLE_HOLE_CLR}`);
+
+// Orin PCB fully inside plate
+check(orinCx + ORIN_PCB.X/2 <= PLATE_L/2,
+  `Orin PCB +X edge inside plate: ${(PLATE_L/2 - (orinCx + ORIN_PCB.X/2)).toFixed(2)} mm spare`);
+check(ORIN_PCB.Y/2 <= PLATE_W/2,
+  `Orin PCB Y inside plate: ${(PLATE_W/2 - ORIN_PCB.Y/2).toFixed(2)} mm spare each side`);
+
+// Counterbore depths sane
+check(M3_CSK_DEPTH < PLATE_T - 0.4,
+  `M3 counterbore depth ${M3_CSK_DEPTH} mm < plate ${PLATE_T} mm`);
+check(QUARTER_CSK_DEPTH < PLATE_T - 0.4,
+  `1/4" counterbore depth ${QUARTER_CSK_DEPTH} mm < plate ${PLATE_T} mm`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

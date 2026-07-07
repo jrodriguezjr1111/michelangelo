@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>SmallRig Riser — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --hole: #d6b35a; --hole-dk: #8a7028;
+    --csk:  #b58df0; --csk-dk:  #6a4c9a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36; text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 220px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SmallRig Riser — 64.23 × 15.30 × 13 mm</h1>
+  <p>Rectangular standoff that bolts up underneath a SmallRig component. Two inner Ø4.90
+     through-holes and two outer Ø6.20 through-holes — the <em>outer</em> holes are
+     counterbored Ø11 × 4 on the bottom for bolt heads.
+     Source: <code>smallrig_riser/make_riser.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Block</th><td id="s-block">—</td></tr>
+      <tr><th>Inner holes (×2)</th><td id="s-inner">—</td></tr>
+      <tr><th>Bolt-head counterbore</th><td id="s-csk">—</td></tr>
+      <tr><th>Outer holes (×2)</th><td id="s-outer">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (15.30 × 64.23 mm face)</h2>
+    <p class="sub">Looking down −Z. Outer holes (gold) and inner holes (gold) shown solid;
+       counterbore footprint dashed (it's on the <em>bottom</em> face, hidden from this side).</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Top face</span>
+      <span><span class="sw" style="background:var(--hole)"></span>Through hole</span>
+      <span><span class="sw" style="background:var(--csk)"></span>Csk (hidden, bottom)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 720 220"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Bottom view (counterbore face)</h2>
+    <p class="sub">The face that mounts down on the substrate. Bolt heads recess into the
+       Ø11 × 4 mm pockets here.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Bottom face</span>
+      <span><span class="sw" style="background:var(--csk)"></span>Counterbore Ø11×4</span>
+      <span><span class="sw" style="background:var(--hole)"></span>Through hole</span>
+    </div>
+    <svg id="bot-svg" viewBox="0 0 720 220"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Side cross-section (X–Z) along Y = 0</h2>
+    <p class="sub">Bottom-side counterbores under the inner holes; outer holes pass straight through.
+       Use this view to gauge wall thickness between counterbore and outer holes.</p>
+    <svg id="sec-svg" viewBox="0 0 720 240"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print floor (top face) down on the bed for cleanest hole geometry; counterbore
+  side will be the upper face during printing. PLA, 0.20 mm standard profile.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_riser.py
+// =====================================================================
+const BLOCK_L = 64.23, BLOCK_W = 15.30, BLOCK_H = 18.00;
+
+const INNER_SPACING = 17.97, INNER_D = 4.90;
+const HEAD_D = 11.00, HEAD_DEPTH = 4.00;
+
+const OUTER_SPACING = 35.72, OUTER_D = 6.20;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e); return e;
+}
+
+// =====================================================================
+// Top view (X horizontal, Y vertical) — looking down −Z
+// =====================================================================
+function drawPlanView(svgId, isBottom) {
+  const svg = document.getElementById(svgId);
+  const VB_W = 720, VB_H = 220, margin = 50;
+  const sX = (VB_W - 2 * margin) / BLOCK_L;
+  const sY = (VB_H - 2 * margin) / BLOCK_W;
+  const s = Math.min(sX, sY);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx + x * s;
+  const Y = y => cy - y * s;
+
+  // Outer block
+  el(svg, 'rect', { x: X(-BLOCK_L/2), y: Y(BLOCK_W/2),
+    width: BLOCK_L * s, height: BLOCK_W * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 2 });
+
+  // Inner holes (no counterbore)
+  for (const sx of [-1, 1]) {
+    const px = sx * INNER_SPACING / 2;
+    el(svg, 'circle', { cx: X(px), cy: Y(0), r: INNER_D / 2 * s,
+      fill: '#101319', stroke: 'var(--hole-dk)', 'stroke-width': 1 });
+  }
+
+  // Outer holes — counterbore on bottom face
+  for (const sx of [-1, 1]) {
+    const px = sx * OUTER_SPACING / 2;
+    if (isBottom) {
+      el(svg, 'circle', { cx: X(px), cy: Y(0), r: HEAD_D / 2 * s,
+        fill: 'var(--csk)', stroke: 'var(--csk-dk)', 'stroke-width': 1, opacity: 0.9 });
+    } else {
+      el(svg, 'circle', { cx: X(px), cy: Y(0), r: HEAD_D / 2 * s,
+        fill: 'none', stroke: 'var(--csk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 2', opacity: 0.7 });
+    }
+    el(svg, 'circle', { cx: X(px), cy: Y(0), r: OUTER_D / 2 * s,
+      fill: '#101319', stroke: 'var(--hole)', 'stroke-width': 1 });
+  }
+
+  // Centerline
+  el(svg, 'line', { x1: X(-BLOCK_L/2), y1: Y(0), x2: X(BLOCK_L/2), y2: Y(0),
+    stroke: 'var(--mute)', 'stroke-width': 0.4, 'stroke-dasharray': '2 4', opacity: 0.7 });
+
+  // Spacing dim — inner
+  const yi = Y(BLOCK_W/2) - 12;
+  el(svg, 'line', { x1: X(-INNER_SPACING/2), y1: yi, x2: X(INNER_SPACING/2), y2: yi,
+    stroke: 'var(--hole)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yi - 4, 'text-anchor': 'middle', class: 'dim', fill: 'var(--hole)' },
+    `inner ${INNER_SPACING}`);
+
+  // Spacing dim — outer
+  const yo = Y(-BLOCK_W/2) + 18;
+  el(svg, 'line', { x1: X(-OUTER_SPACING/2), y1: yo, x2: X(OUTER_SPACING/2), y2: yo,
+    stroke: 'var(--hole)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yo + 12, 'text-anchor': 'middle', class: 'dim', fill: 'var(--hole)' },
+    `outer ${OUTER_SPACING}`);
+
+  // Block dims
+  const yd = Y(-BLOCK_W/2) + 36;
+  el(svg, 'line', { x1: X(-BLOCK_L/2), y1: yd, x2: X(BLOCK_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${BLOCK_L} mm`);
+  const xd = X(-BLOCK_L/2) - 22;
+  el(svg, 'line', { x1: xd, y1: Y(-BLOCK_W/2), x2: xd, y2: Y(BLOCK_W/2),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: cy + 4, 'text-anchor': 'end', class: 'dim' },
+    `${BLOCK_W}`);
+}
+
+drawPlanView('top-svg', false);
+drawPlanView('bot-svg', true);
+
+// =====================================================================
+// Side cross-section (X–Z) along Y = 0
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 720, VB_H = 240, margin = 50;
+  const sX = (VB_W - 2 * margin) / BLOCK_L;
+  const sZ = (VB_H - 2 * margin - 20) / BLOCK_H;
+  const s = Math.min(sX, sZ);
+  const cx = VB_W / 2, floorY = VB_H - margin - 10;
+  const X = x => cx + x * s;
+  const Z = z => floorY - z * s;
+
+  // Outer profile
+  el(svg, 'rect', { x: X(-BLOCK_L/2), y: Z(BLOCK_H),
+    width: BLOCK_L * s, height: BLOCK_H * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5 });
+
+  // Inner holes (full thru, no csk)
+  for (const sx of [-1, 1]) {
+    const px = sx * INNER_SPACING / 2;
+    el(svg, 'rect', { x: X(px) - INNER_D/2 * s, y: Z(BLOCK_H),
+      width: INNER_D * s, height: BLOCK_H * s,
+      fill: '#101319', stroke: 'var(--hole-dk)', 'stroke-width': 1 });
+  }
+
+  // Outer holes (full thru) + counterbore on bottom (Z=0..HEAD_DEPTH)
+  for (const sx of [-1, 1]) {
+    const px = sx * OUTER_SPACING / 2;
+    el(svg, 'rect', { x: X(px) - OUTER_D/2 * s, y: Z(BLOCK_H),
+      width: OUTER_D * s, height: BLOCK_H * s,
+      fill: '#101319', stroke: 'var(--hole)', 'stroke-width': 1 });
+    el(svg, 'rect', { x: X(px) - HEAD_D/2 * s, y: Z(HEAD_DEPTH),
+      width: HEAD_D * s, height: HEAD_DEPTH * s,
+      fill: '#1a1c22', stroke: 'var(--csk)', 'stroke-width': 1 });
+  }
+
+  // Bottom face label
+  el(svg, 'text', { x: X(-BLOCK_L/2) - 6, y: Z(0) + 4, 'text-anchor': 'end', class: 'dim' },
+    `bottom (csk face)`);
+  el(svg, 'text', { x: X(-BLOCK_L/2) - 6, y: Z(BLOCK_H) + 4, 'text-anchor': 'end', class: 'dim' },
+    `top (mounts to SmallRig)`);
+
+  // Z dim
+  const xd = X(BLOCK_L/2) + 22;
+  el(svg, 'line', { x1: xd, y1: Z(0), x2: xd, y2: Z(BLOCK_H),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd + 4, y: Z(BLOCK_H/2) + 4, 'text-anchor': 'start', class: 'dim' },
+    `${BLOCK_H}`);
+
+  // X dim
+  const yd = Z(0) + 22;
+  el(svg, 'line', { x1: X(-BLOCK_L/2), y1: yd, x2: X(BLOCK_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${BLOCK_L} mm`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-block').textContent =
+  `${BLOCK_L} × ${BLOCK_W} × ${BLOCK_H} mm`;
+document.getElementById('s-inner').textContent =
+  `Ø${INNER_D} thru, spaced ${INNER_SPACING} mm (X = ±${(INNER_SPACING/2).toFixed(3)})`;
+document.getElementById('s-outer').textContent =
+  `Ø${OUTER_D} thru, spaced ${OUTER_SPACING} mm (X = ±${(OUTER_SPACING/2).toFixed(3)})`;
+document.getElementById('s-csk').textContent =
+  `Ø${HEAD_D} × ${HEAD_DEPTH} mm pocket on BOTTOM face (concentric with OUTER holes)`;
+
+const cskWall = HEAD_D/2 - OUTER_D/2;            // radial wall around outer thru
+const cskToInner = (OUTER_SPACING - INNER_SPACING) / 2 - (HEAD_D + INNER_D) / 2;
+const floorAboveCsk = BLOCK_H - HEAD_DEPTH;
+const cskToYedge = BLOCK_W/2 - HEAD_D/2;
+const cskToXedge = BLOCK_L/2 - OUTER_SPACING/2 - HEAD_D/2;
+
+const checks = [
+  { ok: cskWall >= 1.0,
+    msg: `Counterbore radial wall (around outer thru): ${cskWall.toFixed(2)} mm` },
+  { ok: cskToInner >= 1.0,
+    msg: `Counterbore ↔ inner hole gap (between Ø11 csk and Ø4.90 hole): ${cskToInner.toFixed(2)} mm` },
+  { ok: floorAboveCsk >= 2.0,
+    msg: `Material above counterbore (top floor): ${floorAboveCsk.toFixed(2)} mm` },
+  { ok: cskToYedge >= 1.0,
+    msg: `Counterbore ↔ Y edge: ${cskToYedge.toFixed(2)} mm` },
+  { ok: cskToXedge >= 1.0,
+    msg: `Counterbore ↔ X edge: ${cskToXedge.toFixed(2)} mm` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

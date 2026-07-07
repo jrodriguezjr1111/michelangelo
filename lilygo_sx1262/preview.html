@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>LILYGO SX1262 Housing — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --batt: #2ec27e; --batt-dk: #1a6f45;
+    --pcb:  #2a8f5a; --pcb-dk: #1d6b42;
+    --m2: #9ab6e6; --m2-dk: #5a7fbf;
+    --m3: #d6b35a; --m3-dk: #8a7028;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36; text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 180px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>LILYGO SX1262 Housing — I-beam with 18650 channel</h1>
+  <p>101 × 35 × 31 mm enclosure. LILYGO mounted on top, 18650 cell in the middle,
+     M3 bottom mount. Source: <code>lilygo_sx1262/make_housing.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Envelope</th><td id="s-env">—</td></tr>
+      <tr><th>Flanges</th><td id="s-fl">—</td></tr>
+      <tr><th>Web</th><td id="s-web">—</td></tr>
+      <tr><th>Battery channel</th><td id="s-batt">—</td></tr>
+      <tr><th>M2 pattern (top)</th><td id="s-m2">—</td></tr>
+      <tr><th>M3 pattern (bottom)</th><td id="s-m3">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>End view (Y–Z cross-section)</h2>
+    <p class="sub">I-beam profile: wide flanges (35 mm) with narrower central web (25 mm) holding the 18650.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Housing</span>
+      <span><span class="sw" style="background:var(--batt);opacity:0.6"></span>18650 Ø18</span>
+      <span><span class="sw" style="background:var(--m2)"></span>M2 clearance</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 csk</span>
+    </div>
+    <svg id="end-svg" viewBox="0 0 360 320"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Side view (X–Z section, long axis)</h2>
+    <p class="sub">Battery channel runs the full 101 mm length, open at both ends.</p>
+    <svg id="side-svg" viewBox="0 0 680 260"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Top view (mount face)</h2>
+    <p class="sub">4× M2 clearance holes for the LILYGO PCB (95.33 × 28.55 mm pattern).</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Top flange</span>
+      <span><span class="sw" style="background:var(--pcb);opacity:0.4"></span>LILYGO board (ghost)</span>
+      <span><span class="sw" style="background:var(--m2)"></span>M2 holes</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 680 260"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Bottom view (mount face)</h2>
+    <p class="sub">4× M3 countersunk holes for attaching the housing to a surface.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Bottom flange</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 countersunk</span>
+    </div>
+    <svg id="bot-svg" viewBox="0 0 680 260"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print as modeled (bottom flange on bed). The U-cutout opens upward — the curved floor
+  prints cleanly without supports. The 18650 cell drops in from above; the LILYGO PCB on
+  top retains it.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_housing.py
+// =====================================================================
+const LENGTH = 101.0, WIDTH = 35.0, HEIGHT = 31.0;
+const FLANGE_T = 4.0, WEB_W = 28.0;
+const WEB_H = HEIGHT - 2 * FLANGE_T;  // 23
+const BATT_D = 22.2;
+const CUTOUT_LENGTH = 75.0;
+const CUTOUT_FLOOR_Z = 4.0;
+
+const M2_PATTERN_X = 95.33, M2_PATTERN_Y = 28.55;
+const M2_CLEAR_D = 2.4;
+
+const M3_PATTERN_X = 90.0, M3_PATTERN_Y = 25.0;
+const M3_CLEAR_D = 3.4, M3_CSK_D = 6.0, M3_CSK_DEPTH = 1.8;
+
+// LILYGO PCB approximate footprint (mount pattern + ~4 mm overhang)
+const PCB_L = M2_PATTERN_X + 4;
+const PCB_W = M2_PATTERN_Y + 4;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e); return e;
+}
+
+// =====================================================================
+// End view: Y (horizontal) × Z (vertical)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('end-svg');
+  const VB_W = 360, VB_H = 320, margin = 40;
+  const sY = (VB_W - 2 * margin) / WIDTH;
+  const sZ = (VB_H - 2 * margin) / HEIGHT;
+  const s = Math.min(sY, sZ);
+  const cx = VB_W / 2, floorY = VB_H - margin - 10;
+  const X = y => cx + y * s;
+  const Y = z => floorY - z * s;
+
+  // I-beam silhouette WITH U-cutout removed (cross-section through middle, in cutout zone)
+  const R = BATT_D / 2;
+  const curveCz = CUTOUT_FLOOR_Z + R;  // center of U curve
+  // Outline: trace outside, then inside U-shape (subtraction).
+  // We approximate by drawing the outer silhouette (path with U cut at top center)
+  const arcSteps = 24;
+  let d = `M ${X(-WIDTH/2)} ${Y(0)} `
+        + `L ${X(WIDTH/2)} ${Y(0)} `
+        + `L ${X(WIDTH/2)} ${Y(FLANGE_T)} `
+        + `L ${X(WEB_W/2)} ${Y(FLANGE_T)} `
+        + `L ${X(WEB_W/2)} ${Y(HEIGHT - FLANGE_T)} `
+        + `L ${X(WIDTH/2)} ${Y(HEIGHT - FLANGE_T)} `
+        + `L ${X(WIDTH/2)} ${Y(HEIGHT)} `
+        // U-slot opens at top: down right side of slot
+        + `L ${X(R)} ${Y(HEIGHT)} `
+        + `L ${X(R)} ${Y(curveCz)} `;
+  // Half-circle (arc) for the U bottom, going from right (R, curveCz) → left (-R, curveCz)
+  // sweeping below curveCz
+  for (let i = 1; i <= arcSteps; i++) {
+    const t = Math.PI * i / arcSteps;  // 0..π
+    const xv = R * Math.cos(t);
+    const yv = curveCz - R * Math.sin(t);
+    d += `L ${X(xv)} ${Y(yv)} `;
+  }
+  d += `L ${X(-R)} ${Y(HEIGHT)} `
+     + `L ${X(-WIDTH/2)} ${Y(HEIGHT)} `
+     + `L ${X(-WIDTH/2)} ${Y(HEIGHT - FLANGE_T)} `
+     + `L ${X(-WEB_W/2)} ${Y(HEIGHT - FLANGE_T)} `
+     + `L ${X(-WEB_W/2)} ${Y(FLANGE_T)} `
+     + `L ${X(-WIDTH/2)} ${Y(FLANGE_T)} `
+     + `Z`;
+  el(svg, 'path', { d, fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5 });
+
+  // Ghost battery sitting in U
+  el(svg, 'circle', { cx: X(0), cy: Y(curveCz), r: 11.0 * s,
+    fill: 'var(--batt)', opacity: 0.5, stroke: 'var(--batt-dk)', 'stroke-width': 1 });
+  el(svg, 'text', { x: X(0), y: Y(curveCz) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: '#fff' }, `Ø22 cell`);
+
+  // M2 clearance (dashed vertical line at ±M2_PATTERN_Y/2 through top flange)
+  for (const sy of [-1, 1]) {
+    const yv = sy * M2_PATTERN_Y/2;
+    el(svg, 'circle', { cx: X(yv), cy: Y(HEIGHT - FLANGE_T/2), r: M2_CLEAR_D/2 * s,
+      fill: '#101319', stroke: 'var(--m2)', 'stroke-width': 1 });
+  }
+
+  // M3 csk (bottom flange)
+  for (const sy of [-1, 1]) {
+    const yv = sy * M3_PATTERN_Y/2;
+    el(svg, 'circle', { cx: X(yv), cy: Y(FLANGE_T/2), r: M3_CSK_D/2 * s,
+      fill: 'var(--m3)', opacity: 0.35 });
+    el(svg, 'circle', { cx: X(yv), cy: Y(FLANGE_T/2), r: M3_CLEAR_D/2 * s,
+      fill: '#101319', stroke: 'var(--m3-dk)', 'stroke-width': 1 });
+  }
+
+  // Dims
+  // Height dim (Z)
+  const xd = X(-WIDTH/2) - 22;
+  el(svg, 'line', { x1: xd, y1: Y(0), x2: xd, y2: Y(HEIGHT),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: Y(HEIGHT/2) + 4, 'text-anchor': 'end', class: 'dim' },
+    `${HEIGHT}`);
+  // Width (Y)
+  const yd = Y(0) + 22;
+  el(svg, 'line', { x1: X(-WIDTH/2), y1: yd, x2: X(WIDTH/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${WIDTH} mm`);
+  // Web width
+  const yw = Y(HEIGHT/2);
+  el(svg, 'line', { x1: X(-WEB_W/2), y1: yw, x2: X(WEB_W/2), y2: yw,
+    stroke: 'var(--info)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yw - 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--info)' }, `web ${WEB_W}`);
+  // Flange thickness
+  el(svg, 'text', { x: X(-WIDTH/2) + 6, y: Y(FLANGE_T/2) + 3, class: 'dim' },
+    `${FLANGE_T}`);
+  el(svg, 'text', { x: X(-WIDTH/2) + 6, y: Y(HEIGHT - FLANGE_T/2) + 3, class: 'dim' },
+    `${FLANGE_T}`);
+})();
+
+// =====================================================================
+// Side view: X (horizontal) × Z (vertical)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('side-svg');
+  const VB_W = 680, VB_H = 260, margin = 40;
+  const sX = (VB_W - 2 * margin) / LENGTH;
+  const sZ = (VB_H - 2 * margin - 20) / HEIGHT;
+  const s = Math.min(sX, sZ);
+  const cx = VB_W / 2, floorY = VB_H - margin - 10;
+  const X = x => cx + x * s;
+  const Y = z => floorY - z * s;
+
+  // Full rectangle with flanges (web is narrower in Y, so in X-Z side view
+  // the outline is still a rectangle)
+  el(svg, 'rect', { x: X(-LENGTH/2), y: Y(HEIGHT),
+    width: LENGTH * s, height: HEIGHT * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  // U-cutout shown as dashed rectangle (extends from CUTOUT_FLOOR_Z to top, length CUTOUT_LENGTH)
+  const curveCz = CUTOUT_FLOOR_Z + BATT_D/2;
+  el(svg, 'rect', { x: X(-CUTOUT_LENGTH/2), y: Y(HEIGHT),
+    width: CUTOUT_LENGTH * s, height: (HEIGHT - CUTOUT_FLOOR_Z) * s,
+    fill: 'var(--batt)', opacity: 0.18,
+    stroke: 'var(--batt-dk)', 'stroke-width': 1, 'stroke-dasharray': '4 3' });
+  el(svg, 'text', { x: cx, y: Y(curveCz) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: '#fff' }, `U-cutout Ø${BATT_D} × ${CUTOUT_LENGTH} (opens upward)`);
+
+  // 18650 cell ghost (65 mm long, Ø22, sits at curve center)
+  const CELL_L = 65.0, CELL_D = 22.0;
+  el(svg, 'rect', { x: X(-CELL_L/2), y: Y(curveCz + CELL_D/2),
+    width: CELL_L * s, height: CELL_D * s,
+    fill: 'var(--batt)', opacity: 0.55,
+    stroke: 'var(--batt-dk)', 'stroke-width': 1.2, rx: CELL_D/2 * s });
+  el(svg, 'text', { x: X(-CELL_L/2) - 4, y: Y(curveCz) + 4, 'text-anchor': 'end', class: 'dim',
+    fill: 'var(--batt-dk)' }, `Ø22 × 65 cell`);
+
+  // M2 holes in top flange
+  for (const sx of [-1, 1]) {
+    const xv = sx * M2_PATTERN_X/2;
+    el(svg, 'line', { x1: X(xv), y1: Y(HEIGHT), x2: X(xv), y2: Y(HEIGHT - FLANGE_T),
+      stroke: 'var(--m2)', 'stroke-width': M2_CLEAR_D * s, opacity: 0.7,
+      'stroke-linecap': 'round' });
+  }
+  // M3 holes in bottom flange + csk
+  for (const sx of [-1, 1]) {
+    const xv = sx * M3_PATTERN_X/2;
+    el(svg, 'line', { x1: X(xv), y1: Y(0), x2: X(xv), y2: Y(FLANGE_T),
+      stroke: 'var(--m3)', 'stroke-width': M3_CLEAR_D * s, opacity: 0.7,
+      'stroke-linecap': 'round' });
+    el(svg, 'rect', { x: X(xv - M3_CSK_D/2), y: Y(M3_CSK_DEPTH),
+      width: M3_CSK_D * s, height: M3_CSK_DEPTH * s,
+      fill: '#1a1c22', stroke: 'var(--m3-dk)', 'stroke-width': 1 });
+  }
+
+  // Dims
+  const yd = Y(0) + 22;
+  el(svg, 'line', { x1: X(-LENGTH/2), y1: yd, x2: X(LENGTH/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${LENGTH} mm`);
+  // M2 pattern
+  const ym2 = Y(HEIGHT) - 6;
+  el(svg, 'line', { x1: X(-M2_PATTERN_X/2), y1: ym2, x2: X(M2_PATTERN_X/2), y2: ym2,
+    stroke: 'var(--m2)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: ym2 - 2, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--m2)' }, `M2: ${M2_PATTERN_X}`);
+  // M3 pattern
+  const ym3 = Y(0) + 40;
+  el(svg, 'line', { x1: X(-M3_PATTERN_X/2), y1: ym3, x2: X(M3_PATTERN_X/2), y2: ym3,
+    stroke: 'var(--m3)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: ym3 + 11, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--m3)' }, `M3: ${M3_PATTERN_X}`);
+})();
+
+// =====================================================================
+// Top & bottom plan views: X × Y
+// =====================================================================
+function planView(svgId, holeSpacingX, holeSpacingY, holeD, cskD, color, cskColor, showPCB) {
+  const svg = document.getElementById(svgId);
+  const VB_W = 680, VB_H = 260, margin = 40;
+  const sX = (VB_W - 2 * margin) / LENGTH;
+  const sY = (VB_H - 2 * margin) / WIDTH;
+  const s = Math.min(sX, sY);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx + x * s;
+  const Y = y => cy - y * s;
+
+  el(svg, 'rect', { x: X(-LENGTH/2), y: Y(WIDTH/2),
+    width: LENGTH * s, height: WIDTH * s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  if (showPCB) {
+    el(svg, 'rect', { x: X(-PCB_L/2), y: Y(PCB_W/2),
+      width: PCB_L * s, height: PCB_W * s,
+      fill: 'var(--pcb)', opacity: 0.3,
+      stroke: 'var(--pcb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' });
+    el(svg, 'text', { x: cx, y: cy + 4, 'text-anchor': 'middle', class: 'dim',
+      fill: 'var(--pcb)' }, 'LILYGO board (acts as battery lid)');
+  }
+
+  // U-cutout opening visible from above (rectangular slot in top flange, length CUTOUT_LENGTH)
+  el(svg, 'rect', { x: X(-CUTOUT_LENGTH/2), y: Y(BATT_D/2),
+    width: CUTOUT_LENGTH * s, height: BATT_D * s,
+    fill: 'var(--batt)', opacity: 0.35,
+    stroke: 'var(--batt-dk)', 'stroke-width': 0.8 });
+
+  // Holes
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const hx = sx * holeSpacingX / 2;
+    const hy = sy * holeSpacingY / 2;
+    if (cskD) {
+      el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: cskD/2 * s,
+        fill: color, opacity: 0.35 });
+    }
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: holeD/2 * s,
+      fill: '#101319', stroke: cskColor, 'stroke-width': 1 });
+  }
+
+  // Pattern dims
+  const ydim = Y(-WIDTH/2) + 22;
+  el(svg, 'line', { x1: X(-holeSpacingX/2), y1: ydim, x2: X(holeSpacingX/2), y2: ydim,
+    stroke: cskColor, 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: ydim + 13, 'text-anchor': 'middle', class: 'dim',
+    fill: cskColor }, `${holeSpacingX} mm`);
+
+  const xdim = X(holeSpacingX/2) + 22;
+  el(svg, 'line', { x1: xdim, y1: Y(-holeSpacingY/2), x2: xdim, y2: Y(holeSpacingY/2),
+    stroke: cskColor, 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xdim + 4, y: cy + 4, class: 'dim',
+    fill: cskColor }, `${holeSpacingY}`);
+
+  // Outer dim
+  const yod = Y(WIDTH/2) - 6;
+  el(svg, 'line', { x1: X(-LENGTH/2), y1: yod, x2: X(LENGTH/2), y2: yod,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yod - 3, 'text-anchor': 'middle', class: 'dim' },
+    `${LENGTH} mm`);
+}
+
+planView('top-svg', M2_PATTERN_X, M2_PATTERN_Y, M2_CLEAR_D, null, 'var(--m2)', 'var(--m2-dk)', true);
+planView('bot-svg', M3_PATTERN_X, M3_PATTERN_Y, M3_CLEAR_D, M3_CSK_D, 'var(--m3)', 'var(--m3-dk)', false);
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-env').textContent = `${LENGTH} × ${WIDTH} × ${HEIGHT} mm`;
+document.getElementById('s-fl').textContent  = `top & bottom: ${FLANGE_T} mm thick each`;
+document.getElementById('s-web').textContent = `${WEB_W} × ${WEB_H} mm (central, narrower than flanges)`;
+document.getElementById('s-batt').textContent = `U-cutout: Ø${BATT_D} curve floor × ${CUTOUT_LENGTH} mm long, opens upward through top flange (end caps ${((LENGTH - CUTOUT_LENGTH)/2).toFixed(1)} mm)`;
+document.getElementById('s-m2').textContent  = `4× Ø${M2_CLEAR_D} clearance at ${M2_PATTERN_X} × ${M2_PATTERN_Y} mm (no countersink)`;
+document.getElementById('s-m3').textContent  = `4× Ø${M3_CLEAR_D} clearance at ${M3_PATTERN_X} × ${M3_PATTERN_Y} mm, countersunk Ø${M3_CSK_D}×${M3_CSK_DEPTH} on bottom face`;
+
+const m2EdgeX = LENGTH/2 - M2_PATTERN_X/2 - M2_CLEAR_D/2;
+const m2EdgeY = WIDTH/2  - M2_PATTERN_Y/2 - M2_CLEAR_D/2;
+const m3EdgeX = LENGTH/2 - M3_PATTERN_X/2 - M3_CSK_D/2;
+const m3EdgeY = WIDTH/2  - M3_PATTERN_Y/2 - M3_CSK_D/2;
+const sideWall = (WEB_W - BATT_D) / 2;
+const endCap = (LENGTH - CUTOUT_LENGTH) / 2;
+const slotToM2X = M2_PATTERN_X/2 - CUTOUT_LENGTH/2 - M2_CLEAR_D/2;
+const slotToM2Y = M2_PATTERN_Y/2 - BATT_D/2 - M2_CLEAR_D/2;
+
+const checks = [
+  { ok: m2EdgeX >= 0.8 && m2EdgeY >= 0.8,
+    msg: `M2 edge clearance: ${m2EdgeX.toFixed(2)} (X), ${m2EdgeY.toFixed(2)} (Y) mm` },
+  { ok: m3EdgeX >= 1.0 && m3EdgeY >= 1.0,
+    msg: `M3 countersink edge clearance: ${m3EdgeX.toFixed(2)} (X), ${m3EdgeY.toFixed(2)} (Y) mm` },
+  { ok: sideWall >= 2.0,
+    msg: `Web wall around U-cutout: ${sideWall.toFixed(2)} mm per side` },
+  { ok: endCap >= 6.0,
+    msg: `Top-flange end caps (X): ${endCap.toFixed(1)} mm each (preserve M2 mount points)` },
+  { ok: slotToM2X >= 1.0,
+    msg: `M2 hole → U-cutout (X): ${slotToM2X.toFixed(2)} mm material between` },
+  { ok: slotToM2Y >= 1.0,
+    msg: `M2 hole → U-cutout (Y): ${slotToM2Y.toFixed(2)} mm material between` },
+  { ok: BATT_D >= 22.0 && BATT_D <= 22.5,
+    msg: `Battery clearance: Ø${BATT_D} vs Ø22 nominal cell (tolerance ${(BATT_D - 22).toFixed(2)} mm)` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

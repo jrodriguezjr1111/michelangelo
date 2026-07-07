@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Flycatcher Platform + Lid — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --pcb:  #2a8f5a; --pcb-dk: #1d6b42;
+    --post: #f2b84b; --post-dk: #b27e1e;
+    --cable: #e06c75; --bolt: #d6b35a;
+    --slot: #c87aff; --usb: #e0a74e; --usb-dk: #a77420;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  section.group { padding: 18px 28px 8px; }
+  section.group > h2 { margin: 0 0 10px; font-size: 16px; font-weight: 600; color: var(--info); }
+  .grid { display: grid; gap: 18px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h3 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                                   text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 180px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 8px 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Flycatcher — Platform + Lid Preview</h1>
+  <p>68 × 60 mm footprint. Rectangular M3 pattern 57.6 × 49.18 mm.
+     Source: <code>flycatcher/make_platform.py</code>, <code>flycatcher/make_lid.py</code></p>
+</header>
+
+<!-- ===================== PLATFORM ===================== -->
+<section class="group">
+  <h2>Platform (wrap-post base)</h2>
+  <div class="grid">
+    <div class="card full">
+      <table class="specs">
+        <tr><th>Footprint</th><td id="p-foot">—</td></tr>
+        <tr><th>Top / walls</th><td id="p-top">—</td></tr>
+        <tr><th>M3 pattern</th><td id="p-m3">—</td></tr>
+        <tr><th>Wrap post</th><td id="p-post">—</td></tr>
+        <tr><th>Cable openings</th><td id="p-slot">—</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Top view (mount face)</h3>
+      <p class="sub">4× M3 countersunk holes in rectangular pattern.</p>
+      <svg id="p-top-svg" viewBox="0 0 420 360"></svg>
+    </div>
+    <div class="card">
+      <h3>Bottom view (cavity + post)</h3>
+      <p class="sub">Cable wraps around the central post. Openings on ±X walls.</p>
+      <svg id="p-bot-svg" viewBox="0 0 420 360"></svg>
+    </div>
+    <div class="card full">
+      <h3>Side cross-section (X–Z)</h3>
+      <svg id="p-sec-svg" viewBox="0 0 700 300"></svg>
+    </div>
+    <div class="card full">
+      <h3>Design checks</h3>
+      <ul class="checks" id="p-checks"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LID ===================== -->
+<section class="group">
+  <h2>Lid (recessed cover)</h2>
+  <div class="grid">
+    <div class="card full">
+      <table class="specs">
+        <tr><th>Footprint</th><td id="l-foot">—</td></tr>
+        <tr><th>Recess</th><td id="l-recess">—</td></tr>
+        <tr><th>M3 pattern</th><td id="l-m3">—</td></tr>
+        <tr><th>USB cutout</th><td id="l-usb">—</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Top view (mount face)</h3>
+      <svg id="l-top-svg" viewBox="0 0 420 360"></svg>
+    </div>
+    <div class="card">
+      <h3>Bottom view (recess)</h3>
+      <p class="sub">USB cutout on -X wall, centered along Y.</p>
+      <svg id="l-bot-svg" viewBox="0 0 420 360"></svg>
+    </div>
+    <div class="card full">
+      <h3>Side cross-section</h3>
+      <svg id="l-sec-svg" viewBox="0 0 700 280"></svg>
+    </div>
+    <div class="card full">
+      <h3>Design checks</h3>
+      <ul class="checks" id="l-checks"></ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Print top-face DOWN on bed for both parts (STLs pre-flipped). No supports. PLA.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_platform.py / make_lid.py
+// =====================================================================
+const PLATE_L = 68.0, PLATE_W = 60.0, PLATE_H = 14.0;
+const TOP_T = 3.0, WALL_T = 2.5;
+const M3_PATTERN_X = 57.6, M3_PATTERN_Y = 49.18;
+const M3_CLEAR_D = 3.4, M3_CSK_D = 6.2, M3_CSK_DEPTH = 1.8;
+
+const POST_D = 14.0;
+const POST_H = PLATE_H - TOP_T;
+
+const CABLE_D = 5.0;
+const SLOT_W = 37.0, SLOT_H = 7.8;
+const SLOT_Z_CENTER = (PLATE_H - TOP_T) / 2;
+
+// Lid
+const LID_H = 11.0;
+const RECESS_L = PLATE_L - 2 * WALL_T;
+const RECESS_W = PLATE_W - 2 * WALL_T;
+const RECESS_H = 8.0;
+const USB_W = 37.0, USB_H = 7.8;
+const USB_Y_CENTER = 0.0;
+const USB_Z_CENTER = RECESS_H / 2;
+
+// Guess board footprint (same pattern + some margin)
+const PCB_L = M3_PATTERN_X + 5;
+const PCB_W = M3_PATTERN_Y + 5;
+
+// =====================================================================
+// Helpers
+// =====================================================================
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e); return e;
+}
+
+function makeScale(svg, viewW, viewH, modelL, modelW, margin=40) {
+  const sX = (viewW - 2 * margin) / modelL;
+  const sY = (viewH - 2 * margin) / modelW;
+  const s = Math.min(sX, sY);
+  const cx = viewW / 2, cy = viewH / 2;
+  return {
+    s, cx, cy,
+    X: x => cx + x * s,
+    Y: y => cy - y * s,
+  };
+}
+
+// =====================================================================
+// PLATFORM — Top view
+// =====================================================================
+(() => {
+  const svg = document.getElementById('p-top-svg');
+  const M = makeScale(svg, 420, 360, PLATE_L, PLATE_W);
+
+  el(svg, 'rect', { x: M.X(-PLATE_L/2), y: M.Y(PLATE_W/2),
+    width: PLATE_L * M.s, height: PLATE_W * M.s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  // PCB ghost
+  el(svg, 'rect', { x: M.X(-PCB_L/2), y: M.Y(PCB_W/2),
+    width: PCB_L * M.s, height: PCB_W * M.s,
+    fill: 'var(--pcb)', opacity: 0.3,
+    stroke: 'var(--pcb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' });
+  el(svg, 'text', { x: M.cx, y: M.cy + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--pcb)' }, 'Flycatcher PCB');
+
+  // M3 rectangular pattern
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const cx = sx * M3_PATTERN_X/2, cy = sy * M3_PATTERN_Y/2;
+    el(svg, 'circle', { cx: M.X(cx), cy: M.Y(cy), r: M3_CSK_D/2 * M.s,
+      fill: 'var(--bolt)', opacity: 0.4 });
+    el(svg, 'circle', { cx: M.X(cx), cy: M.Y(cy), r: M3_CLEAR_D/2 * M.s,
+      fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1 });
+  }
+
+  // Dims
+  const yd = M.Y(-PLATE_W/2) + 22;
+  el(svg, 'line', { x1: M.X(-PLATE_L/2), y1: yd, x2: M.X(PLATE_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: M.cx, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L} mm`);
+
+  // M3 pattern dim X
+  const ymx = M.Y(M3_PATTERN_Y/2) - 8;
+  el(svg, 'line', { x1: M.X(-M3_PATTERN_X/2), y1: ymx, x2: M.X(M3_PATTERN_X/2), y2: ymx,
+    stroke: 'var(--bolt)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: M.cx, y: ymx - 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--bolt)' }, `${M3_PATTERN_X} mm`);
+
+  // M3 pattern dim Y
+  const xmy = M.X(M3_PATTERN_X/2) + 8;
+  el(svg, 'line', { x1: xmy, y1: M.Y(-M3_PATTERN_Y/2), x2: xmy, y2: M.Y(M3_PATTERN_Y/2),
+    stroke: 'var(--bolt)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xmy + 4, y: M.cy + 4, class: 'dim',
+    fill: 'var(--bolt)' }, `${M3_PATTERN_Y}`);
+
+  // Plate W
+  const xd = M.X(-PLATE_L/2) - 22;
+  el(svg, 'line', { x1: xd, y1: M.Y(-PLATE_W/2), x2: xd, y2: M.Y(PLATE_W/2),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: M.cy + 4, 'text-anchor': 'end', class: 'dim' },
+    `${PLATE_W}`);
+})();
+
+// =====================================================================
+// PLATFORM — Bottom view (cavity + post + openings)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('p-bot-svg');
+  const M = makeScale(svg, 420, 360, PLATE_L, PLATE_W);
+
+  el(svg, 'rect', { x: M.X(-PLATE_L/2), y: M.Y(PLATE_W/2),
+    width: PLATE_L * M.s, height: PLATE_W * M.s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  const cavL = PLATE_L - 2 * WALL_T;
+  const cavW = PLATE_W - 2 * WALL_T;
+  el(svg, 'rect', { x: M.X(-cavL/2), y: M.Y(cavW/2),
+    width: cavL * M.s, height: cavW * M.s,
+    fill: '#101319', stroke: 'var(--body-dk)', 'stroke-width': 0.8 });
+
+  // Cable coil visualization around post
+  const coilMax = Math.min(cavL, cavW) / 2 - 1;
+  let d = '';
+  for (let t = 0; t <= 1.25; t += 0.01) {
+    const theta = t * Math.PI * 2;
+    const r = POST_D/2 + CABLE_D/2 + t * (CABLE_D + 0.3);
+    if (r > coilMax - CABLE_D/2) break;
+    d += (d === '' ? 'M' : 'L') + M.X(r * Math.cos(theta + Math.PI)) + ' '
+                                + M.Y(r * Math.sin(theta + Math.PI)) + ' ';
+  }
+  el(svg, 'path', { d, fill: 'none', stroke: 'var(--cable)',
+    'stroke-width': CABLE_D * M.s, 'stroke-linecap': 'round', opacity: 0.55 });
+
+  // Post
+  el(svg, 'circle', { cx: M.cx, cy: M.cy, r: POST_D/2 * M.s,
+    fill: 'var(--post)', stroke: 'var(--post-dk)', 'stroke-width': 1.5 });
+  el(svg, 'text', { x: M.cx, y: M.cy + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: '#000' }, `Ø${POST_D}`);
+
+  // Cable openings on ±X walls (centered in Y)
+  el(svg, 'rect', {
+    x: M.X(PLATE_L/2 - WALL_T - 0.5), y: M.Y(SLOT_W/2),
+    width: (WALL_T + 1) * M.s, height: SLOT_W * M.s,
+    fill: 'var(--slot)', opacity: 0.6, stroke: 'var(--slot)', 'stroke-width': 1
+  });
+  el(svg, 'rect', {
+    x: M.X(-PLATE_L/2 - 0.5), y: M.Y(SLOT_W/2),
+    width: (WALL_T + 1) * M.s, height: SLOT_W * M.s,
+    fill: 'var(--slot)', opacity: 0.6, stroke: 'var(--slot)', 'stroke-width': 1
+  });
+
+  // Labels
+  el(svg, 'text', { x: M.X(PLATE_L/2) + 6, y: M.cy - SLOT_W/2 * M.s - 4,
+    'text-anchor': 'start', class: 'dim', fill: 'var(--slot)' },
+    `${SLOT_W}×${SLOT_H} (+X)`);
+  el(svg, 'text', { x: M.X(-PLATE_L/2) - 6, y: M.cy - SLOT_W/2 * M.s - 4,
+    'text-anchor': 'end', class: 'dim', fill: 'var(--slot)' },
+    `${SLOT_W}×${SLOT_H} (-X)`);
+})();
+
+// =====================================================================
+// PLATFORM — Side cross-section (X-Z)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('p-sec-svg');
+  const VB_W = 700, VB_H = 300, scale = 5, margin = 30;
+  const cx = VB_W / 2, floorY = VB_H - 70;
+  const X = x => cx + x * scale;
+  const Y = z => floorY - z * scale;
+
+  const pL = -PLATE_L/2, pR = PLATE_L/2;
+  const cR = PLATE_L/2 - WALL_T;
+  const ceilZ = PLATE_H - TOP_T;
+
+  // Top plate
+  el(svg, 'rect', { x: X(pL), y: Y(PLATE_H),
+    width: (pR - pL) * scale, height: TOP_T * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+  // Walls
+  el(svg, 'rect', { x: X(pL), y: Y(ceilZ),
+    width: WALL_T * scale, height: ceilZ * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+  el(svg, 'rect', { x: X(cR), y: Y(ceilZ),
+    width: WALL_T * scale, height: ceilZ * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+
+  // Slot cuts on both walls
+  const slotZ1 = SLOT_Z_CENTER + SLOT_H/2;
+  for (const xv of [cR, pL]) {
+    el(svg, 'rect', { x: X(xv), y: Y(slotZ1),
+      width: WALL_T * scale, height: SLOT_H * scale,
+      fill: '#101319', stroke: 'var(--slot)', 'stroke-width': 1, 'stroke-dasharray': '2 2' });
+  }
+
+  // Post
+  el(svg, 'rect', { x: X(-POST_D/2), y: Y(POST_H),
+    width: POST_D * scale, height: POST_H * scale,
+    fill: 'var(--post)', stroke: 'var(--post-dk)', 'stroke-width': 1.2 });
+
+  // PCB on top
+  el(svg, 'rect', { x: X(-PCB_L/2), y: Y(PLATE_H + 1.6),
+    width: PCB_L * scale, height: 1.6 * scale,
+    fill: 'var(--pcb)', opacity: 0.5, stroke: 'var(--pcb-dk)', 'stroke-width': 1 });
+  el(svg, 'text', { x: cx, y: Y(PLATE_H + 1.6) - 6, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--pcb)' }, 'Flycatcher PCB');
+
+  // M3 bolt paths
+  for (const xv of [-M3_PATTERN_X/2, M3_PATTERN_X/2]) {
+    el(svg, 'line', { x1: X(xv), y1: Y(PLATE_H + 4), x2: X(xv), y2: Y(-1),
+      stroke: 'var(--bolt)', 'stroke-width': M3_CLEAR_D * scale, opacity: 0.7,
+      'stroke-linecap': 'round' });
+    el(svg, 'rect', { x: X(xv - M3_CSK_D/2), y: Y(PLATE_H),
+      width: M3_CSK_D * scale, height: M3_CSK_DEPTH * scale,
+      fill: '#1a1c22', stroke: 'var(--bolt)', 'stroke-width': 1 });
+  }
+
+  // Bed
+  el(svg, 'line', { x1: X(pL) - 20, y1: Y(0), x2: X(pR) + 20, y2: Y(0),
+    stroke: '#8b93a7', 'stroke-width': 0.8, 'stroke-dasharray': '4 3' });
+
+  // Dims
+  const xd = X(pL) - 24;
+  el(svg, 'line', { x1: xd, y1: Y(0), x2: xd, y2: Y(PLATE_H),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: Y(PLATE_H/2) + 4, 'text-anchor': 'end', class: 'dim' },
+    `${PLATE_H}`);
+  const yd = Y(0) + 28;
+  el(svg, 'line', { x1: X(pL), y1: yd, x2: X(pR), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L} mm`);
+})();
+
+// =====================================================================
+// LID — Top view
+// =====================================================================
+(() => {
+  const svg = document.getElementById('l-top-svg');
+  const M = makeScale(svg, 420, 360, PLATE_L, PLATE_W);
+
+  el(svg, 'rect', { x: M.X(-PLATE_L/2), y: M.Y(PLATE_W/2),
+    width: PLATE_L * M.s, height: PLATE_W * M.s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  // M3
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const cx = sx * M3_PATTERN_X/2, cy = sy * M3_PATTERN_Y/2;
+    el(svg, 'circle', { cx: M.X(cx), cy: M.Y(cy), r: M3_CSK_D/2 * M.s,
+      fill: 'var(--bolt)', opacity: 0.4 });
+    el(svg, 'circle', { cx: M.X(cx), cy: M.Y(cy), r: M3_CLEAR_D/2 * M.s,
+      fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1 });
+  }
+
+  // USB cutout (on -X wall, centered along Y)
+  el(svg, 'rect', {
+    x: M.X(-PLATE_L/2 - 0.5), y: M.Y(USB_W/2),
+    width: (WALL_T + 1) * M.s, height: USB_W * M.s,
+    fill: 'var(--usb)', opacity: 0.85, stroke: 'var(--usb-dk)', 'stroke-width': 1
+  });
+  el(svg, 'text', { x: M.X(-PLATE_L/2) - 6, y: M.cy + 4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--usb)' }, `USB ${USB_W}×${USB_H}`);
+})();
+
+// =====================================================================
+// LID — Bottom view (recess + USB cutout)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('l-bot-svg');
+  const M = makeScale(svg, 420, 360, PLATE_L, PLATE_W);
+
+  el(svg, 'rect', { x: M.X(-PLATE_L/2), y: M.Y(PLATE_W/2),
+    width: PLATE_L * M.s, height: PLATE_W * M.s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+  el(svg, 'rect', { x: M.X(-RECESS_L/2), y: M.Y(RECESS_W/2),
+    width: RECESS_L * M.s, height: RECESS_W * M.s,
+    fill: '#101319', stroke: 'var(--body-dk)', 'stroke-width': 0.8 });
+
+  // PCB ghost
+  el(svg, 'rect', { x: M.X(-PCB_L/2), y: M.Y(PCB_W/2),
+    width: PCB_L * M.s, height: PCB_W * M.s,
+    fill: 'var(--pcb)', opacity: 0.3,
+    stroke: 'var(--pcb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' });
+
+  // USB cutout
+  el(svg, 'rect', {
+    x: M.X(-PLATE_L/2 - 0.5), y: M.Y(USB_W/2),
+    width: (WALL_T + 1) * M.s, height: USB_W * M.s,
+    fill: 'var(--usb)', opacity: 0.85, stroke: 'var(--usb-dk)', 'stroke-width': 1
+  });
+})();
+
+// =====================================================================
+// LID — Side cross-section
+// =====================================================================
+(() => {
+  const svg = document.getElementById('l-sec-svg');
+  const VB_W = 700, VB_H = 280, scale = 5.5;
+  const cx = VB_W / 2, floorY = VB_H - 70;
+  const X = x => cx + x * scale;
+  const Y = z => floorY - z * scale;
+
+  const pL = -PLATE_L/2, pR = PLATE_L/2;
+  const cR = PLATE_L/2 - WALL_T;
+  const ceilZ = LID_H - TOP_T;
+
+  // Top plate
+  el(svg, 'rect', { x: X(pL), y: Y(LID_H),
+    width: (pR - pL) * scale, height: TOP_T * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+  // Walls
+  el(svg, 'rect', { x: X(pL), y: Y(ceilZ),
+    width: WALL_T * scale, height: ceilZ * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+  el(svg, 'rect', { x: X(cR), y: Y(ceilZ),
+    width: WALL_T * scale, height: ceilZ * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+
+  // USB cutout on -X wall
+  el(svg, 'rect', { x: X(pL), y: Y(USB_Z_CENTER + USB_H/2),
+    width: WALL_T * scale, height: USB_H * scale,
+    fill: 'var(--usb)', opacity: 0.5, stroke: 'var(--usb)', 'stroke-width': 1,
+    'stroke-dasharray': '2 2' });
+
+  // Board ghost inside recess
+  el(svg, 'rect', { x: X(-PCB_L/2), y: Y(1.0 + 1.6),
+    width: PCB_L * scale, height: 1.6 * scale,
+    fill: 'var(--pcb)', opacity: 0.55, stroke: 'var(--pcb-dk)', 'stroke-width': 1 });
+
+  // Bed
+  el(svg, 'line', { x1: X(pL) - 20, y1: Y(0), x2: X(pR) + 20, y2: Y(0),
+    stroke: '#8b93a7', 'stroke-width': 0.8, 'stroke-dasharray': '4 3' });
+
+  // Dims
+  const xd = X(pL) - 24;
+  el(svg, 'line', { x1: xd, y1: Y(0), x2: xd, y2: Y(LID_H),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: Y(LID_H/2) + 4, 'text-anchor': 'end', class: 'dim' },
+    `${LID_H}`);
+  const yd = Y(0) + 28;
+  el(svg, 'line', { x1: X(pL), y1: yd, x2: X(pR), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 13, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L} mm`);
+})();
+
+// =====================================================================
+// Specs text
+// =====================================================================
+const cavH = PLATE_H - TOP_T;
+document.getElementById('p-foot').textContent = `${PLATE_L} × ${PLATE_W} × ${PLATE_H} mm`;
+document.getElementById('p-top').textContent  = `${TOP_T} mm top, ${WALL_T} mm walls, cavity ${(PLATE_L-2*WALL_T).toFixed(1)} × ${(PLATE_W-2*WALL_T).toFixed(1)} × ${cavH.toFixed(1)}`;
+document.getElementById('p-m3').textContent   = `4× Ø${M3_CLEAR_D} at ${M3_PATTERN_X} × ${M3_PATTERN_Y} mm (countersunk Ø${M3_CSK_D}×${M3_CSK_DEPTH})`;
+document.getElementById('p-post').textContent = `Ø${POST_D} × ${POST_H} mm`;
+document.getElementById('p-slot').textContent = `${SLOT_W} × ${SLOT_H} mm on ±X walls, centered`;
+
+document.getElementById('l-foot').textContent = `${PLATE_L} × ${PLATE_W} × ${LID_H} mm`;
+document.getElementById('l-recess').textContent = `${RECESS_L} × ${RECESS_W} × ${RECESS_H} mm`;
+document.getElementById('l-m3').textContent = `4× Ø${M3_CLEAR_D} at ${M3_PATTERN_X} × ${M3_PATTERN_Y} mm (countersunk Ø${M3_CSK_D}×${M3_CSK_DEPTH})`;
+document.getElementById('l-usb').textContent = `${USB_W} × ${USB_H} mm on -X wall, centered`;
+
+// =====================================================================
+// Design checks
+// =====================================================================
+function renderChecks(ulId, items) {
+  const ul = document.getElementById(ulId);
+  for (const c of items) {
+    const li = document.createElement('li');
+    li.innerHTML = c.ok
+      ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+      : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+    ul.appendChild(li);
+  }
+}
+
+const edgeX = PLATE_L/2 - M3_PATTERN_X/2 - M3_CSK_D/2;
+const edgeY = PLATE_W/2 - M3_PATTERN_Y/2 - M3_CSK_D/2;
+const slotYedge = (PLATE_W/2 - WALL_T) - SLOT_W/2;
+
+renderChecks('p-checks', [
+  { ok: edgeX >= 1.0 && edgeY >= 1.0,
+    msg: `M3 edge clearance: ${edgeX.toFixed(2)} (X), ${edgeY.toFixed(2)} (Y) mm` },
+  { ok: slotYedge >= 1.0,
+    msg: `Cable slot to cavity corner (Y): ${slotYedge.toFixed(1)} mm wall remaining at each end` },
+  { ok: (cavH - (SLOT_Z_CENTER + SLOT_H/2)) >= 0.5 && (SLOT_Z_CENTER - SLOT_H/2) >= 0.5,
+    msg: `Slot vertical margins: ${(SLOT_Z_CENTER - SLOT_H/2).toFixed(2)} below, ${(cavH - (SLOT_Z_CENTER + SLOT_H/2)).toFixed(2)} above` },
+  { ok: POST_D >= 12,
+    msg: `Wrap post Ø${POST_D} mm — cable loop Ø${POST_D + CABLE_D} mm` },
+  { ok: SLOT_W > CABLE_D && SLOT_H > CABLE_D,
+    msg: `Slot ${SLOT_W}×${SLOT_H} easily passes cable Ø${CABLE_D}` },
+]);
+
+const usbYedge = (PLATE_W/2 - WALL_T) - USB_W/2;
+const usbZtop = RECESS_H - (USB_Z_CENTER + USB_H/2);
+const usbZbot = USB_Z_CENTER - USB_H/2;
+
+// Check if USB cutout clips any M3 hole
+let usbHitsBolt = false;
+for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+  const hx = sx * M3_PATTERN_X/2, hy = sy * M3_PATTERN_Y/2;
+  // USB cut spans x in [-PLATE_L/2, -PLATE_L/2 + WALL_T], y in [-USB_W/2, USB_W/2]
+  const r = M3_CSK_D/2 + 0.5;
+  if (hx + r > -PLATE_L/2 && hx - r < -PLATE_L/2 + WALL_T &&
+      hy + r > -USB_W/2 && hy - r < USB_W/2) usbHitsBolt = true;
+}
+
+renderChecks('l-checks', [
+  { ok: edgeX >= 1.0 && edgeY >= 1.0,
+    msg: `M3 edge clearance: ${edgeX.toFixed(2)} (X), ${edgeY.toFixed(2)} (Y) mm` },
+  { ok: usbYedge >= 1.0,
+    msg: `USB cutout to corner (Y): ${usbYedge.toFixed(1)} mm wall at each end` },
+  { ok: usbZtop >= 0.5 && usbZbot >= 0.5,
+    msg: `USB vertical margin: ${usbZbot.toFixed(2)} below, ${usbZtop.toFixed(2)} above (recess wall)` },
+  { ok: !usbHitsBolt, msg: `USB cutout clear of M3 countersinks` },
+  { ok: RECESS_H >= 8.0, msg: `Recess height ${RECESS_H} mm clears board + components` },
+]);
+</script>
+</body>
+</html>

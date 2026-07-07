@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>GNSS Saddle Enclosure (USB-C only) — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --pcb:  #2a8f5a; --pcb-dk: #1d6b42;
+    --usb:  #e0a74e; --usb-dk: #a77420;
+    --bolt: #d6b35a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px;
+            color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                                   text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 200px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GNSS Saddle Enclosure — USB-C only</h1>
+  <p>Enclosure that hangs <strong>under</strong> the +Y wing of <code>gnss_saddle/make_gnss_saddle_wide.py</code>.
+     Mount face is the <strong>top</strong>; cavity opens downward. Houses the ZED-F9P breakout.
+     Single <strong>USB-C</strong> passthrough on the −X wall (no GNSS hole), plain M3 thru-holes (no nut pockets).
+     Source: <code>gnss_saddle/make_gnss_enclosure_usb_only.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <h2>Specs</h2>
+    <table class="specs">
+      <tr><th>Footprint</th><td id="spec-foot">—</td></tr>
+      <tr><th>Floor / wall</th><td id="spec-wall">—</td></tr>
+      <tr><th>Cavity</th><td id="spec-cav">—</td></tr>
+      <tr><th>Mount pattern</th><td id="spec-m3">—</td></tr>
+      <tr><th>USB-C opening</th><td id="spec-usb">—</td></tr>
+      <tr><th>Saddle alignment</th><td id="spec-saddle">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view — saddle mount face</h2>
+    <p class="sub">Looking down at the assembled top of the enclosure. The floor (mount face)
+       is uppermost. M3 thru-holes show through. USB-C opening on the −X wall is projected.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall (footprint)</span>
+      <span><span class="sw" style="background:#101319;border:1px solid #555"></span>Cavity interior</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 thru-hole</span>
+      <span><span class="sw" style="background:var(--usb)"></span>USB-C opening</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 400 380"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Bottom view — cavity opening</h2>
+    <p class="sub">Looking up into the open cavity. The board mounts up against the floor
+       (now the ceiling of the cavity). M3 thru-holes appear in the floor.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall (perimeter)</span>
+      <span><span class="sw" style="background:#101319;border:1px solid #555"></span>Cavity (open)</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 thru</span>
+      <span><span class="sw" style="background:var(--usb)"></span>USB-C</span>
+    </div>
+    <svg id="bot-svg" viewBox="0 0 400 380"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>End view from −X — cable opening</h2>
+    <p class="sub">Looking at the −X wall straight on (the side that carries the USB-C passthrough).</p>
+    <svg id="end-svg" viewBox="0 0 600 280"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL is pre-flipped for printing — floor-down on the bed, cavity-up. No supports.
+  In service, the part flips: mount face is up against the saddle, cavity opens
+  toward the ground. Drop M3 bolts down through the saddle's countersunk ZED holes;
+  fasten with free nuts/washers or heat-set inserts as preferred.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — mirror gnss_saddle/make_gnss_enclosure_usb_only.py
+// =====================================================================
+const ENC_L  = 52.0;    // X
+const ENC_W  = 52.0;    // Y
+const ENC_H  = 18.0;    // Z total
+const ZED_SIZE = 45.0;  // ZED-F9P breakout (square)
+
+const FLOOR_T = 3.0;
+const WALL_T  = 2.5;
+
+const M3_PATTERN  = 37.6;
+const M3_CLEAR_D  = 3.4;
+
+// Floor at the TOP of the enclosure (mount face on top).
+const FLOOR_Z0 = ENC_H - FLOOR_T;
+
+const USB_W = 18.0, USB_H = 9.0;
+const USB_Y = 8.0, USB_Z_CENTER = 9.0;   // mm above cavity opening
+
+const CAV_L = ENC_L - 2 * WALL_T;
+const CAV_W = ENC_W - 2 * WALL_T;
+const CAV_H = FLOOR_Z0;
+
+// Saddle context (Y center of the ZED pattern on saddle): Y = 75.5
+const SADDLE_Y_CENTER = 75.5;
+const SADDLE_LEN = 50.0;
+const SADDLE_WID_HALF = 98.5;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// Specs
+// =====================================================================
+document.getElementById('spec-foot').textContent =
+  `${ENC_L} × ${ENC_W} × ${ENC_H} mm`;
+document.getElementById('spec-wall').textContent =
+  `floor ${FLOOR_T} mm · wall ${WALL_T} mm (bottom open)`;
+document.getElementById('spec-cav').textContent =
+  `${CAV_L} × ${CAV_W} × ${CAV_H} mm`;
+document.getElementById('spec-m3').textContent =
+  `4× Ø${M3_CLEAR_D} thru at ${M3_PATTERN} mm sq (thru-holes only, no nut pockets)`;
+document.getElementById('spec-usb').textContent =
+  `${USB_W} × ${USB_H} mm on −X wall at Y=${USB_Y.toFixed(1)}, Z-center=${USB_Z_CENTER.toFixed(1)}`;
+document.getElementById('spec-saddle').textContent =
+  `mount centered on saddle (X=0, Y=${SADDLE_Y_CENTER}); enclosure occupies Y ∈ [${(SADDLE_Y_CENTER - ENC_W/2).toFixed(1)}, ${(SADDLE_Y_CENTER + ENC_W/2).toFixed(1)}] in saddle coords`;
+
+// =====================================================================
+// Top view
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 400, VB_H = 380, margin = 30;
+  const scale = Math.min((VB_W - 2*margin) / ENC_L, (VB_H - 2*margin) / ENC_W);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx + x * scale;
+  const Y = y => cy - y * scale;
+
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Y(ENC_W/2),
+    width: ENC_L*scale, height: ENC_W*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  el(svg, 'rect', { x: X(-CAV_L/2), y: Y(CAV_W/2),
+    width: CAV_L*scale, height: CAV_W*scale,
+    fill: 'var(--body)', opacity: 0.55,
+    stroke: 'var(--body-dk)', 'stroke-width': 0.6, 'stroke-dasharray': '3 3' });
+
+  const half = M3_PATTERN / 2;
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    el(svg, 'circle', { cx: X(sx*half), cy: Y(sy*half), r: M3_CLEAR_D/2 * scale,
+      fill: '#000', stroke: 'var(--bolt)', 'stroke-width': 1.2 });
+  }
+
+  // USB-C opening on the −X wall (projected ghost)
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Y(USB_Y + USB_W/2),
+    width: WALL_T*scale, height: USB_W*scale,
+    fill: 'var(--usb)', opacity: 0.4,
+    stroke: 'var(--usb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 2' });
+  el(svg, 'text', { x: X(-ENC_L/2 + WALL_T/2), y: Y(USB_Y) + 3,
+    'text-anchor': 'middle', class: 'dim', fill: '#000' }, 'USB');
+
+  el(svg, 'text', { x: cx, y: Y(ENC_W/2) - 8, 'text-anchor': 'middle',
+    class: 'dim', fill: 'var(--info)' }, '+Y (toward saddle outer edge)');
+  el(svg, 'text', { x: X(ENC_L/2) + 12, y: cy + 4, class: 'dim',
+    fill: 'var(--info)' }, '+X');
+  el(svg, 'text', { x: X(-ENC_L/2) - 8, y: cy + 4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--info)' }, '−X');
+
+  const yd = Y(-ENC_W/2) + 20;
+  el(svg, 'line', { x1: X(-ENC_L/2), y1: yd, x2: X(ENC_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${ENC_L} mm`);
+  const xd = X(ENC_L/2) + 24;
+  el(svg, 'line', { x1: xd, y1: Y(-ENC_W/2), x2: xd, y2: Y(ENC_W/2),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd + 4, y: cy + 4, class: 'dim' }, `${ENC_W} mm`);
+})();
+
+// =====================================================================
+// Bottom view
+// =====================================================================
+(() => {
+  const svg = document.getElementById('bot-svg');
+  const VB_W = 400, VB_H = 380, margin = 30;
+  const scale = Math.min((VB_W - 2*margin) / ENC_L, (VB_H - 2*margin) / ENC_W);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx - x * scale;
+  const Y = y => cy - y * scale;
+
+  el(svg, 'rect', { x: X(ENC_L/2), y: Y(ENC_W/2),
+    width: ENC_L*scale, height: ENC_W*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  el(svg, 'rect', { x: X(CAV_L/2), y: Y(CAV_W/2),
+    width: CAV_L*scale, height: CAV_W*scale,
+    fill: '#101319', stroke: 'var(--body-dk)', 'stroke-width': 0.8 });
+
+  el(svg, 'rect', { x: X(ZED_SIZE/2), y: Y(ZED_SIZE/2),
+    width: ZED_SIZE*scale, height: ZED_SIZE*scale,
+    fill: 'var(--pcb)', opacity: 0.30,
+    stroke: 'var(--pcb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '4 3' });
+  el(svg, 'text', { x: cx, y: cy + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--pcb)' }, `ZED-F9P ${ZED_SIZE}\u00d7${ZED_SIZE}`);
+
+  const half = M3_PATTERN / 2;
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    el(svg, 'circle', { cx: X(sx*half), cy: Y(sy*half), r: M3_CLEAR_D/2 * scale,
+      fill: '#000', stroke: 'var(--bolt)', 'stroke-width': 1.2 });
+  }
+
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Y(USB_Y + USB_W/2),
+    width: WALL_T*scale, height: USB_W*scale,
+    fill: 'var(--usb)', opacity: 0.85,
+    stroke: 'var(--usb-dk)', 'stroke-width': 1 });
+
+  el(svg, 'text', { x: X(-ENC_L/2) - 8, y: cy + 4, class: 'dim',
+    fill: 'var(--info)' }, '−X (cable side)');
+  el(svg, 'text', { x: cx, y: Y(ENC_W/2) - 8, 'text-anchor': 'middle',
+    class: 'dim', fill: 'var(--info)' }, '+Y');
+
+  const sqY = Y(M3_PATTERN/2) - 8;
+  el(svg, 'line', { x1: X(M3_PATTERN/2), y1: sqY, x2: X(-M3_PATTERN/2), y2: sqY,
+    stroke: 'var(--bolt)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: sqY - 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--bolt)' }, `${M3_PATTERN} mm sq pattern`);
+})();
+
+// =====================================================================
+// End view from −X
+// =====================================================================
+(() => {
+  const svg = document.getElementById('end-svg');
+  const VB_W = 600, VB_H = 280, margin = 40;
+  const scale = Math.min((VB_W - 2*margin) / ENC_W, (VB_H - 2*margin) / ENC_H);
+  const cx = VB_W / 2;
+  const floorY = VB_H - 50;
+  const X = y => cx + y * scale;
+  const Z = z => floorY - z * scale;
+
+  el(svg, 'rect', { x: X(-ENC_W/2), y: Z(ENC_H),
+    width: ENC_W*scale, height: ENC_H*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.4 });
+
+  el(svg, 'rect', { x: X(-CAV_W/2), y: Z(ENC_H),
+    width: CAV_W*scale, height: CAV_H*scale,
+    fill: 'none', stroke: 'var(--body-dk)', 'stroke-width': 0.6,
+    'stroke-dasharray': '4 3', opacity: 0.7 });
+
+  el(svg, 'rect', {
+    x: X(USB_Y - USB_W/2), y: Z(USB_Z_CENTER + USB_H/2),
+    width: USB_W*scale, height: USB_H*scale,
+    fill: 'var(--usb)', opacity: 0.9,
+    stroke: 'var(--usb-dk)', 'stroke-width': 1.2 });
+  el(svg, 'text', { x: X(USB_Y), y: Z(USB_Z_CENTER) + 3,
+    'text-anchor': 'middle', class: 'dim', fill: '#000' }, 'USB-C');
+
+  el(svg, 'line', { x1: X(-ENC_W/2)-12, y1: Z(FLOOR_Z0), x2: X(ENC_W/2)+12, y2: Z(FLOOR_Z0),
+    stroke: 'var(--mute)', 'stroke-width': 0.6, 'stroke-dasharray': '3 3' });
+  el(svg, 'text', { x: X(ENC_W/2)+16, y: Z(FLOOR_Z0)+4, class: 'dim' },
+    `floor ${FLOOR_T} mm`);
+  el(svg, 'text', { x: X(-ENC_W/2)-16, y: Z(ENC_H)+4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--info)' }, 'mount face ↑');
+
+  el(svg, 'line', { x1: X(-ENC_W/2)-20, y1: Z(0), x2: X(ENC_W/2)+20, y2: Z(0),
+    stroke: '#8b93a7', 'stroke-width': 0.8, 'stroke-dasharray': '4 3' });
+  el(svg, 'text', { x: X(-ENC_W/2)-16, y: Z(0)+4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--info)' }, 'cavity opens ↓');
+
+  const xd = X(-ENC_W/2) - 24;
+  el(svg, 'line', { x1: xd, y1: Z(0), x2: xd, y2: Z(ENC_H),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: Z(ENC_H/2) + 4, 'text-anchor': 'end',
+    class: 'dim' }, `${ENC_H} mm`);
+
+  const yd = Z(0) + 24;
+  el(svg, 'line', { x1: X(-ENC_W/2), y1: yd, x2: X(ENC_W/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${ENC_W} mm (Y)`);
+})();
+
+// =====================================================================
+// Design checks
+// =====================================================================
+const checks = [];
+function chk(ok, msg) { checks.push({ ok, msg }); }
+
+const zedClearL = (CAV_L - ZED_SIZE) / 2;
+const zedClearW = (CAV_W - ZED_SIZE) / 2;
+chk(zedClearL >= 0.5 && zedClearW >= 0.5,
+  `ZED-F9P clearance: ${zedClearL.toFixed(2)} mm (X) × ${zedClearW.toFixed(2)} mm (Y) per side`);
+
+const wingHalfX = SADDLE_LEN / 2;
+const overhang = ENC_L/2 - wingHalfX;
+chk(M3_PATTERN/2 <= wingHalfX - 1.0,
+  `M3 pattern half (${M3_PATTERN/2}) lands on saddle wing half (${wingHalfX})`
+  + (overhang > 0 ? ` \u2014 enclosure overhangs ${overhang.toFixed(1)} mm/side in X (OK)` : ''));
+
+const m3ToWall = (Math.min(ENC_L, ENC_W) - M3_PATTERN) / 2 - WALL_T;
+chk(m3ToWall >= 0.5, `M3 hole to inner wall: ${m3ToWall.toFixed(2)} mm`);
+
+const yHalfInside = ENC_W/2 - WALL_T;
+chk(Math.abs(USB_Y) + USB_W/2 <= yHalfInside - 0.5,
+  `USB cutout inside −X wall: |${USB_Y}|+${USB_W/2} ≤ ${yHalfInside-0.5}`);
+
+chk(USB_Z_CENTER - USB_H/2 >= 1.0,
+  `USB cutout above cavity opening by ${(USB_Z_CENTER - USB_H/2).toFixed(2)} mm`);
+chk(USB_Z_CENTER + USB_H/2 <= FLOOR_Z0 - 0.5,
+  `USB cutout below floor by ${(FLOOR_Z0 - USB_Z_CENTER - USB_H/2).toFixed(2)} mm`);
+
+chk(USB_W <= 20, `USB cutout bridge span ${USB_W} mm ≤ 20 mm (PLA-printable without supports)`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>
