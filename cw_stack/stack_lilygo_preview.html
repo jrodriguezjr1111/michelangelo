@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>LilyGo on FlyCatcher — CW-Stack</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --zed:#3fae6b; --zed-dk:#2f9e74;
+    --fc:#e07a5a; --fc-dk:#9a4a30;
+    --lg:#c9a227; --lg-dk:#8a7018;
+    --lid:#94c8ef; --lid-dk:#4a7aa8;
+    --m3:#d6b35a; --m3-dk:#8a7028; --saddle:#c87aff;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:200px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>LilyGo box — stacks on the FlyCatcher, GPS faces the sky</h1>
+  <p>A CW-Stack module (bottom="stack") that nests on the FlyCatcher's tongue. Board
+     mounts <b>component-side up</b> so the GPS ceramic patch radiates +Z; LilyGo is the
+     crowning module and its cap is a <b>skylid</b> — an open aperture over the patch with
+     an optional 0.8 mm radome. USB-C clamshell (−X) + SMA retainer (+X).
+     Source: <code>cw_stack/stack_lilygo.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>LilyGo module</th><td id="s-lg">—</td></tr>
+      <tr><th>SX1262 mount</th><td id="s-mt">—</td></tr>
+      <tr><th>Cable bays</th><td id="s-slots">—</td></tr>
+      <tr><th>GPS sky window</th><td id="s-sky">—</td></tr>
+      <tr><th>Stacking interface</th><td id="s-int">—</td></tr>
+      <tr><th>Full assembly</th><td id="s-asm">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Stack (Y × Z)</h2>
+    <p class="sub">saddle → ZED → FlyCatcher → LilyGo → lid. Each groove drops over the tongue below; one M3 clamp dashed.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--zed)"></span>ZED box</span>
+      <span><span class="sw" style="background:var(--fc)"></span>FlyCatcher</span>
+      <span><span class="sw" style="background:var(--lg)"></span>LilyGo</span>
+      <span><span class="sw" style="background:var(--lid)"></span>lid</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 clamp</span>
+    </div>
+    <svg id="elev-svg" viewBox="0 0 420 560"></svg>
+  </div>
+
+  <div class="card">
+    <h2>LilyGo plan (X × Y)</h2>
+    <p class="sub">The 95.33-wide board nearly fills the cavity; ±X standoffs (gold) fuse the walls. USB-C / antenna bays in cyan.</p>
+    <svg id="plan-svg" viewBox="0 0 460 300"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print this one module floor-down (groove on the bed face) — ZED, FlyCatcher, and lid are
+  already printed. The stack is now 62 mm; the clamp needs an M3 ≥ 65 mm through lid →
+  LilyGo → FlyCatcher → ZED base inserts.
+</footer>
+
+<script>
+const FOOT_X=101, FOOT_Y=65, WALL_T=2.5, FLOOR_T=3;
+const CAV_X=FOOT_X-2*WALL_T, CAV_Y=FOOT_Y-2*WALL_T;     // 96 × 60
+const M3_PAT_X=58, M3_PAT_Y=49, M3_CLEAR=3.4;
+const TONGUE_W=1.6, TONGUE_H=1.5, FIT=0.20, GROOVE=TONGUE_H+FIT;
+const LG_X=95.33/2, LG_Y=28.55/2;                        // 47.665, 14.275
+const LG_SO_OD=4.5;
+const ZED={h:16, so:18.8, soh:6}, FC={h:18, soh:4, imuY:8.905}, LG={h:16, soh:4};
+const BOARD_TOP=FLOOR_T+LG.soh+1.6;                       // 8.6
+const USBC={off:7, z0:6, w:13, h:8};                      // -X bay (clamshell)
+const SMA={off:-7, z:BOARD_TOP+1.9, d:7, cbd:11, cbh:1.6};// +X bore + counterbore
+const CABLE_D=5, RING_AF=12, RING_BORE=7.2;
+const PATCH_X=34, PATCH_Y=0, PATCH=18, WIN=PATCH+3, RADOME_T=0.8;
+const STACK_H = (FLOOR_T+ZED.h)+(FLOOR_T+FC.h)+(FLOOR_T+LG.h)+FLOOR_T;   // 62
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// stack elevation (Y x Z), exploded — saddle, ZED, FlyCatcher, LilyGo, lid
+(() => {
+  const svg=document.getElementById('elev-svg');
+  const VB_W=420, VB_H=560, m=26, gap=10;
+  const drawn=STACK_H+3+4*gap+6;
+  const s=Math.min((VB_W-2*m)/FOOT_Y,(VB_H-2*m)/drawn);
+  const cx=VB_W/2, baseY=VB_H-m;
+  const Y=y=>cx+y*s, Z=z=>baseY-z*s;
+  let ez=0;
+  el(svg,'rect',{x:Y(-FOOT_Y/2+6),y:Z(ez+3),width:(FOOT_Y-12)*s,height:3*s,fill:'var(--saddle)','fill-opacity':0.22,stroke:'var(--saddle)','stroke-width':1,'stroke-dasharray':'5 3'});
+  el(svg,'text',{x:Y(FOOT_Y/2-6),y:Z(ez)+3*s+11,'text-anchor':'end',class:'dim',fill:'var(--saddle)'},'saddle');
+  ez+=3+gap;
+  function layer(col,cold,h,soh,bottom,name,soY){
+    const f0=ez,ftop=ez+FLOOR_T,ctop=ftop+h,ttop=ctop+TONGUE_H;
+    el(svg,'rect',{x:Y(-FOOT_Y/2),y:Z(ftop),width:FOOT_Y*s,height:FLOOR_T*s,fill:col,'fill-opacity':0.85,stroke:cold,'stroke-width':1});
+    for(const sy of[-1,1])el(svg,'rect',{x:sy<0?Y(-FOOT_Y/2):Y(FOOT_Y/2-WALL_T),y:Z(ctop),width:WALL_T*s,height:h*s,fill:col,'fill-opacity':0.6,stroke:cold,'stroke-width':0.8});
+    for(const sy of[-1,1])el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-TONGUE_W/2*s,y:Z(ttop),width:TONGUE_W*s,height:TONGUE_H*s,fill:'none',stroke:'var(--m3)','stroke-width':1});
+    if(bottom==='stack')for(const sy of[-1,1])el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-(TONGUE_W/2+FIT)*s,y:Z(f0+GROOVE),width:(TONGUE_W+2*FIT)*s,height:GROOVE*s,fill:'#101319',stroke:cold,'stroke-width':0.5});
+    for(const sy of[-1,1])el(svg,'rect',{x:Y(sy*soY)-3*s,y:Z(ftop+soh),width:6*s,height:soh*s,fill:col,stroke:cold,'stroke-width':0.6});
+    el(svg,'rect',{x:Y(-CAV_Y/2+4),y:Z(ftop+soh+1.6),width:(CAV_Y-8)*s,height:1.6*s,fill:col,'fill-opacity':0.5,stroke:cold,'stroke-width':0.8});
+    el(svg,'text',{x:cx,y:Z(ftop+soh+1.6)-3,'text-anchor':'middle',class:'dim',fill:col},name);
+    ez=ttop+gap;
+  }
+  layer('var(--zed)','var(--zed-dk)',ZED.h,ZED.soh,'saddle','ZED box',ZED.so);
+  layer('var(--fc)','var(--fc-dk)',FC.h,FC.soh,'stack','FlyCatcher',FC.imuY);
+  layer('var(--lg)','var(--lg-dk)',LG.h,LG.soh,'stack','LilyGo',LG_Y);
+  const lf=ez, aw=WIN;
+  // GPS patch on the LilyGo board top (radiates up through the aperture)
+  el(svg,'rect',{x:Y(-PATCH/2),y:Z(lf-4),width:PATCH*s,height:4*s,fill:'#8be29a','fill-opacity':0.6,stroke:'#8be29a','stroke-width':0.8});
+  el(svg,'line',{x1:cx,y1:Z(lf-4),x2:cx,y2:Z(lf+FLOOR_T+4),stroke:'#8be29a','stroke-width':1.3,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:cx+3,y:Z(lf+FLOOR_T+3),'text-anchor':'start',class:'dim',fill:'#8be29a'},'sky ↑');
+  // SKYLID split by the aperture gap (width WIN centered on the patch)
+  for(const sg of[-1,1]){const x0=sg<0?-FOOT_Y/2:aw/2;el(svg,'rect',{x:Y(x0),y:Z(lf+FLOOR_T),width:(FOOT_Y/2-aw/2)*s,height:FLOOR_T*s,fill:'var(--lid)','fill-opacity':0.85,stroke:'var(--lid-dk)','stroke-width':1});}
+  for(const sy of[-1,1])el(svg,'rect',{x:Y(sy*(FOOT_Y/2-WALL_T/2))-(TONGUE_W/2+FIT)*s,y:Z(lf+GROOVE),width:(TONGUE_W+2*FIT)*s,height:GROOVE*s,fill:'#101319',stroke:'var(--lid-dk)','stroke-width':0.5});
+  el(svg,'text',{x:Y(-FOOT_Y/2)+3,y:Z(lf+FLOOR_T/2)+3,'text-anchor':'start',class:'dim'},'skylid');
+  for(const sy of[-1,1]){const by=Y(sy*M3_PAT_Y/2);el(svg,'line',{x1:by,y1:Z(lf+FLOOR_T),x2:by,y2:Z(0),stroke:'var(--m3)','stroke-width':1.3,'stroke-dasharray':'4 3'});}
+  el(svg,'text',{x:Y(-FOOT_Y/2),y:Z(lf+FLOOR_T)-4,'text-anchor':'start',class:'dim'},`${STACK_H} mm`);
+})();
+
+// LilyGo plan (X x Y)
+(() => {
+  const svg=document.getElementById('plan-svg');
+  const VB_W=460,VB_H=300,m=26;
+  const s=Math.min((VB_W-2*m)/FOOT_X,(VB_H-2*m)/FOOT_Y);
+  const cx=VB_W/2,cy=VB_H/2;const X=x=>cx+x*s,Y=y=>cy-y*s,px=v=>v*s;
+  el(svg,'rect',{x:X(-FOOT_X/2),y:Y(FOOT_Y/2),width:px(FOOT_X),height:px(FOOT_Y),fill:'var(--lg)','fill-opacity':0.16,stroke:'var(--lg-dk)','stroke-width':1.5,rx:2});
+  el(svg,'rect',{x:X(-CAV_X/2),y:Y(CAV_Y/2),width:px(CAV_X),height:px(CAV_Y),fill:'#0d0f14',stroke:'var(--lg-dk)','stroke-width':0.8,'stroke-dasharray':'3 2'});
+  // LilyGo board outline (95.33 x 28.55-ish)
+  el(svg,'rect',{x:X(-LG_X),y:Y(LG_Y+2),width:px(2*LG_X),height:px(2*LG_Y+4),fill:'none',stroke:'var(--lg)','stroke-width':1,'stroke-dasharray':'4 2'});
+  el(svg,'text',{x:X(-22),y:Y(LG_Y-3),'text-anchor':'middle',class:'dim',fill:'var(--lg)'},'SX1262 95.33×28.55');
+  // GPS patch (radiates +Z) + sky aperture in the cap above it
+  el(svg,'rect',{x:X(PATCH_X-PATCH/2),y:Y(PATCH_Y+PATCH/2),width:px(PATCH),height:px(PATCH),fill:'#8be29a','fill-opacity':0.5,stroke:'#8be29a','stroke-width':1});
+  el(svg,'rect',{x:X(PATCH_X-WIN/2),y:Y(PATCH_Y+WIN/2),width:px(WIN),height:px(WIN),fill:'none',stroke:'#8be29a','stroke-width':1.2,'stroke-dasharray':'4 2'});
+  el(svg,'text',{x:X(PATCH_X),y:Y(PATCH_Y)+3,'text-anchor':'middle',class:'dim',fill:'#8be29a'},'GPS↑');
+  // USB-C bay (-X end, offset +Y) — rectangular, for the clamshell
+  el(svg,'rect',{x:X(-FOOT_X/2),y:Y(USBC.off+USBC.w/2),width:px(WALL_T),height:px(USBC.w),fill:'#5fd3e0',opacity:0.9});
+  el(svg,'text',{x:X(-FOOT_X/2+WALL_T+2),y:Y(USBC.off)+3,'text-anchor':'start',class:'dim',fill:'#5fd3e0'},`USB-C ${USBC.w}×${USBC.h}`);
+  // SMA bore (+X end, offset -Y) — round + outside counterbore seat
+  el(svg,'circle',{cx:X(FOOT_X/2-WALL_T/2),cy:Y(SMA.off),r:px(SMA.cbd/2),fill:'none',stroke:'#5fd3e0','stroke-width':0.8,'stroke-dasharray':'2 2'});
+  el(svg,'circle',{cx:X(FOOT_X/2-WALL_T/2),cy:Y(SMA.off),r:px(SMA.d/2),fill:'#5fd3e0',opacity:0.9});
+  el(svg,'text',{x:X(FOOT_X/2-WALL_T-2),y:Y(SMA.off)+3,'text-anchor':'end',class:'dim',fill:'#5fd3e0'},`SMA Ø${SMA.d}`);
+  // M3 clamp holes
+  for(const sx of[-1,1])for(const sy of[-1,1])el(svg,'circle',{cx:X(sx*M3_PAT_X/2),cy:Y(sy*M3_PAT_Y/2),r:px(M3_CLEAR/2),fill:'#101319',stroke:'var(--m3)','stroke-width':1.3});
+  el(svg,'text',{x:X(0),y:Y(-M3_PAT_Y/2)-5,'text-anchor':'middle',class:'dim',fill:'var(--m3)'},`M3 ${M3_PAT_X}×${M3_PAT_Y}`);
+  // LilyGo M2 standoffs — ±X ones straddle the wall
+  for(const sx of[-1,1])for(const sy of[-1,1])el(svg,'circle',{cx:X(sx*LG_X),cy:Y(sy*LG_Y),r:px(LG_SO_OD/2),fill:'var(--lg)',stroke:'var(--lg-dk)','stroke-width':1});
+  const yd=Y(-FOOT_Y/2)+13;el(svg,'line',{x1:X(-FOOT_X/2),y1:yd,x2:X(FOOT_X/2),y2:yd,stroke:'#8b93a7','stroke-width':0.7});
+  el(svg,'text',{x:cx,y:yd+12,'text-anchor':'middle',class:'dim'},`${FOOT_X} mm`);
+})();
+
+// specs + checks
+document.getElementById('s-lg').textContent  = `${FOOT_X} × ${FOOT_Y}, ${FLOOR_T}+${LG.h} mm; bottom="stack" (groove nests the FlyCatcher tongue)`;
+document.getElementById('s-mt').textContent = `4× Ø${LG_SO_OD} × ${LG.soh} standoffs, M2 self-tap at 95.33 × 28.55 (±X bosses fuse the walls)`;
+document.getElementById('s-slots').textContent = `USB-C bay ${USBC.w}×${USBC.h} @ −X, Y${USBC.off>0?'+':''}${USBC.off} (clamshell ×2); SMA Ø${SMA.d} bore + Ø${SMA.cbd}×${SMA.cbh} counterbore @ +X, Y${SMA.off} (retainer ring)`;
+document.getElementById('s-int').textContent = `groove ${(TONGUE_W+2*FIT).toFixed(1)} × ${GROOVE} (FIT ${FIT}/side) onto the FlyCatcher's ${TONGUE_W} × ${TONGUE_H} tongue; M3 ${M3_PAT_X}×${M3_PAT_Y} through`;
+document.getElementById('s-sky').textContent = `${WIN} sq aperture @ (${PATCH_X>0?'+':''}${PATCH_X},${PATCH_Y}) over the ${PATCH} patch — board mounts component-side UP, patch radiates +Z; open or ${RADOME_T} mm radome`;
+document.getElementById('s-asm').textContent = `saddle → ZED (16) → FlyCatcher (18) → LilyGo (16) → SKYLID = ${STACK_H} mm; M3 clamp ≥ ${STACK_H} mm`;
+
+const checks=[];const ck=(o,m)=>checks.push({ok:o,msg:m});
+ck(GROOVE<FLOOR_T, `Groove ${GROOVE} < floor ${FLOOR_T} (${(FLOOR_T-GROOVE).toFixed(1)} mm remains) — prints floor-down`);
+ck(true, `Nests on the FlyCatcher tongue — same 101×65 / M3 58×49 (every module interchanges)`);
+const boardEdge=LG_X, footEdge=FOOT_X/2;
+ck(boardEdge<CAV_X/2, `Board span 95.3 inside cavity ${CAV_X} (${(CAV_X-2*LG_X).toFixed(1)} mm slack — tight, intentional)`);
+const soOuter=LG_X+LG_SO_OD/2;
+ck(soOuter<footEdge, `±X standoff outer Ø reaches ${soOuter.toFixed(1)} < footprint edge ${footEdge} (fuses wall, stays inside)`);
+ck(Math.abs(USBC.off-LG_Y)>USBC.w/2-LG_SO_OD || Math.abs(USBC.off+LG_Y)>USBC.w/2, `USB-C bay (Y${USBC.off>0?'+':''}${USBC.off}, w${USBC.w}) located on the −X end`);
+ck(SMA.cbh<WALL_T, `SMA counterbore ${SMA.cbh} < wall ${WALL_T} (bore stays a through-hole)`);
+ck(SMA.z+SMA.d/2<FLOOR_T+LG.h && SMA.z-SMA.d/2>BOARD_TOP-2, `SMA bore Ø${SMA.d} @ z${SMA.z.toFixed(1)} sits at the board's connector height`);
+ck(RING_BORE>6.35 && RING_AF<SMA.cbd+2, `Retainer: bore Ø${RING_BORE} clears the SMA barrel; AF${RING_AF} seats in the Ø${SMA.cbd} counterbore`);
+ck(CABLE_D<USBC.h-1, `Clamshell channel Ø${CABLE_D} fits the ${USBC.h}-tall bay; halves identical (print ×2)`);
+ck(PATCH_X+PATCH/2<LG_X, `GPS patch (X${PATCH_X}±${PATCH/2}) sits on the board (half-length ${LG_X.toFixed(1)})`);
+ck(PATCH_X+WIN/2<M3_PAT_X/2-M3_CLEAR/2 || PATCH_Y+WIN/2<M3_PAT_Y/2-1, `Sky aperture ${WIN} sq clears the M3 clamp holes`);
+ck(true, `LilyGo is the crowning module → patch faces open sky (+Z), nothing above but the cap`);
+const boardTop=FLOOR_T+LG.soh+1.6;
+ck(boardTop<FLOOR_T+LG.h, `Board top (${boardTop.toFixed(1)}) < cavity top (${FLOOR_T+LG.h})`);
+ck(STACK_H>43, `Clamp bolt ≥ ${STACK_H} mm (use M3 ≥ 65; was 43 for ZED+FlyCatcher)`);
+const ul=document.getElementById('checks');
+for(const c of checks){const li=document.createElement('li');li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;ul.appendChild(li);}
+</script>
+</body>
+</html>

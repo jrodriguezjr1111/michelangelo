@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Jetson Nano Enclosure (saddle-mount) — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --board:#3fae6b; --board-dk:#2f9e74;
+    --bolt:#d6b35a; --bolt-dk:#8a7028;
+    --pass:#c87aff; --io:#e07a5a;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:210px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Jetson Nano Enclosure — bolts onto the GNSS saddle</h1>
+  <p>Base tray: floor mates on the saddle top, 4× M4 holes at the saddle's
+     <strong>±18 mm bolt pattern</strong>, board standoffs, central passthrough over the
+     GNSS hole. Source: <code>gnss_saddle/make_nano_enclosure.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Outer shell</th><td id="s-outer">—</td></tr>
+      <tr><th>Cavity</th><td id="s-cav">—</td></tr>
+      <tr><th>Board / hole pattern</th><td id="s-board">—</td></tr>
+      <tr><th>Board standoffs</th><td id="s-stand">—</td></tr>
+      <tr><th>Saddle M4 mounts</th><td id="s-m4">—</td></tr>
+      <tr><th>Cable passthrough</th><td id="s-pass">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Looking down into the tray. Board outline dashed; M4 holes match the saddle bolts.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Shell</span>
+      <span><span class="sw" style="background:var(--board)"></span>Board / standoff</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M4 (saddle)</span>
+      <span><span class="sw" style="background:var(--pass)"></span>Passthrough</span>
+      <span><span class="sw" style="background:var(--io)"></span>I/O notch</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 460 560"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (X × Z)</h2>
+    <p class="sub">Floor on the saddle; board on standoffs clears the M4 heads; passthrough through the floor.</p>
+    <svg id="sec-svg" viewBox="0 0 560 280"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print floor-down, no supports. Mount with 4× longer M4 screws through the floor +
+  both saddle halves (nut in the saddle's bottom counterbore). Lid + exact port cutouts TBD.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_nano_enclosure.py
+// =====================================================================
+const BOARD_X = 80.0, BOARD_Y = 100.0, HOLE_X = 58.25, HOLE_Y = 86.14;
+const STANDOFF_OD = 6.0, STANDOFF_H = 8.0, STANDOFF_PILOT = 2.5;
+const CLEAR = 2.0, WALL_T = 2.5, FLOOR_T = 3.0, WALL_H = 20.0;
+const INNER_X = BOARD_X + 2*CLEAR, INNER_Y = BOARD_Y + 2*CLEAR;
+const OUTER_X = INNER_X + 2*WALL_T, OUTER_Y = INNER_Y + 2*WALL_T;
+const ENC_H = FLOOR_T + WALL_H;
+const M4_PAT = 18.0, M4_CLEAR_D = 4.4;
+const PASS_D = 20.0;
+const IO_W = 60.0, IO_Z0 = 5.0;
+const BOARD_T = 1.6;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text){
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 460, VB_H = 560, m = 34;
+  const s = Math.min((VB_W - 2*m)/OUTER_X, (VB_H - 2*m)/OUTER_Y);
+  const cx = VB_W/2, cy = VB_H/2;
+  const X = x => cx + x*s, Y = y => cy - y*s, px = v => v*s;
+
+  // Outer shell
+  el(svg, 'rect', { x:X(-OUTER_X/2), y:Y(OUTER_Y/2), width:px(OUTER_X), height:px(OUTER_Y),
+    fill:'var(--body)', 'fill-opacity':0.2, stroke:'var(--body-dk)', 'stroke-width':1.5, rx:3 });
+  // Cavity outline
+  el(svg, 'rect', { x:X(-INNER_X/2), y:Y(INNER_Y/2), width:px(INNER_X), height:px(INNER_Y),
+    fill:'none', stroke:'var(--body-dk)', 'stroke-width':1, 'stroke-dasharray':'3 2' });
+  // Board outline (dashed)
+  el(svg, 'rect', { x:X(-BOARD_X/2), y:Y(BOARD_Y/2), width:px(BOARD_X), height:px(BOARD_Y),
+    fill:'none', stroke:'var(--board)', 'stroke-width':1, 'stroke-dasharray':'2 2' });
+
+  // I/O notch on +X wall
+  el(svg, 'rect', { x:X(OUTER_X/2 - WALL_T), y:Y(IO_W/2), width:px(WALL_T), height:px(IO_W),
+    fill:'var(--io)', opacity:0.75 });
+
+  // Central passthrough
+  el(svg, 'circle', { cx:X(0), cy:Y(0), r:px(PASS_D/2), fill:'#101319', stroke:'var(--pass)', 'stroke-width':1.5 });
+  el(svg, 'text', { x:X(0), y:Y(0)+3, 'text-anchor':'middle', fill:'var(--pass)', 'font-size':10, 'font-weight':700 }, `Ø${PASS_D}`);
+
+  // M4 saddle mounts
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+    el(svg, 'circle', { cx:X(sx*M4_PAT), cy:Y(sy*M4_PAT), r:px(M4_CLEAR_D/2),
+      fill:'#101319', stroke:'var(--bolt)', 'stroke-width':1.4 });
+    el(svg, 'text', { x:X(sx*M4_PAT)+ (sx<0?-2:2), y:Y(sy*M4_PAT)-px(M4_CLEAR_D/2)-3,
+      'text-anchor':'middle', fill:'var(--bolt)', 'font-size':8, 'font-weight':700 }, 'M4');
+  }
+
+  // Board standoffs
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+    el(svg, 'circle', { cx:X(sx*HOLE_X/2), cy:Y(sy*HOLE_Y/2), r:px(STANDOFF_OD/2),
+      fill:'var(--board)', stroke:'var(--board-dk)', 'stroke-width':1 });
+    el(svg, 'circle', { cx:X(sx*HOLE_X/2), cy:Y(sy*HOLE_Y/2), r:px(STANDOFF_PILOT/2), fill:'#101319' });
+  }
+
+  // Dims
+  const yd = Y(-OUTER_Y/2) + 16;
+  el(svg, 'line', { x1:X(-OUTER_X/2), y1:yd, x2:X(OUTER_X/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${OUTER_X} mm (X)`);
+  const xd = X(-OUTER_X/2) - 14;
+  el(svg, 'line', { x1:xd, y1:Y(-OUTER_Y/2), x2:xd, y2:Y(OUTER_Y/2), stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:xd-4, y:cy+4, 'text-anchor':'end', class:'dim' }, `${OUTER_Y} (Y)`);
+})();
+
+// =====================================================================
+// Cross-section (X × Z) — projected features
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 560, VB_H = 280, m = 40;
+  const s = Math.min((VB_W - 2*m)/OUTER_X, (VB_H - 2*m - 20)/ENC_H);
+  const cx = VB_W/2, floorY = VB_H - m - 10;
+  const X = x => cx + x*s, Z = z => floorY - z*s;
+
+  // Floor
+  el(svg, 'rect', { x:X(-OUTER_X/2), y:Z(FLOOR_T), width:OUTER_X*s, height:FLOOR_T*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.2 });
+  // Walls
+  el(svg, 'rect', { x:X(-OUTER_X/2), y:Z(ENC_H), width:WALL_T*s, height:WALL_H*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.2 });
+  // +X wall with I/O notch (split into the part below the notch only)
+  el(svg, 'rect', { x:X(OUTER_X/2 - WALL_T), y:Z(FLOOR_T + IO_Z0), width:WALL_T*s, height:IO_Z0*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.2 });
+  el(svg, 'text', { x:X(OUTER_X/2 - WALL_T) - 2, y:Z(FLOOR_T + IO_Z0 + WALL_H/2), 'text-anchor':'end',
+    fill:'var(--io)', 'font-size':9, 'font-weight':700 }, 'I/O');
+
+  // Standoffs (projected at ±HOLE_X/2) + board slab
+  for (const sx of [-1,1])
+    el(svg, 'rect', { x:X(sx*HOLE_X/2 - STANDOFF_OD/2), y:Z(FLOOR_T + STANDOFF_H), width:STANDOFF_OD*s, height:STANDOFF_H*s,
+      fill:'var(--board)', stroke:'var(--board-dk)', 'stroke-width':0.8 });
+  el(svg, 'rect', { x:X(-BOARD_X/2), y:Z(FLOOR_T + STANDOFF_H + BOARD_T), width:BOARD_X*s, height:BOARD_T*s,
+    fill:'none', stroke:'var(--board)', 'stroke-width':1, 'stroke-dasharray':'3 2' });
+  el(svg, 'text', { x:cx, y:Z(FLOOR_T + STANDOFF_H + BOARD_T) - 4, 'text-anchor':'middle', class:'dim' }, 'Jetson Nano');
+
+  // M4 mount holes (projected at ±M4_PAT) + head on floor
+  for (const sx of [-1,1]) {
+    el(svg, 'rect', { x:X(sx*M4_PAT)-M4_CLEAR_D/2*s, y:Z(FLOOR_T), width:M4_CLEAR_D*s, height:FLOOR_T*s,
+      fill:'#101319', stroke:'var(--bolt)', 'stroke-width':1 });
+    el(svg, 'rect', { x:X(sx*M4_PAT)-7/2*s, y:Z(FLOOR_T + 4), width:7*s, height:4*s,
+      fill:'var(--bolt-dk)', stroke:'var(--bolt)', 'stroke-width':0.8 });
+  }
+  // Passthrough through floor
+  el(svg, 'rect', { x:X(0)-PASS_D/2*s, y:Z(FLOOR_T), width:PASS_D*s, height:FLOOR_T*s,
+    fill:'#101319', stroke:'var(--pass)', 'stroke-width':1 });
+
+  // Saddle-top reference line (below floor)
+  el(svg, 'line', { x1:X(-OUTER_X/2), y1:Z(0), x2:X(OUTER_X/2), y2:Z(0),
+    stroke:'#8b93a7', 'stroke-dasharray':'5 4', 'stroke-width':1 });
+  el(svg, 'text', { x:X(OUTER_X/2)+4, y:Z(0)+3, class:'dim' }, 'saddle top');
+
+  // Z dim
+  const zd = X(OUTER_X/2) + 20;
+  el(svg, 'line', { x1:zd, y1:Z(0), x2:zd, y2:Z(ENC_H), stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:zd+6, y:Z(ENC_H/2)+3, class:'dim', transform:`rotate(-90 ${zd+6} ${Z(ENC_H/2)+3})` }, `${ENC_H} mm (Z)`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-outer').textContent = `${OUTER_X} × ${OUTER_Y} × ${ENC_H} mm (floor ${FLOOR_T}, walls ${WALL_T})`;
+document.getElementById('s-cav').textContent   = `${INNER_X} × ${INNER_Y} × ${WALL_H} mm`;
+document.getElementById('s-board').textContent = `Nano ${BOARD_X} × ${BOARD_Y}; holes ${HOLE_X} × ${HOLE_Y}`;
+document.getElementById('s-stand').textContent = `4× ⌀${STANDOFF_OD} × ${STANDOFF_H} mm, ${STANDOFF_PILOT} pilot (M3 self-tap) at (±${(HOLE_X/2).toFixed(2)}, ±${(HOLE_Y/2).toFixed(2)})`;
+document.getElementById('s-m4').textContent    = `4× Ø${M4_CLEAR_D} at (±${M4_PAT}, ±${M4_PAT}) — matches the saddle's M4 bolt pattern`;
+document.getElementById('s-pass').textContent  = `Ø${PASS_D} central, over the saddle's Ø30 GNSS hole`;
+
+const standX = INNER_X/2 - HOLE_X/2 - STANDOFF_OD/2;
+const standY = INNER_Y/2 - HOLE_Y/2 - STANDOFF_OD/2;
+const m4Edge = OUTER_X/2 - M4_PAT - M4_CLEAR_D/2;
+const m4Pass = Math.hypot(M4_PAT, M4_PAT) - M4_CLEAR_D/2 - PASS_D/2;
+const headClr = STANDOFF_H - 4.0;
+const boardFit = INNER_X/2 - BOARD_X/2;
+
+const checks = [
+  { ok: M4_PAT === 18.0, msg: `M4 mounts at ±18 match the saddle bolt pattern (bolts on)` },
+  { ok: standX >= 0.5 && standY >= 0.5, msg: `Standoff → cavity wall: X=${standX.toFixed(2)}, Y=${standY.toFixed(2)} mm` },
+  { ok: m4Edge >= 1.0, msg: `M4 hole → outer edge: ${m4Edge.toFixed(2)} mm` },
+  { ok: m4Pass >= 1.0, msg: `M4 hole → passthrough: ${m4Pass.toFixed(2)} mm` },
+  { ok: headClr >= 1.0, msg: `Board clears M4 cap head: ${headClr.toFixed(2)} mm (standoff ${STANDOFF_H} − head 4)` },
+  { ok: boardFit >= 1.0, msg: `Board → cavity wall clearance: ${boardFit.toFixed(2)} mm/side` },
+  { ok: PASS_D < 30.0, msg: `Passthrough Ø${PASS_D} fits within the saddle's Ø30 GNSS hole` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

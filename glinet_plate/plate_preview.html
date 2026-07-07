@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>GL.iNet hub mounting plate preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5;
+    --plastic: #f2b84b; --plastic-dk: #b07a1c; --plastic-lt: #f7d489;
+    --boss: #e09a2e;
+    --bolt: #d6b35a; --case: #8aa6d1;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.wide { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  .ok { fill: var(--accent); font: 700 11px sans-serif; }
+  .warn { fill: var(--warn); font: 700 11px sans-serif; }
+  table.bom { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.bom th, table.bom td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                               text-align: left; vertical-align: top; }
+  table.bom th { color: var(--mute); font-weight: 600; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GL.iNet WiFi hub mounting plate</h1>
+  <p>Rendered from the same parameters as
+     <code>glinet_plate/make_glinet_plate.py</code>. 4 outer standoffs support
+     the hub (8-32 bolts up); 4 inner countersunk holes attach the plate to
+     the Pelican case (8-32 flat-heads down through plate, nuts inside).</p>
+</header>
+
+<main>
+
+  <div class="card wide">
+    <h2>Specifications</h2>
+    <table class="bom">
+      <tr><th>Plate</th><td id="spec-plate">—</td></tr>
+      <tr><th>Hub standoffs</th><td id="spec-stand">—</td></tr>
+      <tr><th>Hub bolt spacing</th><td id="spec-hub">—</td></tr>
+      <tr><th>Case mount spacing</th><td id="spec-case">—</td></tr>
+      <tr><th>Hardware</th><td id="spec-hw">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view</h2>
+    <p class="sub">Looking down Z onto plate top face.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>plate</span>
+      <span><span class="sw" style="background:var(--boss)"></span>standoff</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>hub bolt (8-32)</span>
+      <span><span class="sw" style="background:var(--case)"></span>case mount (flat-head)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 600 420"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Side view (look along Y)</h2>
+    <p class="sub">Plate cross-section with standoffs and countersinks shown.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>plate / standoff</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>hub bolt</span>
+      <span><span class="sw" style="background:var(--case)"></span>case screw</span>
+    </div>
+    <svg id="side-svg" viewBox="0 0 600 260"></svg>
+  </div>
+
+  <div class="card wide">
+    <h2>Fit-check assertions</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL source of truth: <code>glinet_plate/make_glinet_plate.py</code>. Print plate flat on bed,
+  standoffs up. Hardware: 4× 8-32 bolts for hub, 4× 8-32 flat-heads + nuts for case.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_glinet_plate.py
+// =====================================================================
+const PLATE_L = 122.0;
+const PLATE_W = 78.0;
+const PLATE_T = 4.0;
+const HUB_SPACING_X = 101.91;
+const HUB_SPACING_Y = 37.0;
+const STANDOFF_H  = 6.0;
+const STANDOFF_OD = 10.0;
+const CASE_SPACING_X = 60.0;
+const CASE_SPACING_Y = 37.0;
+const SCREW_CLEAR_D = 4.5;
+const CSK_TOP_D     = 8.4;
+const CSK_ANGLE     = 82.0;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, name, attrs, text) {
+  const e = document.createElementNS(ns, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// TOP VIEW — X horizontal, Y vertical
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 600, VB_H = 420;
+  const scale = Math.min((VB_W - 100) / PLATE_L, (VB_H - 110) / PLATE_W);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx + x * scale;
+  const Y = y => cy - y * scale;
+
+  // Plate
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+    width: PLATE_L * scale, height: PLATE_W * scale,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5, rx: 2
+  });
+
+  // Standoffs (4 outer corners of hub pattern)
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const px = X(sx * HUB_SPACING_X/2), py = Y(sy * HUB_SPACING_Y/2);
+    el(svg, 'circle', { cx: px, cy: py, r: STANDOFF_OD/2 * scale,
+      fill: 'var(--boss)', stroke: 'var(--plastic-dk)', 'stroke-width': 1 });
+    el(svg, 'circle', { cx: px, cy: py, r: SCREW_CLEAR_D/2 * scale,
+      fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1 });
+  }
+
+  // Case mount holes (countersink rim + clearance bore)
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const px = X(sx * CASE_SPACING_X/2), py = Y(sy * CASE_SPACING_Y/2);
+    el(svg, 'circle', { cx: px, cy: py, r: CSK_TOP_D/2 * scale,
+      fill: 'none', stroke: 'var(--case)', 'stroke-width': 1, 'stroke-dasharray': '3 2' });
+    el(svg, 'circle', { cx: px, cy: py, r: SCREW_CLEAR_D/2 * scale,
+      fill: '#101319', stroke: 'var(--case)', 'stroke-width': 1 });
+  }
+
+  // Dimension lines: long axis (X) along bottom
+  const yLong = Y(-PLATE_W/2) + 30;
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: yLong, x2: X(PLATE_L/2), y2: yLong, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: yLong-4, x2: X(-PLATE_L/2), y2: yLong+4, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X( PLATE_L/2), y1: yLong-4, x2: X( PLATE_L/2), y2: yLong+4, stroke: '#8b93a7' });
+  el(svg, 'text', { x: X(0), y: yLong+14, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L.toFixed(2)} mm  (X, long)`);
+
+  // Hub spacing X
+  const yHub = Y(HUB_SPACING_Y/2) - 14;
+  el(svg, 'line', { x1: X(-HUB_SPACING_X/2), y1: yHub, x2: X(HUB_SPACING_X/2), y2: yHub, stroke: '#94efb1' });
+  el(svg, 'line', { x1: X(-HUB_SPACING_X/2), y1: yHub-4, x2: X(-HUB_SPACING_X/2), y2: yHub+4, stroke: '#94efb1' });
+  el(svg, 'line', { x1: X( HUB_SPACING_X/2), y1: yHub-4, x2: X( HUB_SPACING_X/2), y2: yHub+4, stroke: '#94efb1' });
+  el(svg, 'text', { x: X(0), y: yHub - 4, 'text-anchor': 'middle', class: 'ok' },
+    `hub C-C ${HUB_SPACING_X} mm`);
+
+  // Case spacing X
+  const yCase = Y(-CASE_SPACING_Y/2) + 14;
+  el(svg, 'line', { x1: X(-CASE_SPACING_X/2), y1: yCase, x2: X(CASE_SPACING_X/2), y2: yCase, stroke: '#8aa6d1' });
+  el(svg, 'line', { x1: X(-CASE_SPACING_X/2), y1: yCase-4, x2: X(-CASE_SPACING_X/2), y2: yCase+4, stroke: '#8aa6d1' });
+  el(svg, 'line', { x1: X( CASE_SPACING_X/2), y1: yCase-4, x2: X( CASE_SPACING_X/2), y2: yCase+4, stroke: '#8aa6d1' });
+  el(svg, 'text', { x: X(0), y: yCase + 12, 'text-anchor': 'middle',
+    fill: '#8aa6d1', 'font-size': 11, 'font-weight': 700 }, `case C-C ${CASE_SPACING_X} mm`);
+
+  // Y dim (short axis) right side
+  const xY = X(PLATE_L/2) + 30;
+  el(svg, 'line', { x1: xY, y1: Y(-PLATE_W/2), x2: xY, y2: Y(PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xY-4, y1: Y(-PLATE_W/2), x2: xY+4, y2: Y(-PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xY-4, y1: Y( PLATE_W/2), x2: xY+4, y2: Y( PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xY+8, y: Y(0)+3, class: 'dim',
+    transform: `rotate(-90 ${xY+8} ${Y(0)+3})` }, `${PLATE_W} mm  (Y)`);
+
+  // Y short-axis hub/case spacing label
+  el(svg, 'text', { x: X(0), y: Y(0)+4, 'text-anchor': 'middle', class: 'dim' },
+    `hub Y = ±${HUB_SPACING_Y/2}    case Y = ±${CASE_SPACING_Y/2}`);
+})();
+
+// =====================================================================
+// SIDE VIEW — X horizontal, Z vertical (look along Y)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('side-svg');
+  const VB_W = 600, VB_H = 260;
+  const totalZ = PLATE_T + STANDOFF_H;
+  const scale = Math.min((VB_W - 100) / PLATE_L, (VB_H - 90) / (totalZ * 4));
+  const cx = VB_W / 2, baseY = VB_H - 80;
+  const X = x => cx + x * scale;
+  const Z = z => baseY - z * scale;
+
+  // Plate
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Z(PLATE_T),
+    width: PLATE_L * scale, height: PLATE_T * scale,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5
+  });
+
+  // Standoffs at hub bolt locations (projected on X-Z)
+  for (const sx of [-1, 1]) {
+    const px = X(sx * HUB_SPACING_X/2);
+    el(svg, 'rect', {
+      x: px - STANDOFF_OD/2 * scale, y: Z(PLATE_T + STANDOFF_H),
+      width: STANDOFF_OD * scale, height: STANDOFF_H * scale,
+      fill: 'var(--boss)', stroke: 'var(--plastic-dk)', 'stroke-width': 1
+    });
+    // hub bolt shaft up through standoff
+    el(svg, 'line', {
+      x1: px, y1: Z(0)-2, x2: px, y2: Z(PLATE_T + STANDOFF_H + 6),
+      stroke: 'var(--bolt)', 'stroke-width': SCREW_CLEAR_D * scale * 0.6, opacity: 0.85
+    });
+    el(svg, 'text', { x: px, y: Z(PLATE_T + STANDOFF_H) - 6,
+      'text-anchor': 'middle', fill: 'var(--bolt)', 'font-size': 10, 'font-weight': 700
+    }, '8-32 → hub');
+  }
+
+  // Case mount screws (countersunk on top, going DOWN through plate)
+  for (const sx of [-1, 1]) {
+    const px = X(sx * CASE_SPACING_X/2);
+    // bolt shaft
+    el(svg, 'line', {
+      x1: px, y1: Z(PLATE_T)+2, x2: px, y2: Z(0)-8,
+      stroke: 'var(--case)', 'stroke-width': SCREW_CLEAR_D * scale * 0.6, opacity: 0.85
+    });
+    // flat head (triangle sitting in countersink)
+    const hw = CSK_TOP_D/2 * scale, hh = ((CSK_TOP_D - SCREW_CLEAR_D)/2 / Math.tan(Math.PI*CSK_ANGLE/360)) * scale;
+    el(svg, 'polygon', {
+      points: `${px - hw},${Z(PLATE_T)} ${px + hw},${Z(PLATE_T)} ${px},${Z(PLATE_T) + hh}`,
+      fill: 'var(--case)', stroke: '#3d5a85', 'stroke-width': 1
+    });
+    el(svg, 'text', { x: px, y: Z(PLATE_T) - 6,
+      'text-anchor': 'middle', fill: 'var(--case)', 'font-size': 10, 'font-weight': 700
+    }, '8-32 ⌄ case');
+  }
+
+  // Bed line
+  el(svg, 'line', { x1: 20, y1: Z(0), x2: VB_W-20, y2: Z(0),
+    stroke: '#444', 'stroke-dasharray': '4 3' });
+  el(svg, 'text', { x: 24, y: Z(0)-4, class: 'dim' }, 'bed (Z=0)');
+
+  // Z dim
+  const xz = X(PLATE_L/2) + 26;
+  el(svg, 'line', { x1: xz, y1: Z(0), x2: xz, y2: Z(totalZ), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xz-4, y1: Z(0),     x2: xz+4, y2: Z(0),     stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xz-4, y1: Z(totalZ),x2: xz+4, y2: Z(totalZ),stroke: '#8b93a7' });
+  el(svg, 'text', { x: xz+8, y: Z(totalZ/2)+3, class: 'dim',
+    transform: `rotate(-90 ${xz+8} ${Z(totalZ/2)+3})` },
+    `${PLATE_T}+${STANDOFF_H} = ${totalZ} mm`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+const csk_depth = ((CSK_TOP_D - SCREW_CLEAR_D)/2) / Math.tan(Math.PI*CSK_ANGLE/360);
+
+document.getElementById('spec-plate').textContent =
+  `${PLATE_L} × ${PLATE_W} × ${PLATE_T} mm`;
+document.getElementById('spec-stand').textContent =
+  `4× Ø${STANDOFF_OD} × ${STANDOFF_H} mm bosses, Ø${SCREW_CLEAR_D} bolt clearance through standoff + plate`;
+document.getElementById('spec-hub').textContent =
+  `${HUB_SPACING_X} × ${HUB_SPACING_Y} mm  (centers at ±${(HUB_SPACING_X/2).toFixed(2)}, ±${HUB_SPACING_Y/2})`;
+document.getElementById('spec-case').textContent =
+  `${CASE_SPACING_X} × ${CASE_SPACING_Y} mm  (centers at ±${CASE_SPACING_X/2}, ±${CASE_SPACING_Y/2}) — Ø${SCREW_CLEAR_D} bore + Ø${CSK_TOP_D} × ${CSK_ANGLE}° countersink (top)`;
+document.getElementById('spec-hw').textContent =
+  `4× 8-32 bolts (hub mount), 4× 8-32 flat-head + nuts (case mount). Countersink depth ≈ ${csk_depth.toFixed(2)} mm.`;
+
+const checks = [];
+const ck = (ok, msg) => checks.push({ ok, msg });
+
+const edgeMarginHubX = PLATE_L/2 - (HUB_SPACING_X/2 + STANDOFF_OD/2);
+const edgeMarginHubY = PLATE_W/2 - (HUB_SPACING_Y/2 + STANDOFF_OD/2);
+const standoffToCaseX = (HUB_SPACING_X - CASE_SPACING_X) / 2;
+const cskWallRemaining = PLATE_T - csk_depth;
+
+ck(edgeMarginHubX > 0, `Standoff to long-edge margin: ${edgeMarginHubX.toFixed(2)} mm`);
+ck(edgeMarginHubY > 0, `Standoff to short-edge margin: ${edgeMarginHubY.toFixed(2)} mm`);
+ck(standoffToCaseX > STANDOFF_OD/2 + CSK_TOP_D/2 + 1, `Standoff↔case-csk X gap: ${standoffToCaseX.toFixed(2)} mm`);
+ck(cskWallRemaining > 1.0, `Plate wall below countersink: ${cskWallRemaining.toFixed(2)} mm`);
+ck(CSK_TOP_D < STANDOFF_OD * 2, `Countersink Ø ${CSK_TOP_D} < 2× standoff Ø ${STANDOFF_OD*2}`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

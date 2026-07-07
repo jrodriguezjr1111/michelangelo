@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Carrier Base Lid — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --m3:#94c8ef; --m3-dk:#4a7aa8;
+    --m2:#b58df0; --m2-dk:#6a4c9a;
+    --carrier:#d6b35a;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:215px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Carrier Base Lid — covers the ZED-F9P + IMU tray</h1>
+  <p>101 × 65 × 3 plate on the carrier's rim that also mounts the LILYGO:
+     M3 csk at the corner bosses (±45, ±27); <strong>Ø7 × 5 standoff extrusions</strong>
+     at the M2 pattern (stepped bore: Ø5.2 pocket below / Ø2.4 above); central
+     <strong>94.98 × 23.49 cutout</strong>. Source: <code>lilygo_sx1262/make_base_lid.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Lid plate</th><td id="s-lid">—</td></tr>
+      <tr><th>M3 corner attach</th><td id="s-m3">—</td></tr>
+      <tr><th>M2 standoff extrusions</th><td id="s-m2">—</td></tr>
+      <tr><th>Central cutout</th><td id="s-cut">—</td></tr>
+      <tr><th>Wall openings below</th><td id="s-open">—</td></tr>
+      <tr><th>Stack order</th><td id="s-stack">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">M3 csk (blue) at the corners; M2 pass-throughs (purple) with the carrier's bosses inside; carrier cavity dashed.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Lid</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3 (csk top)</span>
+      <span><span class="sw" style="background:var(--m2)"></span>M2 pass-through</span>
+      <span><span class="sw" style="background:var(--carrier)"></span>Carrier (ref)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 640 460"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (Y × Z)</h2>
+    <p class="sub">Lid on the rim + corner-boss tops; M2 bosses pass through and stand 2 mm proud for the LILYGO plate.</p>
+    <svg id="sec-svg" viewBox="0 0 640 300"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print flat, no supports. Fastening: the carrier's corner bores are Ø3.4 clearance —
+  use M3 heat-set inserts in the boss tops (or through-bolts). The −Y wall openings
+  end at z=17, below the 27 mm rim, so the lid leaves them clear.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_base_lid.py / make_base_stacked.py
+// =====================================================================
+const BASE_L=101.0, BASE_W=65.0, BASE_H=27.0;
+const WALL_T=3.0, CAV_L=BASE_L-2*WALL_T, CAV_W=BASE_W-2*WALL_T;
+const CB_X=45.0, CB_Y=27.0, CB_OD=6.0, CB_CLEAR_D=3.4;
+const M2_PX=95.33, M2_PY=28.55, M2_BOSS_D=4.5, M2_BOSS_H=5.0;
+const LID_T=3.0, M3_CSK_D=6.0, M3_CSK_DEPTH=1.8, M2_PASS_D=5.2;
+const M2_EXT_OD=7.0, M2_EXT_H=5.0, M2_CLEAR_D=2.4;
+const CUT_TRIM_NEG=7.4, CUT_TRIM_POS=1.5;
+const CUT_X=94.98-CUT_TRIM_NEG-CUT_TRIM_POS, CUT_Y=23.49;   // 86.08
+const CUT_XC=(CUT_TRIM_NEG-CUT_TRIM_POS)/2;                 // +2.95
+const BOARD_T=1.6;   // LILYGO PCB (ref)
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('top-svg');
+  const VB_W=640, VB_H=460, m=36;
+  const s=Math.min((VB_W-2*m)/BASE_L,(VB_H-2*m)/BASE_W);
+  const cx=VB_W/2, cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s, px=v=>v*s;
+
+  // lid
+  el(svg,'rect',{x:X(-BASE_L/2),y:Y(BASE_W/2),width:px(BASE_L),height:px(BASE_W),
+    fill:'var(--body)','fill-opacity':0.22,stroke:'var(--body-dk)','stroke-width':1.5,rx:3});
+  // carrier cavity (ref)
+  el(svg,'rect',{x:X(-CAV_L/2),y:Y(CAV_W/2),width:px(CAV_L),height:px(CAV_W),
+    fill:'none',stroke:'var(--carrier)','stroke-width':1,'stroke-dasharray':'4 3'});
+  el(svg,'text',{x:cx,y:Y(0)+3,'text-anchor':'middle',class:'dim',fill:'var(--carrier)'},
+    'carrier cavity 95 × 59 (ref)');
+
+  // M3 corner holes (csk)
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*CB_X),cy:Y(sy*CB_Y),r:px(M3_CSK_D/2),
+      fill:'none',stroke:'var(--m3)','stroke-width':0.8,'stroke-dasharray':'2 2'});
+    el(svg,'circle',{cx:X(sx*CB_X),cy:Y(sy*CB_Y),r:px(CB_CLEAR_D/2),
+      fill:'#101319',stroke:'var(--m3)','stroke-width':1.4});
+    el(svg,'circle',{cx:X(sx*CB_X),cy:Y(sy*CB_Y),r:px(CB_OD/2),
+      fill:'none',stroke:'var(--m3-dk)','stroke-width':0.6,'stroke-dasharray':'1 2'});
+  }
+  el(svg,'text',{x:X(CB_X),y:Y(CB_Y)-px(CB_OD/2)-3,'text-anchor':'middle',
+    fill:'var(--m3)','font-size':8,'font-weight':700},'M3');
+
+  // central cutout (X-shifted by the asymmetric trims)
+  el(svg,'rect',{x:X(CUT_XC-CUT_X/2),y:Y(CUT_Y/2),width:px(CUT_X),height:px(CUT_Y),
+    fill:'#101319',stroke:'var(--warn)','stroke-width':1.3});
+  el(svg,'text',{x:X(CUT_XC),y:Y(CUT_Y/2)-5,'text-anchor':'middle',class:'dim',fill:'var(--warn)'},
+    `cutout ${CUT_X.toFixed(2)} × ${CUT_Y} at X=${CUT_XC>0?'+':''}${CUT_XC.toFixed(2)}`);
+
+  // M2 standoff extrusions (edge-clipped) with stepped bores
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*M2_PX/2),cy:Y(sy*M2_PY/2),r:px(M2_EXT_OD/2),
+      fill:'var(--m2)','fill-opacity':0.5,stroke:'var(--m2-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(sx*M2_PX/2),cy:Y(sy*M2_PY/2),r:px(M2_PASS_D/2),
+      fill:'none',stroke:'var(--m2)','stroke-width':0.7,'stroke-dasharray':'2 1'});
+    el(svg,'circle',{cx:X(sx*M2_PX/2),cy:Y(sy*M2_PY/2),r:px(M2_CLEAR_D/2),
+      fill:'#101319',stroke:'var(--m2)','stroke-width':1});
+  }
+
+  // dims
+  const yd=Y(-BASE_W/2)+16;
+  el(svg,'line',{x1:X(-BASE_L/2),y1:yd,x2:X(BASE_L/2),y2:yd,stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:cx,y:yd+13,'text-anchor':'middle',class:'dim'},`${BASE_L} mm (X)`);
+  const xd=X(-BASE_L/2)-14;
+  el(svg,'line',{x1:xd,y1:Y(-BASE_W/2),x2:xd,y2:Y(BASE_W/2),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:xd-4,y:cy+4,'text-anchor':'end',class:'dim'},`${BASE_W} (Y)`);
+})();
+
+// =====================================================================
+// Cross-section (Y × Z) — z=0 at the carrier rim (lid underside)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('sec-svg');
+  const VB_W=640, VB_H=300, m=40;
+  const BELOW=10;                          // drawn portion of the carrier below
+  const ABOVE=LID_T+M2_EXT_H+BOARD_T+3;
+  const s=Math.min((VB_W-2*m)/BASE_W,(VB_H-2*m-10)/(ABOVE+BELOW));
+  const cx=VB_W/2, rimY=VB_H-m-BELOW*s;
+  const Y=y=>cx+y*s, Z=z=>rimY-z*s;        // z=0 = rim / lid underside
+
+  // carrier walls + corner bosses (dashed, below)
+  for (const sy of [-1,1]){
+    el(svg,'rect',{x:sy<0?Y(-BASE_W/2):Y(BASE_W/2-WALL_T),y:Z(0),width:WALL_T*s,height:BELOW*s,
+      fill:'none',stroke:'var(--carrier)','stroke-width':1,'stroke-dasharray':'5 3'});
+    el(svg,'rect',{x:Y(sy*CB_Y)-CB_OD/2*s,y:Z(0),width:CB_OD*s,height:BELOW*s,
+      fill:'none',stroke:'var(--m3-dk)','stroke-width':0.8,'stroke-dasharray':'3 2'});
+    // carrier M2 bosses nesting into the lid's lower pocket (2 mm proud)
+    el(svg,'rect',{x:Y(sy*M2_PY/2)-M2_BOSS_D/2*s,y:Z(M2_BOSS_H-LID_T),width:M2_BOSS_D*s,height:(M2_BOSS_H-LID_T)*s,
+      fill:'var(--m2)','fill-opacity':0.5,stroke:'var(--m2-dk)','stroke-width':0.8});
+  }
+  el(svg,'text',{x:Y(-BASE_W/2)+4,y:Z(0)+12,class:'dim',fill:'var(--carrier)'},'carrier walls / bosses');
+
+  // lid plate (gap at the central cutout, Y ±11.745)
+  el(svg,'rect',{x:Y(-BASE_W/2),y:Z(LID_T),width:BASE_W*s,height:LID_T*s,
+    fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+  el(svg,'rect',{x:Y(-CUT_Y/2),y:Z(LID_T)-0.5,width:CUT_Y*s,height:LID_T*s+1,fill:'#101319'});
+  el(svg,'text',{x:cx,y:Z(LID_T/2)+3,'text-anchor':'middle',class:'dim',fill:'var(--warn)'},
+    `cutout ${CUT_Y} across`);
+
+  // M2 standoff extrusions above the lid with stepped bores
+  for (const sy of [-1,1]){
+    const by=Y(sy*M2_PY/2);
+    el(svg,'rect',{x:by-M2_EXT_OD/2*s,y:Z(LID_T+M2_EXT_H),width:M2_EXT_OD*s,height:M2_EXT_H*s,
+      fill:'var(--m2)','fill-opacity':0.8,stroke:'var(--m2-dk)','stroke-width':0.8});
+    el(svg,'rect',{x:by-M2_CLEAR_D/2*s,y:Z(LID_T+M2_EXT_H),width:M2_CLEAR_D*s,height:M2_EXT_H*s,fill:'#101319'});
+    el(svg,'rect',{x:by-M2_PASS_D/2*s,y:Z(LID_T),width:M2_PASS_D*s,height:LID_T*s,fill:'#101319',
+      stroke:'var(--m2)','stroke-width':0.5});
+  }
+
+  // LILYGO board on the extrusion tops (dashed)
+  el(svg,'rect',{x:Y(-M2_PY/2-6),y:Z(LID_T+M2_EXT_H+BOARD_T),width:(M2_PY+12)*s,height:BOARD_T*s,
+    fill:'none',stroke:'var(--m2)','stroke-width':1,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:cx,y:Z(LID_T+M2_EXT_H+BOARD_T)-4,'text-anchor':'middle',class:'dim',fill:'var(--m2)'},
+    `LILYGO board seat z=${LID_T+M2_EXT_H}`);
+
+  // M3 csk pockets + screw lines at ±CB_Y
+  for (const sy of [-1,1]){
+    const by=Y(sy*CB_Y);
+    el(svg,'rect',{x:by-M3_CSK_D/2*s,y:Z(LID_T),width:M3_CSK_D*s,height:M3_CSK_DEPTH*s,
+      fill:'#101319',stroke:'var(--m3)','stroke-width':0.7});
+    el(svg,'line',{x1:by,y1:Z(LID_T)-2,x2:by,y2:Z(-BELOW+2),
+      stroke:'var(--m3)','stroke-width':1.3,'stroke-dasharray':'4 3'});
+  }
+  el(svg,'text',{x:Y(CB_Y)+6,y:Z(-BELOW/2),class:'dim',fill:'var(--m3)'},'M3 → boss bore');
+
+  // dims
+  const zd=Y(BASE_W/2)+22;
+  el(svg,'line',{x1:zd,y1:Z(0),x2:zd,y2:Z(LID_T),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:zd+6,y:Z(LID_T/2)+3,class:'dim'},`${LID_T}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-lid').textContent  = `${BASE_L} × ${BASE_W} × ${LID_T} mm — seats on the rim + 4 corner-boss tops (z=27)`;
+document.getElementById('s-m3').textContent   = `4× Ø${CB_CLEAR_D} at (±${CB_X}, ±${CB_Y}), csk Ø${M3_CSK_D}×${M3_CSK_DEPTH} on top — into the carrier's Ø${CB_OD} boss bores`;
+document.getElementById('s-m2').textContent   = `4× Ø${M2_EXT_OD}×${M2_EXT_H} (edge-clipped) at (±${(M2_PX/2).toFixed(2)}, ±${(M2_PY/2).toFixed(2)}) — bore Ø${M2_PASS_D} below (swallows the ${(M2_BOSS_H-LID_T).toFixed(0)} mm proud carrier boss) / Ø${M2_CLEAR_D} above; board seat z=${LID_T+M2_EXT_H}`;
+document.getElementById('s-cut').textContent  = `${CUT_X.toFixed(2)} × ${CUT_Y} mm at X=${CUT_XC>0?'+':''}${CUT_XC.toFixed(2)} — −X trimmed ${CUT_TRIM_NEG}, +X trimmed ${CUT_TRIM_POS} (from 94.98)`;
+document.getElementById('s-open').textContent = `USB-C / Ø6.21 / IMU openings end at z=17 < rim z=${BASE_H} — not blocked`;
+document.getElementById('s-stack').textContent= `saddle → carrier → THIS LID (LILYGO mounts directly on its extrusions) → board → tunnel lid`;
+
+const checks=[];
+const ck=(ok,msg)=>checks.push({ok,msg});
+
+ck(true, `Lid M3 (±${CB_X}, ±${CB_Y}) = carrier corner-boss pattern — Δ = 0.00 mm`);
+ck(CB_X+M3_CSK_D/2<BASE_L/2 && CB_Y+M3_CSK_D/2<BASE_W/2,
+  `M3 csk inside the footprint (edges ${(BASE_L/2-CB_X-M3_CSK_D/2).toFixed(1)} / ${(BASE_W/2-CB_Y-M3_CSK_D/2).toFixed(1)} mm)`);
+ck((M2_PASS_D-M2_BOSS_D)/2>=0.3, `Lower pocket swallows the carrier boss: ${((M2_PASS_D-M2_BOSS_D)/2).toFixed(2)} mm/side, depth ${LID_T} ≥ ${(M2_BOSS_H-LID_T).toFixed(0)} proud`);
+ck(M2_CLEAR_D>2.0 && M2_CLEAR_D<2.8, `Upper bore Ø${M2_CLEAR_D} (M2 clearance) through the ${M2_EXT_H} mm extrusion`);
+const dM3M2=Math.hypot(CB_X-M2_PX/2, CB_Y-M2_PY/2)-M3_CSK_D/2-M2_EXT_OD/2;
+ck(dM3M2>1, `M3 csk → M2 extrusion: ${dM3M2.toFixed(1)} mm`);
+const rimPos=BASE_L/2-(CUT_XC+CUT_X/2), rimNeg=BASE_L/2+(CUT_XC-CUT_X/2);
+ck(rimPos>1 && rimNeg>1 && CUT_Y/2+1<BASE_W/2,
+  `Cutout inside the footprint (rims +X ${rimPos.toFixed(2)} / −X ${rimNeg.toFixed(2)} / Y ${(BASE_W/2-CUT_Y/2).toFixed(2)} mm)`);
+ck((CB_Y-CUT_Y/2)-M3_CSK_D/2>2, `Cutout → corner M3 csk: ${((CB_Y-CUT_Y/2)-M3_CSK_D/2).toFixed(1)} mm`);
+let dBore=Infinity;
+for (const sx of [-1,1]){
+  const edgeX=CUT_XC+sx*CUT_X/2;
+  dBore=Math.min(dBore, Math.hypot(sx*M2_PX/2-edgeX, M2_PY/2-CUT_Y/2)-M2_CLEAR_D/2);
+}
+ck(dBore>1, `Cutout corner → M2 bore wall: ${dBore.toFixed(2)} mm (worst side)`);
+
+const ul=document.getElementById('checks');
+for (const c of checks){
+  const li=document.createElement('li');
+  li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

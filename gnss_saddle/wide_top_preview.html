@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>GNSS Saddle (Y-wide) — −Y Wing Top Plate Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --m2:#d6b35a; --m2-dk:#8a7028; --m2l:#b58df0; --m2l-dk:#6a4c9a;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:900px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:220px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GNSS Saddle (Y-wide) — −Y Wing Top Plate</h1>
+  <p>Flat cover/mount plate carrying both M2 patterns, aligned to the −Y wing of
+     <code>gnss_saddle/make_gnss_saddle_wide.py</code>.
+     Source: <code>gnss_saddle/make_gnss_saddle_wide_top.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Plate</th><td id="s-plate">—</td></tr>
+      <tr><th>Y span (global)</th><td id="s-yspan">—</td></tr>
+      <tr><th>M2 small pattern</th><td id="s-m2s">—</td></tr>
+      <tr><th>M2 large pattern</th><td id="s-m2l">—</td></tr>
+      <tr><th>Countersink</th><td id="s-csk">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Plate footprint with both M2 patterns; dashed rings = top-face countersinks.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Plate</span>
+      <span><span class="sw" style="background:var(--m2)"></span>M2 small</span>
+      <span><span class="sw" style="background:var(--m2l)"></span>M2 large</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 420 560"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (X–Z) through a hole row</h2>
+    <p class="sub">Ø2.4 clearance through plate, Ø4.0 countersink on top face.</p>
+    <svg id="sec-svg" viewBox="0 0 560 220"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print flat on bed, countersink face UP — no supports. The plate drops onto the
+  saddle's −Y wing; M2 screws pass through and thread into the boards/standoffs below.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_gnss_saddle_wide_top.py
+// =====================================================================
+const BLOCK_LEN = 50.0, BLOCK_WID = 197.0;
+const M2_CLEAR_D = 2.4, M2_CSK_D = 4.0, M2_CSK_DEPTH = 1.2;
+const PLATE_T = 3.0, MARGIN = 4.0;
+
+// Patterns: [pat_x, pat_y, y_center]
+const M2S = [19.95, 17.81, -87.0];
+const M2L = [45.90, 18.27, -61.0];
+const PATTERNS = [{p:M2S, cls:'s'}, {p:M2L, cls:'l'}];
+
+// Derived footprint (mirror of the Python)
+const yHoles = [];
+for (const {p} of PATTERNS) for (const sy of [-1,1]) yHoles.push(p[2] + sy*p[1]/2);
+const PLATE_Y_MIN = Math.max(Math.min(...yHoles) - MARGIN, -BLOCK_WID/2);
+const PLATE_Y_MAX = Math.max(...yHoles) + MARGIN;
+const PLATE_WID = PLATE_Y_MAX - PLATE_Y_MIN;
+const PLATE_Y_CEN = (PLATE_Y_MAX + PLATE_Y_MIN)/2;
+const maxHoleX = Math.max(...PATTERNS.map(o => o.p[0]/2));
+const PLATE_X = Math.max(BLOCK_LEN, 2*(maxHoleX + M2_CSK_D/2 + MARGIN));
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text){
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+
+// =====================================================================
+// Top view — plate-local frame (centered at plate center)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 420, VB_H = 560, margin = 40;
+  const s = Math.min((VB_W - 2*margin)/PLATE_X, (VB_H - 2*margin)/PLATE_WID);
+  const cx = VB_W/2, cy = VB_H/2;
+  // local coords: x as-is, y relative to plate center (global y - PLATE_Y_CEN)
+  const X = x => cx + x*s;
+  const Y = yLocal => cy - yLocal*s;
+
+  // Plate
+  el(svg, 'rect', { x: X(-PLATE_X/2), y: Y(PLATE_WID/2),
+    width: PLATE_X*s, height: PLATE_WID*s,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width':1.5, rx:3 });
+
+  // Holes for both patterns
+  for (const {p, cls} of PATTERNS) {
+    const col = cls === 's' ? 'var(--m2)' : 'var(--m2l)';
+    const colDk = cls === 's' ? 'var(--m2-dk)' : 'var(--m2l-dk)';
+    for (const sx of [-1,1]) for (const sy of [-1,1]) {
+      const gx = sx*p[0]/2;
+      const gyLocal = (p[2] + sy*p[1]/2) - PLATE_Y_CEN;
+      el(svg, 'circle', { cx: X(gx), cy: Y(gyLocal), r: M2_CSK_D/2*s,
+        fill:'none', stroke: col, 'stroke-width':0.8, 'stroke-dasharray':'2 2' });
+      el(svg, 'circle', { cx: X(gx), cy: Y(gyLocal), r: M2_CLEAR_D/2*s,
+        fill:'#101319', stroke: colDk, 'stroke-width':1 });
+    }
+    // pattern box outline
+    const bx = X(-p[0]/2), by = Y((p[2]+p[1]/2) - PLATE_Y_CEN);
+    el(svg, 'rect', { x: bx, y: by, width: p[0]*s, height: p[1]*s,
+      fill:'none', stroke: col, 'stroke-width':0.6, 'stroke-dasharray':'4 3', opacity:0.6 });
+    el(svg, 'text', { x: cx, y: Y(p[2]-PLATE_Y_CEN)+3, 'text-anchor':'middle',
+      class:'dim', fill: col }, `${p[0]} × ${p[1]}`);
+  }
+
+  // Plate dims
+  const yd = Y(-PLATE_WID/2) + 20;
+  el(svg, 'line', { x1:X(-PLATE_X/2), y1:yd, x2:X(PLATE_X/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${PLATE_X.toFixed(1)} mm (X)`);
+  const xd = X(-PLATE_X/2) - 18;
+  el(svg, 'line', { x1:xd, y1:Y(-PLATE_WID/2), x2:xd, y2:Y(PLATE_WID/2), stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:xd-4, y:cy+4, 'text-anchor':'end', class:'dim' }, `${PLATE_WID.toFixed(1)} (Y)`);
+  el(svg, 'text', { x:cx, y:Y(PLATE_WID/2)-6, 'text-anchor':'middle', class:'dim' }, `−Y wing  ·  toward block →`);
+})();
+
+// =====================================================================
+// Cross-section (X–Z) through the large pattern row
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 560, VB_H = 220, margin = 40;
+  const s = Math.min((VB_W - 2*margin)/PLATE_X, (VB_H - 2*margin - 20)/(PLATE_T*6));
+  const cx = VB_W/2, floorY = VB_H - margin - 10;
+  const X = x => cx + x*s;
+  const Y = z => floorY - z*s;
+
+  // Plate profile
+  el(svg, 'rect', { x:X(-PLATE_X/2), y:Y(PLATE_T), width:PLATE_X*s, height:PLATE_T*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5 });
+
+  // Holes at large pattern X (±22.95) and small (±9.97)
+  const xs = [M2L[0]/2, M2S[0]/2];
+  for (const hx of xs) for (const sx of [-1,1]) {
+    const xv = sx*hx;
+    el(svg, 'rect', { x:X(xv)-M2_CLEAR_D/2*s, y:Y(PLATE_T), width:M2_CLEAR_D*s, height:PLATE_T*s,
+      fill:'#101319', stroke:'var(--m2)', 'stroke-width':1 });
+    el(svg, 'rect', { x:X(xv)-M2_CSK_D/2*s, y:Y(PLATE_T), width:M2_CSK_D*s, height:M2_CSK_DEPTH*s,
+      fill:'#1a1c22', stroke:'var(--m2)', 'stroke-width':1 });
+  }
+
+  // Dims
+  const yd = Y(0) + 22;
+  el(svg, 'line', { x1:X(-PLATE_X/2), y1:yd, x2:X(PLATE_X/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${PLATE_X.toFixed(1)} mm`);
+  el(svg, 'text', { x:X(PLATE_X/2)-4, y:Y(PLATE_T)-3, 'text-anchor':'end', class:'dim' }, `t ${PLATE_T}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-plate').textContent = `${PLATE_X.toFixed(1)} × ${PLATE_WID.toFixed(2)} × ${PLATE_T} mm (Y center ${PLATE_Y_CEN.toFixed(2)})`;
+document.getElementById('s-yspan').textContent = `${PLATE_Y_MIN.toFixed(2)} … ${PLATE_Y_MAX.toFixed(2)} mm`;
+document.getElementById('s-m2s').textContent = `4× Ø${M2_CLEAR_D} at (±${(M2S[0]/2).toFixed(2)}, ${(M2S[2]-M2S[1]/2).toFixed(2)}…${(M2S[2]+M2S[1]/2).toFixed(2)}) — ${M2S[0]} × ${M2S[1]}`;
+document.getElementById('s-m2l').textContent = `4× Ø${M2_CLEAR_D} at (±${(M2L[0]/2).toFixed(2)}, ${(M2L[2]-M2L[1]/2).toFixed(2)}…${(M2L[2]+M2L[1]/2).toFixed(2)}) — ${M2L[0]} × ${M2L[1]}`;
+document.getElementById('s-csk').textContent = `Ø${M2_CSK_D} × ${M2_CSK_DEPTH} on top face (flush M2 heads)`;
+
+const edgeX = PLATE_X/2 - maxHoleX - M2_CSK_D/2;
+const edgeYmin = (Math.min(...yHoles) - M2_CSK_D/2) - PLATE_Y_MIN;
+const edgeYmax = PLATE_Y_MAX - (Math.max(...yHoles) + M2_CSK_D/2);
+const gap = (M2L[2]-M2L[1]/2) - (M2S[2]+M2S[1]/2);
+const clampEdge = -BLOCK_WID/2 - PLATE_Y_MIN;  // ≥0 means plate stays within block −Y edge
+
+const checks = [
+  { ok: edgeX >= 0.5, msg: `csk → plate X edge: ${edgeX.toFixed(2)} mm` },
+  { ok: edgeYmin >= 0.5 && edgeYmax >= 0.5, msg: `csk → plate Y edges: ${edgeYmin.toFixed(2)} (−Y), ${edgeYmax.toFixed(2)} (+Y) mm` },
+  { ok: gap > M2_CLEAR_D + 1.0, msg: `M2 small ↔ large row gap: ${gap.toFixed(2)} mm` },
+  { ok: clampEdge >= -0.001, msg: `Plate −Y edge vs block −Y edge: ${clampEdge.toFixed(2)} mm (0 = flush)` },
+  { ok: M2_CSK_DEPTH < PLATE_T, msg: `Csk depth ${M2_CSK_DEPTH} < plate ${PLATE_T} mm` },
+  { ok: PLATE_X > BLOCK_LEN, msg: `Plate X ${PLATE_X.toFixed(1)} mm overhangs ${BLOCK_LEN} mm clamp by ${((PLATE_X-BLOCK_LEN)/2).toFixed(2)} mm per side` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

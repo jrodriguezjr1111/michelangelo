@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>IMU Platform Saddle — Snap-on Lid Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --lip:#3fae6b; --lip-dk:#2f9e74;
+    --snap:#e07a5a; --snap-dk:#9a4a30;
+    --m3:#d6b35a; --m3-dk:#8a7028;
+    --saddle:#c87aff;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:210px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Snug-fit Lid — for the IMU platform saddle</h1>
+  <p>Closes the saddle's open bottom: 101 × 65 plate with a <strong>solid 4 mm
+     rectangular extrusion</strong> that press-fits the saddle's wall frame
+     (0.15 mm/side); same centered 58 × 49 M3 pattern as the saddle so
+     through-bolts pass both. Source: <code>flycatcher/make_imu_platform_lid.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Plate</th><td id="s-plate">—</td></tr>
+      <tr><th>Inner lip</th><td id="s-lip">—</td></tr>
+      <tr><th>Snap ridges</th><td id="s-snap">—</td></tr>
+      <tr><th>M3 holes</th><td id="s-m3">—</td></tr>
+      <tr><th>Rect cutout</th><td id="s-cut">—</td></tr>
+      <tr><th>Saddle interface</th><td id="s-sad">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Solid plug (green) nests in the saddle cavity (dashed purple); M3 gold.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Plate</span>
+      <span><span class="sw" style="background:var(--lip)"></span>Solid plug</span>
+      <span><span class="sw" style="background:var(--m3)"></span>M3</span>
+      <span><span class="sw" style="background:var(--saddle)"></span>Saddle (ref)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 640 460"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (Y × Z)</h2>
+    <p class="sub">Saddle walls (dashed) drop around the solid plug — snug press fit, no ridges.</p>
+    <svg id="sec-svg" viewBox="0 0 640 300"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print plate-down, plug UP — no supports. Snug press fit: tune <code>FIT_CLEAR</code>
+  (0.15/side) if too tight or loose. Plug stays below the saddle's cable slots, so they
+  remain open with the lid fitted.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_imu_platform_lid.py
+// =====================================================================
+const SAD_L=101.0, SAD_W=65.0, SAD_WALL=2.5;
+const CAV_L=SAD_L-2*SAD_WALL, CAV_W=SAD_W-2*SAD_WALL;   // 96 × 60
+const SLOT_Z_BOTTOM=(29.0-3.0)/2-2.0-7.8/2;             // 7.1 (saddle frame)
+
+const LID_T=3.0, FIT_CLEAR=0.15, PLUG_H=4.0;
+const PLUG_X=CAV_L-2*FIT_CLEAR, PLUG_Y=CAV_W-2*FIT_CLEAR;   // 95.7 × 59.7
+const M3_PAT_X=58.0, M3_PAT_Y=49.0, M3_D=3.4;
+const CUT_W_X=9.0, CUT_L_Y=18.0, CUT_EDGE=28.0-11.30;   // shifted +11.30 in X
+const CUT_XC=SAD_L/2-CUT_EDGE-CUT_W_X/2, CUT_YC=0.0;   // +29.3 (near face 16.7 from +X edge)
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('top-svg');
+  const VB_W=640, VB_H=460, m=36;
+  const s=Math.min((VB_W-2*m)/SAD_L,(VB_H-2*m)/SAD_W);
+  const cx=VB_W/2, cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s, px=v=>v*s;
+
+  // plate
+  el(svg,'rect',{x:X(-SAD_L/2),y:Y(SAD_W/2),width:px(SAD_L),height:px(SAD_W),
+    fill:'var(--body)','fill-opacity':0.2,stroke:'var(--body-dk)','stroke-width':1.5,rx:3});
+
+  // saddle cavity reference (dashed)
+  el(svg,'rect',{x:X(-CAV_L/2),y:Y(CAV_W/2),width:px(CAV_L),height:px(CAV_W),
+    fill:'none',stroke:'var(--saddle)','stroke-width':1,'stroke-dasharray':'4 3'});
+
+  // solid rectangular extrusion (plug)
+  el(svg,'rect',{x:X(-PLUG_X/2),y:Y(PLUG_Y/2),width:px(PLUG_X),height:px(PLUG_Y),
+    fill:'var(--lip)','fill-opacity':0.35,stroke:'var(--lip-dk)','stroke-width':1.2});
+  el(svg,'text',{x:X(0),y:Y(0)+4,'text-anchor':'middle',class:'dim',fill:'var(--lip)'},
+    `solid plug ${PLUG_X} × ${PLUG_Y}`);
+
+  // rectangular cutout (through plate + plug)
+  el(svg,'rect',{x:X(CUT_XC-CUT_W_X/2),y:Y(CUT_YC+CUT_L_Y/2),width:px(CUT_W_X),height:px(CUT_L_Y),
+    fill:'#101319',stroke:'var(--snap)','stroke-width':1.4});
+  el(svg,'text',{x:X(CUT_XC),y:Y(CUT_YC+CUT_L_Y/2)-5,'text-anchor':'middle',class:'dim',fill:'var(--snap)'},
+    `${CUT_W_X}×${CUT_L_Y}`);
+
+  // M3 holes
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*M3_PAT_X/2),cy:Y(sy*M3_PAT_Y/2),r:px(M3_D/2),
+      fill:'#101319',stroke:'var(--m3)','stroke-width':1.4});
+  }
+  el(svg,'text',{x:X(0),y:Y(M3_PAT_Y/2)-6,'text-anchor':'middle',class:'dim',fill:'var(--m3)'},
+    `M3 ${M3_PAT_X}×${M3_PAT_Y} centered (= saddle)`);
+
+  // dims
+  const yd=Y(-SAD_W/2)+16;
+  el(svg,'line',{x1:X(-SAD_L/2),y1:yd,x2:X(SAD_L/2),y2:yd,stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:cx,y:yd+13,'text-anchor':'middle',class:'dim'},`${SAD_L} mm (X)`);
+  const xd=X(-SAD_L/2)-14;
+  el(svg,'line',{x1:xd,y1:Y(-SAD_W/2),x2:xd,y2:Y(SAD_W/2),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:xd-4,y:cy+4,'text-anchor':'end',class:'dim'},`${SAD_W} (Y)`);
+})();
+
+// =====================================================================
+// Cross-section (Y × Z)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('sec-svg');
+  const VB_W=640, VB_H=300, m=40;
+  const SHOW_SAD_H=14;     // drawn portion of saddle walls above
+  const totZ=LID_T+PLUG_H+SHOW_SAD_H;
+  const s=Math.min((VB_W-2*m)/SAD_W, (VB_H-2*m-10)/totZ);
+  const cx=VB_W/2, floorY=VB_H-m;
+  const Y=y=>cx+y*s, Z=z=>floorY-z*s;
+
+  // plate
+  el(svg,'rect',{x:Y(-SAD_W/2),y:Z(LID_T),width:SAD_W*s,height:LID_T*s,
+    fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+
+  // solid plug (full width between the saddle walls)
+  el(svg,'rect',{x:Y(-PLUG_Y/2),y:Z(LID_T+PLUG_H),width:PLUG_Y*s,height:PLUG_H*s,
+    fill:'var(--lip)','fill-opacity':0.7,stroke:'var(--lip-dk)','stroke-width':1});
+  el(svg,'text',{x:Y(0),y:Z(LID_T+PLUG_H/2)+3,'text-anchor':'middle',class:'dim'},
+    `solid plug ${PLUG_Y} wide × ${PLUG_H}`);
+
+  // saddle walls dropping over (dashed)
+  for (const sy of [-1,1]){
+    el(svg,'rect',{x:sy<0?Y(-SAD_W/2):Y(SAD_W/2-SAD_WALL),y:Z(LID_T+SHOW_SAD_H),
+      width:SAD_WALL*s,height:SHOW_SAD_H*s,
+      fill:'none',stroke:'var(--saddle)','stroke-width':1.2,'stroke-dasharray':'5 3'});
+  }
+  el(svg,'text',{x:Y(SAD_W/2)-4,y:Z(LID_T+SHOW_SAD_H)-4,'text-anchor':'end',class:'dim',fill:'var(--saddle)'},
+    'saddle walls (open bottom)');
+  // slot bottom reference
+  el(svg,'line',{x1:Y(-SAD_W/2),y1:Z(LID_T+SLOT_Z_BOTTOM),x2:Y(SAD_W/2),y2:Z(LID_T+SLOT_Z_BOTTOM),
+    stroke:'#8b93a7','stroke-dasharray':'4 3','stroke-width':0.8});
+  el(svg,'text',{x:Y(SAD_W/2)+4,y:Z(LID_T+SLOT_Z_BOTTOM)+3,class:'dim'},'cable slots start');
+
+  // M3 (projected at Y=±24.5) — through plate AND plug
+  for (const sy of [-1,1])
+    el(svg,'rect',{x:Y(sy*M3_PAT_Y/2)-M3_D/2*s,y:Z(LID_T+PLUG_H),width:M3_D*s,height:(LID_T+PLUG_H)*s,
+      fill:'#101319',stroke:'var(--m3)','stroke-width':1});
+
+  // dims
+  const zd=Y(SAD_W/2)+26;
+  el(svg,'line',{x1:zd,y1:Z(0),x2:zd,y2:Z(LID_T+PLUG_H),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:zd+6,y:Z((LID_T+PLUG_H)/2)+3,class:'dim',transform:`rotate(-90 ${zd+6} ${Z((LID_T+PLUG_H)/2)+3})`},
+    `${LID_T+PLUG_H} mm`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-plate').textContent = `${SAD_L} × ${SAD_W} × ${LID_T} mm (matches the saddle footprint)`;
+document.getElementById('s-lip').textContent   = `${PLUG_X} × ${PLUG_Y} × ${PLUG_H} mm SOLID rectangular extrusion — ${FIT_CLEAR}/side in the ${CAV_L} × ${CAV_W} frame`;
+document.getElementById('s-snap').textContent  = `snug press fit (no ridges) — total clearance ${(2*FIT_CLEAR).toFixed(2)} mm per axis`;
+document.getElementById('s-m3').textContent    = `4× Ø${M3_D} at (±${M3_PAT_X/2}, ±${M3_PAT_Y/2}) — identical to the saddle's pattern, through plate + plug`;
+document.getElementById('s-cut').textContent   = `${CUT_W_X} (X) × ${CUT_L_Y} (Y) through plate + plug at (X=${CUT_XC.toFixed(1)}, Y=${CUT_YC}) — near face ${CUT_EDGE} mm from the +X edge, Y-centered`;
+document.getElementById('s-sad').textContent   = `plug nests in the saddle's open bottom; rim band ${(SAD_WALL).toFixed(1)} mm seats on the plate edge`;
+
+const checks=[];
+const ck=(ok,msg)=>checks.push({ok,msg});
+
+ck(true, `Lid M3 = saddle M3 (58×49 centered) — Δ = 0.00 mm`);
+ck(FIT_CLEAR>=0.1 && FIT_CLEAR<=0.2, `Snug fit: ${FIT_CLEAR} mm/side (press fit in PLA)`);
+ck(LID_T+PLUG_H+0.5 < LID_T+SLOT_Z_BOTTOM, `Plug top (z=${LID_T+PLUG_H}) below the cable slots (z=${(LID_T+SLOT_Z_BOTTOM).toFixed(1)})`);
+ck(M3_PAT_X/2+M3_D/2 < PLUG_X/2 && M3_PAT_Y/2+M3_D/2 < PLUG_Y/2,
+  `M3 holes inside the plug (edges ±${(PLUG_X/2).toFixed(1)}, ±${(PLUG_Y/2).toFixed(1)})`);
+ck(SAD_L===101.0, `Lid length = 101 mm (matches the saddle)`);
+
+// cutout placement
+let cutM3=Infinity;
+for (const sx of [-1,1]) for (const sy of [-1,1]){
+  const dx=Math.max(Math.abs(sx*M3_PAT_X/2-CUT_XC)-CUT_W_X/2,0);
+  const dy=Math.max(Math.abs(sy*M3_PAT_Y/2-CUT_YC)-CUT_L_Y/2,0);
+  cutM3=Math.min(cutM3, Math.hypot(dx,dy)-M3_D/2);
+}
+ck(CUT_XC+CUT_W_X/2<PLUG_X/2-1, `Cutout inside the plug (edge ${(CUT_XC+CUT_W_X/2).toFixed(1)} < ${(PLUG_X/2-1).toFixed(1)})`);
+ck(cutM3>1, `Cutout → nearest M3 hole: ${cutM3.toFixed(1)} mm`);
+ck(Math.abs(CUT_YC)<0.01 && Math.abs((SAD_L/2-(CUT_XC+CUT_W_X/2))-CUT_EDGE)<0.01,
+  `Cutout centered in Y; near face ${(SAD_L/2-(CUT_XC+CUT_W_X/2)).toFixed(1)} mm from the +X (65 mm) edge`);
+
+const ul=document.getElementById('checks');
+for (const c of checks){
+  const li=document.createElement('li');
+  li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

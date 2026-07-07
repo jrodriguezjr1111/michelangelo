@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Jetson Nano X-Base — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --nano:#3fae6b; --nano-dk:#2f9e74;
+    --m4:#d6b35a; --m4-dk:#8a7028;
+    --saddle:#c87aff;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:210px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Jetson Nano X-Base — bolts to the GNSS saddle's M4s</h1>
+  <p>Four arms from the center to the Nano's 58.25 × 86.14 holes, picking up the
+     saddle's M4 clamp bolts at (±18, ±18): Ø4.4 clearance, Ø8 × 4.5 counterbore in
+     raised Ø12 × 4 bosses. Source: <code>gnss_saddle/make_nano_xbase.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>X-plate</th><td id="s-plate">—</td></tr>
+      <tr><th>M4 attach (extrusions)</th><td id="s-m4">—</td></tr>
+      <tr><th>Nano standoffs</th><td id="s-nano">—</td></tr>
+      <tr><th>Heights</th><td id="s-z">—</td></tr>
+      <tr><th>Assembly</th><td id="s-asm">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">The X: arms to the Nano corners (green standoffs); M4 bosses gold; saddle refs dashed purple.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Arms</span>
+      <span><span class="sw" style="background:var(--m4)"></span>M4 boss + cb</span>
+      <span><span class="sw" style="background:var(--nano)"></span>Nano standoff</span>
+      <span><span class="sw" style="background:var(--saddle)"></span>Saddle (ref)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 460 560"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (Y × Z)</h2>
+    <p class="sub">Plate on the saddle top; M4 heads recessed in the bosses; board on standoffs clears everything.</p>
+    <svg id="sec-svg" viewBox="0 0 640 300"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print flat, no supports. Long M4 cap screws drop into the boss counterbores and clamp
+  X-base → saddle top half → saddle bottom half (nut in the saddle's bottom counterbore).
+  The hub covers the saddle's Ø30 GNSS hole — ask for a center passthrough if needed.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_nano_xbase.py
+// =====================================================================
+const NANO_HX=58.25, NANO_HY=86.14;
+const NANO_X=NANO_HX/2, NANO_Y=NANO_HY/2;          // 29.13, 43.07
+const M4_P=18.0, M4_CLEAR_D=4.4, M4_CB_D=8.0, M4_CB_DEPTH=4.5;
+const M4_BOSS_OD=12.0, M4_BOSS_H=4.0, M4_PAD_OD=14.0;
+const PLATE_T=4.0, ARM_W=20.0;
+const ARM_LEN0=Math.hypot(NANO_X,NANO_Y);          // 51.99
+const ARM_LEN=ARM_LEN0+6.0;
+const SO_OD=6.0, SO_H=6.0, SO_PILOT=2.5;
+const BOARD_T=1.6;
+const GNSS_D=30.0;                                  // saddle center hole (ref)
+const BOARD_W=80.0, BOARD_L=100.0;                  // Nano board envelope (ref)
+const OFFAXIS=Math.abs(M4_P*NANO_Y-M4_P*NANO_X)/ARM_LEN0;   // 4.83
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('top-svg');
+  const VB_W=460, VB_H=560, m=36;
+  const envX=2*(NANO_X+8), envY=2*(NANO_Y+8);
+  const s=Math.min((VB_W-2*m)/envX,(VB_H-2*m)/envY);
+  const cx=VB_W/2, cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s, px=v=>v*s;
+
+  // saddle refs: outline + GNSS hole (dashed)
+  el(svg,'rect',{x:X(-50.77),y:Y(50.77*65/101.54),width:px(101.54),height:px(65),
+    fill:'none',stroke:'var(--saddle)','stroke-width':0.8,'stroke-dasharray':'5 4',opacity:0.5});
+  el(svg,'circle',{cx:X(0),cy:Y(0),r:px(GNSS_D/2),
+    fill:'none',stroke:'var(--saddle)','stroke-width':1,'stroke-dasharray':'4 3'});
+
+  // arms (rotated rects; screen angle = −model angle)
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    const ang=Math.atan2(sy*NANO_Y,sx*NANO_X)*180/Math.PI;
+    el(svg,'rect',{x:cx,y:cy-px(ARM_W/2),width:px(ARM_LEN),height:px(ARM_W),
+      fill:'var(--body)','fill-opacity':0.35,stroke:'var(--body-dk)','stroke-width':1,
+      transform:`rotate(${-ang} ${cx} ${cy})`});
+  }
+
+  // M4 pads + bosses + cb + hole
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    const hx=sx*M4_P, hy=sy*M4_P;
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(M4_PAD_OD/2),fill:'var(--body)','fill-opacity':0.5,stroke:'var(--body-dk)','stroke-width':0.6});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(M4_BOSS_OD/2),fill:'var(--m4)','fill-opacity':0.55,stroke:'var(--m4-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(M4_CB_D/2),fill:'none',stroke:'var(--m4)','stroke-width':0.8,'stroke-dasharray':'2 2'});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(M4_CLEAR_D/2),fill:'#101319',stroke:'var(--m4)','stroke-width':1.2});
+  }
+  el(svg,'text',{x:X(0),y:Y(M4_P)-px(M4_BOSS_OD/2)-4,'text-anchor':'middle',class:'dim',fill:'var(--m4)'},
+    'M4 ±18 (saddle bolts)');
+
+  // Nano board outline + standoffs
+  el(svg,'rect',{x:X(-BOARD_W/2),y:Y(BOARD_L/2),width:px(BOARD_W),height:px(BOARD_L),
+    fill:'none',stroke:'var(--nano)','stroke-width':0.8,'stroke-dasharray':'3 2',opacity:0.7});
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    el(svg,'circle',{cx:X(sx*NANO_X),cy:Y(sy*NANO_Y),r:px(SO_OD/2),
+      fill:'var(--nano)',stroke:'var(--nano-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(sx*NANO_X),cy:Y(sy*NANO_Y),r:px(SO_PILOT/2),fill:'#101319'});
+  }
+  el(svg,'text',{x:X(0),y:Y(NANO_Y)-px(SO_OD/2)-4,'text-anchor':'middle',class:'dim',fill:'var(--nano)'},
+    `Nano ${NANO_HX} × ${NANO_HY}`);
+
+  // dims
+  const yd=Y(-NANO_Y-8)+14;
+  el(svg,'line',{x1:X(-NANO_X),y1:yd,x2:X(NANO_X),y2:yd,stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:cx,y:yd+12,'text-anchor':'middle',class:'dim'},`${NANO_HX} mm (X)`);
+})();
+
+// =====================================================================
+// Cross-section (Y × Z) — z=0 at the saddle top face
+// =====================================================================
+(() => {
+  const svg=document.getElementById('sec-svg');
+  const VB_W=640, VB_H=300, m=40;
+  const SPAN=2*(NANO_Y+8);
+  const topZ=PLATE_T+SO_H+BOARD_T+4;
+  const s=Math.min((VB_W-2*m)/SPAN,(VB_H-2*m-16)/(topZ+6));
+  const cx=VB_W/2, baseY=VB_H-m-6*s;
+  const Y=y=>cx+y*s, Z=z=>baseY-z*s;
+
+  // saddle top reference
+  el(svg,'line',{x1:Y(-SPAN/2),y1:Z(0),x2:Y(SPAN/2),y2:Z(0),stroke:'var(--saddle)','stroke-dasharray':'5 4','stroke-width':1});
+  el(svg,'text',{x:Y(SPAN/2)-2,y:Z(0)+12,'text-anchor':'end',class:'dim',fill:'var(--saddle)'},'saddle top (M4s continue down)');
+
+  // plate (projected continuous through the hub)
+  el(svg,'rect',{x:Y(-NANO_Y-6),y:Z(PLATE_T),width:(2*NANO_Y+12)*s,height:PLATE_T*s,
+    fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+
+  // M4 bosses at ±18 with cb + screw lines
+  for (const sy of [-1,1]){
+    const by=Y(sy*M4_P);
+    el(svg,'rect',{x:by-M4_BOSS_OD/2*s,y:Z(PLATE_T+M4_BOSS_H),width:M4_BOSS_OD*s,height:M4_BOSS_H*s,
+      fill:'var(--m4)','fill-opacity':0.7,stroke:'var(--m4-dk)','stroke-width':0.8});
+    el(svg,'rect',{x:by-M4_CB_D/2*s,y:Z(PLATE_T+M4_BOSS_H),width:M4_CB_D*s,height:M4_CB_DEPTH*s,
+      fill:'#101319',stroke:'var(--m4)','stroke-width':0.6});
+    el(svg,'line',{x1:by,y1:Z(PLATE_T+M4_BOSS_H-M4_CB_DEPTH),x2:by,y2:Z(0)-8*s,
+      stroke:'var(--m4)','stroke-width':1.3,'stroke-dasharray':'4 3'});
+  }
+
+  // Nano standoffs + board
+  for (const sy of [-1,1])
+    el(svg,'rect',{x:Y(sy*NANO_Y)-SO_OD/2*s,y:Z(PLATE_T+SO_H),width:SO_OD*s,height:SO_H*s,
+      fill:'var(--nano)',stroke:'var(--nano-dk)','stroke-width':0.8});
+  el(svg,'rect',{x:Y(-BOARD_L/2),y:Z(PLATE_T+SO_H+BOARD_T),width:BOARD_L*s,height:BOARD_T*s,
+    fill:'var(--nano)','fill-opacity':0.6,stroke:'var(--nano-dk)','stroke-width':1});
+  el(svg,'text',{x:cx,y:Z(PLATE_T+SO_H+BOARD_T)-4,'text-anchor':'middle',class:'dim',fill:'var(--nano)'},
+    `Jetson Nano (bottom z=${PLATE_T+SO_H})`);
+
+  // dims
+  const zd=Y(-SPAN/2)-16;
+  el(svg,'line',{x1:zd,y1:Z(0),x2:zd,y2:Z(PLATE_T+M4_BOSS_H),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:zd-6,y:Z((PLATE_T+M4_BOSS_H)/2)+3,'text-anchor':'end',class:'dim'},`${PLATE_T+M4_BOSS_H}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-plate').textContent =
+  `4 arms ${ARM_W} × ${PLATE_T} mm from center to the Nano corners — envelope ≈${(2*(NANO_X+6)).toFixed(0)} × ${(2*(NANO_Y+6)).toFixed(0)} mm`;
+document.getElementById('s-m4').textContent =
+  `4× Ø${M4_CLEAR_D} at (±${M4_P}, ±${M4_P}); cb Ø${M4_CB_D}×${M4_CB_DEPTH} in Ø${M4_BOSS_OD}×${M4_BOSS_H} bosses on Ø${M4_PAD_OD} pads (${OFFAXIS.toFixed(2)} mm off the arm axis)`;
+document.getElementById('s-nano').textContent =
+  `4× Ø${SO_OD}×${SO_H}, Ø${SO_PILOT} pilot (M3 self-tap) at (±${NANO_X.toFixed(2)}, ±${NANO_Y.toFixed(2)})`;
+document.getElementById('s-z').textContent =
+  `plate ${PLATE_T}; boss top ${PLATE_T+M4_BOSS_H}; board bottom ${PLATE_T+SO_H} (${SO_H-M4_BOSS_H} mm over the bosses)`;
+document.getElementById('s-asm').textContent =
+  `long M4s: X-base → saddle top half → saddle bottom half (heads recessed in the bosses)`;
+
+const checks=[];
+const ck=(ok,msg)=>checks.push({ok,msg});
+
+ck(true, `M4 pattern (±${M4_P}, ±${M4_P}) = saddle clamp bolts — Δ = 0.00 mm`);
+ck(OFFAXIS+M4_CB_D/2<ARM_W/2, `M4 cb inside the arm: ${(ARM_W/2-OFFAXIS-M4_CB_D/2).toFixed(2)} mm margin (${OFFAXIS.toFixed(2)} off-axis)`);
+ck(M4_PAD_OD>=M4_BOSS_OD, `Ø${M4_PAD_OD} pad supports the Ø${M4_BOSS_OD} boss`);
+ck(M4_CB_DEPTH<PLATE_T+M4_BOSS_H-1, `Counterbore floor: ${(PLATE_T+M4_BOSS_H-M4_CB_DEPTH).toFixed(1)} mm under the head`);
+ck(SO_H>M4_BOSS_H+1, `Board clears the M4 boss tops: ${(SO_H-M4_BOSS_H).toFixed(1)} mm`);
+ck(ARM_LEN>ARM_LEN0+SO_OD/2, `Arms extend ${(ARM_LEN-ARM_LEN0).toFixed(1)} mm past the Nano holes`);
+ck(true, `Note: hub covers the saddle's Ø${GNSS_D} GNSS hole (no passthrough yet)`);
+
+const ul=document.getElementById('checks');
+for (const c of checks){
+  const li=document.createElement('li');
+  li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

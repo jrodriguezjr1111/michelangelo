@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CyberWing — Jetson sub-panel preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --plastic: #f2b84b; --plastic-dk: #b07a1c;
+    --pcb-orin: #4a6a9a; --pcb-nano: #4a9a5c;
+    --brass: #d6b35a; --metal: #cfd7e4;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.wide { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .label { fill: var(--ink); font: 600 11px sans-serif; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  .ok { fill: var(--accent); font: 700 11px sans-serif; }
+  .warn { fill: var(--warn); font: 700 11px sans-serif; }
+  table.bom { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.bom th, table.bom td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                               text-align: left; vertical-align: top; }
+  table.bom th { color: var(--mute); font-weight: 600; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CyberWing — Jetson sub-panel (top view)</h1>
+  <p>Rendered directly from the same parameters as
+     <code>sub_panel/make_panel.py</code>. Change the values in the PARAMETERS block below
+     to preview alternate layouts, then re-run the Python script to regenerate the STL.</p>
+</header>
+
+<main>
+
+  <!-- ============================================================= -->
+  <!-- Summary                                                        -->
+  <!-- ============================================================= -->
+  <div class="card wide">
+    <h2>Specifications</h2>
+    <table class="bom">
+      <tr><th>Plate</th><td id="spec-plate">—</td></tr>
+      <tr><th>Orin Nano pattern</th><td id="spec-orin">—</td></tr>
+      <tr><th>Jetson Nano pattern</th><td id="spec-nano">—</td></tr>
+      <tr><th>Gap between patterns</th><td id="spec-gap">—</td></tr>
+      <tr><th>GNSS notch</th><td id="spec-notch">—</td></tr>
+      <tr><th>Hex lattice</th><td id="spec-hex">—</td></tr>
+      <tr><th>Estimated volume</th><td id="spec-vol">—</td></tr>
+    </table>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- TOP VIEW                                                       -->
+  <!-- ============================================================= -->
+  <div class="card wide">
+    <h2>Top view (Jetsons mount on this face)</h2>
+    <p class="sub">Honeycomb is render-accurate. Blue PCBs show Jetson dev-kit footprints for fit check; they are NOT part of the STL.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>PLA plate</span>
+      <span><span class="sw" style="background:#101319;border:1px solid #444"></span>hex cutout</span>
+      <span><span class="sw" style="background:var(--pcb-orin)"></span>Jetson Orin Nano dev kit (reference)</span>
+      <span><span class="sw" style="background:var(--pcb-nano)"></span>Jetson Nano B01 dev kit (reference)</span>
+      <span><span class="sw" style="background:var(--brass)"></span>M3 clearance hole</span>
+      <span><span class="sw" style="background:var(--warn)"></span>GNSS notch</span>
+    </div>
+    <svg id="panel-svg" viewBox="0 0 780 500"></svg>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- Clearance / fit check                                          -->
+  <!-- ============================================================= -->
+  <div class="card wide">
+    <h2>Fit-check assertions</h2>
+    <ul id="fit-checks" style="margin:0 0 4px 18px; line-height:1.7;"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL source of truth: <code>sub_panel/make_panel.py</code>. Two mirrored panels butt along the +Y long edge; the half-circles combine into a Ø20 hole for the GNSS antenna stud.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_panel.py
+// =====================================================================
+const INCH = 25.4;
+const PLATE_L = 8.75 * INCH;        // X
+const PLATE_W = 5.50 * INCH;        // Y
+const PLATE_T = 4.0;
+
+const M3_CLEAR_D = 3.4;
+const ORIN_PCB = { L: 100.0, W: 78.79 };
+const NANO_PCB = { L: 100.0, W: 78.79 };
+const ORIN = { patL: 92.12, patW: 57.59 };
+const NANO = { patL: 88.65, patW: 57.59 };
+
+const PCB_GAP = 5.0;
+const MIN_SCREW_EDGE_CLR = 5.0;
+
+const GNSS_NOTCH_D = 20.0;
+const GNSS_NOTCH_ON_PLUS_Y = true;
+
+const USE_HEX_LATTICE = true;
+const HEX_FLAT = 14.0;
+const HEX_WALL = 3.5;
+const HEX_EDGE_MARGIN = 10.0;
+const HEX_SCREW_KEEPOUT_R = 9.0;
+const HEX_NOTCH_KEEPOUT_R = GNSS_NOTCH_D / 2 + 10.0;
+
+// =====================================================================
+// Derived
+// =====================================================================
+const orinCx = -(ORIN_PCB.L + PCB_GAP) / 2;
+const nanoCx = +(NANO_PCB.L + PCB_GAP) / 2;
+const gapBetweenPatterns = (nanoCx - NANO.patL/2) - (orinCx + ORIN.patL/2);
+const orinLeftScrewClr  = (orinCx - ORIN.patL/2) - (-PLATE_L/2);
+const nanoRightScrewClr = (+PLATE_L/2) - (nanoCx + NANO.patL/2);
+const notchCy = GNSS_NOTCH_ON_PLUS_Y ? +PLATE_W/2 : -PLATE_W/2;
+
+const screwCenters = [];
+for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+  screwCenters.push([orinCx + sx * ORIN.patL/2, sy * ORIN.patW/2]);
+  screwCenters.push([nanoCx + sx * NANO.patL/2, sy * NANO.patW/2]);
+}
+
+// =====================================================================
+// Hex lattice computation (mirrors python)
+// =====================================================================
+function hexCenters() {
+  if (!USE_HEX_LATTICE) return [];
+  const circ_r  = HEX_FLAT / Math.sqrt(3);
+  const pitch_x = HEX_FLAT + HEX_WALL;
+  const pitch_y = (HEX_FLAT + HEX_WALL) * Math.sqrt(3) / 2;
+  const half_L  = PLATE_L/2 - HEX_EDGE_MARGIN;
+  const half_W  = PLATE_W/2 - HEX_EDGE_MARGIN;
+  const n_rows  = Math.floor(half_W / pitch_y) + 1;
+  const n_cols  = Math.floor(half_L / pitch_x) + 1;
+  const centers = [];
+  for (let i = -n_rows; i <= n_rows; i++) {
+    const y = i * pitch_y;
+    const x_off = (i % 2) ? pitch_x/2 : 0;
+    for (let j = -n_cols; j <= n_cols; j++) {
+      const x = j * pitch_x + x_off;
+      if (Math.abs(x) + circ_r > half_L) continue;
+      if (Math.abs(y) + circ_r > half_W) continue;
+      // Screw keepout
+      const hitScrew = screwCenters.some(([sx, sy]) =>
+        Math.hypot(x - sx, y - sy) < HEX_SCREW_KEEPOUT_R);
+      if (hitScrew) continue;
+      if (Math.hypot(x - 0, y - notchCy) < HEX_NOTCH_KEEPOUT_R) continue;
+      centers.push([x, y]);
+    }
+  }
+  return { centers, circ_r };
+}
+
+// =====================================================================
+// SVG rendering
+// =====================================================================
+// Coordinate system: Y in real world is UP; SVG Y is DOWN → flip.
+// Center the plate in the viewBox.
+const VB_W = 780, VB_H = 500;
+const scale = Math.min((VB_W - 60) / PLATE_L, (VB_H - 60) / PLATE_W);
+const ox = VB_W / 2;
+const oy = VB_H / 2;
+const X = x => ox + x * scale;
+const Y = y => oy - y * scale;   // flip
+
+const svg = document.getElementById('panel-svg');
+const ns = 'http://www.w3.org/2000/svg';
+function el(name, attrs, parent) {
+  const e = document.createElementNS(ns, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(e);
+  return e;
+}
+
+// Plate rectangle
+el('rect', {
+  x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+  width: PLATE_L * scale, height: PLATE_W * scale,
+  fill: '#f2b84b', stroke: '#b07a1c', 'stroke-width': 1.5,
+  rx: 2
+});
+
+// Hex cutouts
+const hex = hexCenters();
+if (hex.centers) {
+  for (const [hx, hy] of hex.centers) {
+    const pts = [];
+    for (let k = 0; k < 6; k++) {
+      const ang = Math.PI/2 + k * Math.PI/3;   // pointy-top
+      const px = hx + hex.circ_r * Math.cos(ang);
+      const py = hy + hex.circ_r * Math.sin(ang);
+      pts.push(`${X(px).toFixed(2)},${Y(py).toFixed(2)}`);
+    }
+    el('polygon', {
+      points: pts.join(' '),
+      fill: '#101319', stroke: '#8b6a2c', 'stroke-width': 0.5
+    });
+  }
+}
+
+// GNSS notch (half-circle)
+(() => {
+  const cx = X(0), cy = Y(notchCy);
+  const r  = (GNSS_NOTCH_D/2) * scale;
+  // Draw filled half-disk (the portion INSIDE the plate = below the edge if +Y)
+  const path = GNSS_NOTCH_ON_PLUS_Y
+    ? `M ${cx - r} ${cy} a ${r} ${r} 0 0 0 ${2*r} 0`
+    : `M ${cx - r} ${cy} a ${r} ${r} 0 0 1 ${2*r} 0`;
+  el('path', { d: path, fill: '#101319', stroke: '#fca5a5', 'stroke-width': 1.5 });
+  // Keepout ring (dashed)
+  const kr = HEX_NOTCH_KEEPOUT_R * scale;
+  el('circle', { cx, cy, r: kr, fill: 'none',
+                 stroke: '#fca5a5', 'stroke-width': 1,
+                 'stroke-dasharray': '3 3', opacity: 0.5 });
+  // Label
+  el('text', { x: cx, y: cy + (GNSS_NOTCH_ON_PLUS_Y ? 16 : -18),
+               'text-anchor': 'middle', class: 'warn',
+               fill: '#fca5a5', 'font-size': 11, 'font-weight': 700 },
+             ).textContent = `GNSS Ø${GNSS_NOTCH_D}`;
+})();
+
+// Jetson reference PCB footprints
+function drawPCB(cx, cy, pcb, pat, color, label) {
+  el('rect', {
+    x: X(cx - pcb.L/2), y: Y(cy + pcb.W/2),
+    width: pcb.L * scale, height: pcb.W * scale,
+    fill: color, opacity: 0.35,
+    stroke: color, 'stroke-width': 1
+  });
+  el('text', { x: X(cx), y: Y(cy) + 4,
+               'text-anchor': 'middle',
+               fill: '#e6e8ee', 'font-size': 12, 'font-weight': 600 },
+             ).textContent = label;
+}
+drawPCB(orinCx, 0, ORIN_PCB, ORIN, '#4a6a9a', 'Jetson Orin Nano');
+drawPCB(nanoCx, 0, NANO_PCB, NANO, '#4a9a5c', 'Jetson Nano B01');
+
+// M3 clearance holes + keepout rings
+for (const [sx, sy] of screwCenters) {
+  const cx = X(sx), cy = Y(sy);
+  // keepout
+  el('circle', { cx, cy, r: HEX_SCREW_KEEPOUT_R * scale,
+                 fill: 'none', stroke: '#d6b35a', 'stroke-width': 1,
+                 'stroke-dasharray': '2 2', opacity: 0.55 });
+  // M3 hole
+  el('circle', { cx, cy, r: (M3_CLEAR_D/2) * scale,
+                 fill: '#101319', stroke: '#d6b35a', 'stroke-width': 1 });
+}
+
+// Plate outline on top of hex cutouts
+el('rect', {
+  x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+  width: PLATE_L * scale, height: PLATE_W * scale,
+  fill: 'none', stroke: '#b07a1c', 'stroke-width': 1.5
+});
+
+// Dimension lines
+(() => {
+  const y_dim = Y(-PLATE_W/2) + 24;
+  el('line', { x1: X(-PLATE_L/2), y1: y_dim, x2: X(PLATE_L/2), y2: y_dim,
+               stroke: '#8b93a7' });
+  el('line', { x1: X(-PLATE_L/2), y1: y_dim-4, x2: X(-PLATE_L/2), y2: y_dim+4,
+               stroke: '#8b93a7' });
+  el('line', { x1: X( PLATE_L/2), y1: y_dim-4, x2: X( PLATE_L/2), y2: y_dim+4,
+               stroke: '#8b93a7' });
+  el('text', { x: X(0), y: y_dim+14, 'text-anchor': 'middle',
+               fill: '#8b93a7', 'font-size': 10, 'font-family': 'ui-monospace' },
+             ).textContent = `${PLATE_L.toFixed(2)} mm  (8.75")`;
+
+  const x_dim = X(-PLATE_L/2) - 16;
+  el('line', { x1: x_dim, y1: Y(-PLATE_W/2), x2: x_dim, y2: Y(PLATE_W/2),
+               stroke: '#8b93a7' });
+  el('line', { x1: x_dim-4, y1: Y(-PLATE_W/2), x2: x_dim+4, y2: Y(-PLATE_W/2),
+               stroke: '#8b93a7' });
+  el('line', { x1: x_dim-4, y1: Y( PLATE_W/2), x2: x_dim+4, y2: Y( PLATE_W/2),
+               stroke: '#8b93a7' });
+  el('text', { x: x_dim-6, y: Y(0)+4,
+               'text-anchor': 'end',
+               fill: '#8b93a7', 'font-size': 10, 'font-family': 'ui-monospace' },
+             ).textContent = `${PLATE_W.toFixed(2)} mm  (5.50")`;
+})();
+
+// Axis compass in empty corner
+(() => {
+  const ax = X(PLATE_L/2) + 20, ay = Y(-PLATE_W/2);
+  el('line', { x1: ax, y1: ay, x2: ax + 30, y2: ay,
+               stroke: '#fca5a5', 'stroke-width': 1.5 });
+  el('polygon', { points: `${ax+30},${ay} ${ax+24},${ay-4} ${ax+24},${ay+4}`,
+                  fill: '#fca5a5' });
+  el('text', { x: ax+36, y: ay+4, fill: '#fca5a5', 'font-size': 10 }).textContent = '+X';
+  el('line', { x1: ax, y1: ay, x2: ax, y2: ay - 30,
+               stroke: '#94efb1', 'stroke-width': 1.5 });
+  el('polygon', { points: `${ax},${ay-30} ${ax-4},${ay-24} ${ax+4},${ay-24}`,
+                  fill: '#94efb1' });
+  el('text', { x: ax+4, y: ay-30, fill: '#94efb1', 'font-size': 10 }).textContent = '+Y';
+})();
+
+// =====================================================================
+// Fill spec table + fit checks
+// =====================================================================
+const nHex = hex.centers ? hex.centers.length : 0;
+const hex_area = nHex * 1.5 * Math.sqrt(3) * Math.pow(HEX_FLAT/2, 2);   // area of a hex
+const notch_area = Math.PI * Math.pow(GNSS_NOTCH_D/2, 2) / 2;
+const total_area = PLATE_L * PLATE_W - hex_area - notch_area;
+const vol = total_area * PLATE_T / 1000;  // cm^3
+const solid_vol = PLATE_L * PLATE_W * PLATE_T / 1000;
+const saving_pct = 100 * (solid_vol - vol) / solid_vol;
+
+document.getElementById('spec-plate').textContent =
+  `${PLATE_L.toFixed(2)} × ${PLATE_W.toFixed(2)} × ${PLATE_T} mm (8.75 × 5.50 in)`;
+document.getElementById('spec-orin').textContent =
+  `${ORIN.patL} × ${ORIN.patW} mm, center X = ${orinCx.toFixed(1)} mm`;
+document.getElementById('spec-nano').textContent =
+  `${NANO.patL} × ${NANO.patW} mm, center X = ${nanoCx.toFixed(1)} mm`;
+document.getElementById('spec-gap').textContent =
+  `PCB-to-PCB ${PCB_GAP} mm · screws ${gapBetweenPatterns.toFixed(2)} mm · `
+  + `plate-edge clr Orin ${orinLeftScrewClr.toFixed(2)} / Nano ${nanoRightScrewClr.toFixed(2)} mm`;
+document.getElementById('spec-notch').textContent =
+  `Ø${GNSS_NOTCH_D} mm on ${GNSS_NOTCH_ON_PLUS_Y ? '+Y' : '-Y'} long edge, centered`;
+document.getElementById('spec-hex').textContent =
+  USE_HEX_LATTICE ? `${nHex} hex cutouts · flat=${HEX_FLAT} mm · wall=${HEX_WALL} mm`
+                  : '(disabled — solid plate)';
+document.getElementById('spec-vol').textContent =
+  `${vol.toFixed(1)} cm³  (solid would be ${solid_vol.toFixed(1)} cm³ — ${saving_pct.toFixed(0)} % material saved)`;
+
+// Fit checks
+const checks = [];
+function check(ok, msg) {
+  checks.push({ ok, msg });
+}
+
+check(gapBetweenPatterns > 5, `Screw-pattern gap = ${gapBetweenPatterns.toFixed(2)} mm (> 5 mm)`);
+check(orinLeftScrewClr  >= MIN_SCREW_EDGE_CLR, `Orin leftmost  screw to plate edge = ${orinLeftScrewClr.toFixed(2)} mm (≥ ${MIN_SCREW_EDGE_CLR})`);
+check(nanoRightScrewClr >= MIN_SCREW_EDGE_CLR, `Nano rightmost screw to plate edge = ${nanoRightScrewClr.toFixed(2)} mm (≥ ${MIN_SCREW_EDGE_CLR})`);
+const pcbEdgeGap = (nanoCx - NANO_PCB.L/2) - (orinCx + ORIN_PCB.L/2);
+check(pcbEdgeGap > 0, `PCB-to-PCB edge gap = ${pcbEdgeGap.toFixed(2)} mm`);
+for (const [sx, sy] of screwCenters) {
+  const clr_edge = Math.min(
+    PLATE_L/2 - Math.abs(sx),
+    PLATE_W/2 - Math.abs(sy)
+  );
+  check(clr_edge > 6, `M3 @(${sx.toFixed(1)}, ${sy.toFixed(1)}) edge clearance ${clr_edge.toFixed(1)} mm (> 6 mm)`);
+}
+// notch vs Jetson screws
+const notchClr = Math.min(...screwCenters.map(([x,y]) =>
+  Math.hypot(x - 0, y - notchCy) - GNSS_NOTCH_D/2));
+check(notchClr > 8, `GNSS notch to nearest Jetson screw: ${notchClr.toFixed(1)} mm (> 8 mm)`);
+// Orin PCB within plate
+check(orinCx - ORIN_PCB.L/2 > -PLATE_L/2, `Orin PCB fits within plate (X)`);
+check(nanoCx + NANO_PCB.L/2 < +PLATE_L/2, `Nano PCB fits within plate (X)`);
+check(ORIN_PCB.W/2 < PLATE_W/2, `Orin PCB fits within plate (Y)`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

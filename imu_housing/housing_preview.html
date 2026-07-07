@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CyberWing — IMU Housing v3 (Qwiic variant)</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --plastic: #f2b84b; --plastic-dk: #b07a1c; --plastic-lt: #f6cd7b;
+    --pcb-imu: #4a7a4a; --pcb-mcu: #7a5a30;
+    --bed: #2a2f3a; --metal: #cfd7e4; --brass: #d6b35a;
+    --qwiic: #c87aff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p  { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr; }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim   { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  .label { fill: var(--ink); font: 600 11px ui-sans-serif, sans-serif; }
+  .ok    { fill: var(--accent); }
+  .warn  { fill: var(--warn); }
+  .info  { fill: var(--info); }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36; text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 200px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CyberWing — IMU Housing v3 (Qwiic variant)</h1>
+  <p>ISM330DHCX (with Qwiic on <b>both</b> −X and +X edges) + XIAO ESP32-S3. Both Qwiic ports
+     wired internally to the XIAO — <b>no external cable</b>, no wall cutouts. IMU centered with
+     equal clearance on both ends. 88 × 40 × 18 mm. Source: <code>imu_housing/make_housing.py</code></p>
+</header>
+
+<main>
+
+  <div class="card">
+    <table class="specs">
+      <tr><th>Outer envelope</th><td id="s-outer">—</td></tr>
+      <tr><th>Internal cavity</th><td id="s-cav">—</td></tr>
+      <tr><th>Walls / base / lid</th><td id="s-walls">—</td></tr>
+      <tr><th>Sub-panel mount (M3)</th><td id="s-m3">—</td></tr>
+      <tr><th>IMU mount (M2)</th><td id="s-imu">—</td></tr>
+      <tr><th>XIAO cradle</th><td id="s-xiao">—</td></tr>
+      <tr><th>Lid (M2 heat-set)</th><td id="s-lid">—</td></tr>
+      <tr><th>Cable exit</th><td id="s-cable">—</td></tr>
+      <tr><th>IMU clearance (−X / +X)</th><td id="s-gap">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (lid removed) — interior layout</h2>
+    <p class="sub">Looking down into the open housing, +X forward (right). The IMU is centered between the XIAO and the +X wall. Qwiic plugs on both IMU ends route inside the cavity back to the XIAO.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>housing wall</span>
+      <span><span class="sw" style="background:var(--plastic-lt)"></span>boss / rib</span>
+      <span><span class="sw" style="background:var(--pcb-mcu)"></span>XIAO PCB</span>
+      <span><span class="sw" style="background:var(--pcb-imu)"></span>IMU PCB</span>
+      <span><span class="sw" style="background:var(--brass)"></span>brass insert</span>
+      <span><span class="sw" style="background:var(--qwiic)"></span>Qwiic cable</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 900 380"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Side view (along +Y) — stack-up</h2>
+    <p class="sub">XIAO sits in a clamp cradle; IMU rides on 3 mm M2 brass standoffs. Lid clamps with corner M2 screws into heat-set inserts. Optional gasket groove for IP54.</p>
+    <svg id="side-svg" viewBox="0 0 900 280"></svg>
+  </div>
+
+  <div class="card">
+    <h2>IMU connector detail — both ends</h2>
+    <p class="sub">JST-SH plugs sit on top of the IMU PCB at both −X and +X short edges. Cables route inside the cavity back to the XIAO.</p>
+    <svg id="cable-svg" viewBox="0 0 500 240"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print body base-on-bed (cavity opens up), lid inside-face-up. No supports. Hardware:
+  4× M2 heat-set + M2×6 (lid), 4× M2 heat-set + M2×5 (IMU standoffs),
+  4× M3 socket-cap (panel mount). Power/data via Qwiic.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with imu_housing/make_housing.py
+// =====================================================================
+const OUTER_L = 88.0, OUTER_W = 40.0, OUTER_H = 18.0;
+const WALL = 2.0, BASE_H = 3.0, LID_H = 2.0;
+const CAVITY_L = OUTER_L - 2*WALL;
+const CAVITY_W = OUTER_W - 2*WALL;
+const CAVITY_H = OUTER_H - BASE_H - LID_H;
+const BODY_H = OUTER_H - LID_H;
+
+const PANEL_PX = 65.0, PANEL_PY = 30.0;
+const M3_D = 3.4, M3_CSK_D = 5.8;
+
+const LID_INSET = 4.0;
+const M2_INSERT_D = 3.2, M2_CLEAR_D = 2.4;
+
+const QWIIC_CONN_H = 3.0;
+const QWIIC_PLUG_X = 6.0;
+
+const XIAO_L = 21.17, XIAO_W = 17.93, XIAO_T = 1.6;
+const XIAO_USBC_OH = 1.5, XIAO_FIT = 0.3;
+
+const IMU_PCB_L = 25.53, IMU_PCB_W = 25.42;
+const IMU_PAT_L = 20.45, IMU_PAT_W = 20.45;
+const IMU_BOSS_OD = 4.4, IMU_STANDOFF_H = 3.0;
+
+// Derived X positions (mirror make_housing.py)
+const XIAO_CX = -OUTER_L/2 + WALL + XIAO_USBC_OH + 2.0 + XIAO_L/2;
+const _xiao_plus_x  = XIAO_CX + XIAO_L/2;
+const _inner_plus_x = OUTER_L/2 - WALL;
+const IMU_CX = (_xiao_plus_x + _inner_plus_x) / 2;
+const IMU_LEFT_CLEAR  = IMU_CX - IMU_PCB_L/2 - _xiao_plus_x;
+const IMU_RIGHT_CLEAR = _inner_plus_x - (IMU_CX + IMU_PCB_L/2);
+const IMU_PCB_TOP_Z   = BASE_H + IMU_STANDOFF_H + 1.6;
+const QWIIC_Z_CENTER  = IMU_PCB_TOP_Z + QWIIC_CONN_H/2;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e); return e;
+}
+
+// =====================================================================
+// TOP VIEW
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 900, VB_H = 380, margin = 60;
+  const sX = (VB_W - 2*margin) / OUTER_L;
+  const sY = (VB_H - 2*margin - 30) / OUTER_W;
+  const s = Math.min(sX, sY);
+  const cx = VB_W / 2, cy = VB_H / 2 - 5;
+  const X = x => cx + x * s;
+  const Y = y => cy - y * s;
+
+  // Outer wall
+  el(svg, 'rect', { x: X(-OUTER_L/2), y: Y(OUTER_W/2),
+    width: OUTER_L*s, height: OUTER_W*s,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5, rx: 3 });
+  // Cavity
+  el(svg, 'rect', { x: X(-CAVITY_L/2), y: Y(CAVITY_W/2),
+    width: CAVITY_L*s, height: CAVITY_W*s,
+    fill: '#101319', stroke: 'var(--plastic-dk)', 'stroke-width': 0.8 });
+
+  // 4× lid heat-set bosses (corners)
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+    const bcx = sx*(OUTER_L/2 - LID_INSET);
+    const bcy = sy*(OUTER_W/2 - LID_INSET);
+    el(svg, 'circle', { cx: X(bcx), cy: Y(bcy), r: LID_INSET*0.9*s,
+      fill: 'var(--plastic-lt)', stroke: 'var(--plastic-dk)', 'stroke-width': 0.8 });
+    el(svg, 'circle', { cx: X(bcx), cy: Y(bcy), r: M2_INSERT_D/2*s,
+      fill: 'var(--brass)', stroke: '#8a6f2c', 'stroke-width': 0.8 });
+  }
+
+  // (No wall slots — pure internal Qwiic wiring)
+
+  // XIAO PCB + cradle
+  const fence_L = XIAO_L + 2*XIAO_FIT + 2*1.0;
+  const fence_W = XIAO_W + 2*XIAO_FIT + 2*1.0;
+  el(svg, 'rect', { x: X(XIAO_CX - fence_L/2), y: Y(fence_W/2),
+    width: fence_L*s, height: fence_W*s,
+    fill: 'none', stroke: 'var(--plastic-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '2 2' });
+  el(svg, 'rect', { x: X(XIAO_CX - XIAO_L/2), y: Y(XIAO_W/2),
+    width: XIAO_L*s, height: XIAO_W*s,
+    fill: 'var(--pcb-mcu)', stroke: '#4a3818', rx: 2 });
+  el(svg, 'text', { x: X(XIAO_CX), y: Y(0)+4,
+    'text-anchor': 'middle', class: 'label' }, 'XIAO ESP32-S3');
+  el(svg, 'text', { x: X(XIAO_CX), y: Y(0)+18,
+    'text-anchor': 'middle', class: 'dim', fill: '#e6e8ee' },
+    `${XIAO_L} × ${XIAO_W}`);
+  // USB-C connector overhang on XIAO (-X edge) — kept since the board has it,
+  // even though we don't pass it through the wall any more.
+  el(svg, 'rect', { x: X(XIAO_CX - XIAO_L/2 - XIAO_USBC_OH), y: Y(2.5),
+    width: XIAO_USBC_OH*s, height: 5*s,
+    fill: 'var(--metal)', stroke: '#6b7788', 'stroke-width': 0.6 });
+
+  // IMU PCB + 4 standoffs
+  el(svg, 'rect', { x: X(IMU_CX - IMU_PCB_L/2), y: Y(IMU_PCB_W/2),
+    width: IMU_PCB_L*s, height: IMU_PCB_W*s,
+    fill: 'var(--pcb-imu)', stroke: '#2c4a2c', rx: 2 });
+  el(svg, 'text', { x: X(IMU_CX), y: Y(0)+4,
+    'text-anchor': 'middle', class: 'label' }, 'ISM330DHCX');
+  el(svg, 'text', { x: X(IMU_CX), y: Y(0)+18,
+    'text-anchor': 'middle', class: 'dim', fill: '#e6e8ee' },
+    `${IMU_PCB_L} × ${IMU_PCB_W}`);
+  for (const sx of [-1,1]) for (const sy of [-1,1]) {
+    const hx = IMU_CX + sx*IMU_PAT_L/2;
+    const hy = sy*IMU_PAT_W/2;
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: IMU_BOSS_OD/2*s,
+      fill: 'var(--brass)', stroke: '#8a6f2c', 'stroke-width': 0.6 });
+    el(svg, 'circle', { cx: X(hx), cy: Y(hy), r: 1.0*s,
+      fill: '#101319' });
+  }
+  // Silkscreen X arrow
+  const arrX0 = IMU_CX + IMU_PCB_L/2 - 4;
+  el(svg, 'line', { x1: X(arrX0-3), y1: Y(-IMU_PCB_W/2+3),
+    x2: X(arrX0), y2: Y(-IMU_PCB_W/2+3),
+    stroke: '#fff', 'stroke-width': 1.2 });
+  el(svg, 'text', { x: X(arrX0+1), y: Y(-IMU_PCB_W/2+3)+3,
+    fill: '#fff', class: 'dim' }, 'X→');
+
+  // Qwiic plugs on BOTH ends of IMU + cables routing back to XIAO
+  const cy0 = Y(0);
+  const xiaoR = X(XIAO_CX + XIAO_L/2);
+  const imuL  = X(IMU_CX - IMU_PCB_L/2);
+  const imuR  = X(IMU_CX + IMU_PCB_L/2);
+  // Plug bodies (drawn just inside each IMU short edge)
+  el(svg, 'rect', { x: imuL - QWIIC_PLUG_X*s, y: cy0 - 3,
+    width: QWIIC_PLUG_X*s, height: 6,
+    fill: 'var(--metal)', stroke: '#6b7788', 'stroke-width': 0.6 });
+  el(svg, 'rect', { x: imuR, y: cy0 - 3,
+    width: QWIIC_PLUG_X*s, height: 6,
+    fill: 'var(--metal)', stroke: '#6b7788', 'stroke-width': 0.6 });
+  // -X cable (short, straight from IMU -X plug to XIAO area)
+  el(svg, 'path', {
+    d: `M ${imuL - QWIIC_PLUG_X*s} ${cy0} L ${xiaoR + 4} ${cy0}`,
+    stroke: 'var(--qwiic)', 'stroke-width': 2.6,
+    'stroke-linecap': 'round', fill: 'none', opacity: 0.9 });
+  // +X cable wraps around the +Y side of the IMU back to the XIAO
+  const wrapY = Y(IMU_PCB_W/2 + 3);
+  el(svg, 'path', {
+    d: `M ${imuR + QWIIC_PLUG_X*s} ${cy0} ` +
+       `L ${imuR + 8} ${cy0} ` +
+       `Q ${imuR + 14} ${cy0}, ${imuR + 14} ${wrapY} ` +
+       `L ${xiaoR + 8} ${wrapY} ` +
+       `Q ${xiaoR + 4} ${wrapY}, ${xiaoR + 4} ${cy0 - 4}`,
+    stroke: 'var(--qwiic)', 'stroke-width': 2.4,
+    'stroke-linecap': 'round', fill: 'none', opacity: 0.9 });
+
+  // Body axes arrows (lower-left corner of view)
+  const ax = X(-OUTER_L/2)+18, ay = Y(-OUTER_W/2)+22;
+  el(svg, 'line', { x1: ax, y1: ay, x2: ax+30, y2: ay,
+    stroke: 'var(--warn)', 'stroke-width': 1.4 });
+  el(svg, 'polygon', { points: `${ax+30},${ay} ${ax+24},${ay-3} ${ax+24},${ay+3}`, fill: 'var(--warn)' });
+  el(svg, 'text', { x: ax+34, y: ay+3, class: 'dim', fill: 'var(--warn)' }, '+X');
+  el(svg, 'line', { x1: ax, y1: ay, x2: ax, y2: ay-30,
+    stroke: 'var(--accent)', 'stroke-width': 1.4 });
+  el(svg, 'polygon', { points: `${ax},${ay-30} ${ax-3},${ay-24} ${ax+3},${ay-24}`, fill: 'var(--accent)' });
+  el(svg, 'text', { x: ax+4, y: ay-30, class: 'dim', fill: 'var(--accent)' }, '+Y');
+
+  // Outer dimension
+  const yd = Y(-OUTER_W/2) + 28;
+  el(svg, 'line', { x1: X(-OUTER_L/2), y1: yd, x2: X(OUTER_L/2), y2: yd,
+    stroke: 'var(--mute)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: X(0), y: yd+13, 'text-anchor': 'middle', class: 'dim' },
+    `${OUTER_L} × ${OUTER_W} mm`);
+})();
+
+// =====================================================================
+// SIDE VIEW (along +Y)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('side-svg');
+  const VB_W = 900, VB_H = 280, margin = 60;
+  const sX = (VB_W - 2*margin) / OUTER_L;
+  const sZ = (VB_H - 2*margin - 30) / OUTER_H;
+  const s = Math.min(sX, sZ);
+  const cx = VB_W / 2;
+  const baseY = VB_H - margin - 10;
+  const X = x => cx + x * s;
+  const Y = z => baseY - z * s;
+
+  // Outer body (z = 0..BODY_H)
+  el(svg, 'rect', { x: X(-OUTER_L/2), y: Y(BODY_H),
+    width: OUTER_L*s, height: BODY_H*s,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5 });
+  // Lid sits on top
+  el(svg, 'rect', { x: X(-OUTER_L/2), y: Y(OUTER_H),
+    width: OUTER_L*s, height: LID_H*s,
+    fill: 'var(--plastic-lt)', stroke: 'var(--plastic-dk)', 'stroke-width': 1 });
+  // Cavity dashed
+  el(svg, 'rect', { x: X(-CAVITY_L/2), y: Y(BODY_H),
+    width: CAVITY_L*s, height: CAVITY_H*s,
+    fill: '#101319', stroke: 'var(--plastic-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '3 3' });
+
+  // (No cable slot — fully sealed)
+
+  // XIAO PCB at floor (clamp cradle, not standoffs)
+  el(svg, 'rect', { x: X(XIAO_CX - XIAO_L/2), y: Y(BASE_H + XIAO_T),
+    width: XIAO_L*s, height: XIAO_T*s,
+    fill: 'var(--pcb-mcu)', stroke: '#4a3818' });
+  el(svg, 'text', { x: X(XIAO_CX), y: Y(BASE_H + XIAO_T)-4,
+    'text-anchor': 'middle', class: 'dim' }, 'XIAO');
+
+  // Lid down-force rib (presses XIAO top)
+  const ribH = (OUTER_H - LID_H) - (BASE_H + XIAO_T);
+  el(svg, 'rect', { x: X(XIAO_CX - 4), y: Y(BODY_H),
+    width: 8*s, height: ribH*s,
+    fill: 'var(--plastic-lt)', stroke: 'var(--plastic-dk)', 'stroke-width': 0.6 });
+
+  // IMU board on standoffs
+  el(svg, 'rect', { x: X(IMU_CX - IMU_PCB_L/2), y: Y(BASE_H + IMU_STANDOFF_H + XIAO_T),
+    width: IMU_PCB_L*s, height: XIAO_T*s,
+    fill: 'var(--pcb-imu)', stroke: '#2c4a2c' });
+  // Standoffs (left/right of IMU view = pattern endpoints)
+  for (const sx of [-1,1]) {
+    const hx = IMU_CX + sx*IMU_PAT_L/2;
+    el(svg, 'rect', { x: X(hx) - 1.6, y: Y(BASE_H + IMU_STANDOFF_H),
+      width: 3.2, height: IMU_STANDOFF_H*s,
+      fill: 'var(--brass)', stroke: '#8a6f2c', 'stroke-width': 0.6 });
+  }
+  el(svg, 'text', { x: X(IMU_CX), y: Y(BASE_H + IMU_STANDOFF_H + XIAO_T)-4,
+    'text-anchor': 'middle', class: 'dim', fill: '#cfd7e4' },
+    `IMU on 3 mm M2 standoffs`);
+
+  // Qwiic plugs on both IMU ends (sit on top of the PCB)
+  const plugCY = QWIIC_Z_CENTER;
+  for (const sx of [-1, 1]) {
+    const plugX0 = sx === 1 ? IMU_CX + IMU_PCB_L/2 : IMU_CX - IMU_PCB_L/2 - QWIIC_PLUG_X;
+    el(svg, 'rect', { x: X(plugX0), y: Y(plugCY + QWIIC_CONN_H/2),
+      width: QWIIC_PLUG_X*s, height: QWIIC_CONN_H*s,
+      fill: 'var(--metal)', stroke: '#6b7788', 'stroke-width': 0.6 });
+  }
+  el(svg, 'text', { x: X(IMU_CX), y: Y(plugCY)-8,
+    'text-anchor': 'middle', class: 'dim' }, 'Qwiic plugs (both ends)');
+
+  // -X side cable: drops down from plug to ~mid-cavity then runs left to XIAO
+  el(svg, 'path', {
+    d: `M ${X(IMU_CX - IMU_PCB_L/2 - QWIIC_PLUG_X/2)} ${Y(plugCY)} ` +
+       `Q ${X(IMU_CX - IMU_PCB_L/2 - QWIIC_PLUG_X)} ${Y(BASE_H + IMU_STANDOFF_H/2)}, ` +
+       `${X((IMU_CX - IMU_PCB_L/2 + XIAO_CX + XIAO_L/2)/2)} ${Y(BASE_H + 1)} ` +
+       `T ${X(XIAO_CX + XIAO_L/2 - 1)} ${Y(BASE_H + XIAO_T + 0.5)}`,
+    stroke: 'var(--qwiic)', 'stroke-width': 2.4,
+    'stroke-linecap': 'round', fill: 'none', opacity: 0.85 });
+
+  // Vertical dim
+  el(svg, 'line', { x1: X(OUTER_L/2)+18, y1: Y(0),
+    x2: X(OUTER_L/2)+18, y2: Y(OUTER_H),
+    stroke: 'var(--mute)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: X(OUTER_L/2)+22, y: Y(OUTER_H/2)+3,
+    class: 'dim' }, `${OUTER_H}`);
+
+  // Outer X dim
+  const xdy = Y(0) + 22;
+  el(svg, 'line', { x1: X(-OUTER_L/2), y1: xdy, x2: X(OUTER_L/2), y2: xdy,
+    stroke: 'var(--mute)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: X(0), y: xdy+13, 'text-anchor': 'middle', class: 'dim' },
+    `${OUTER_L} mm`);
+})();
+
+// =====================================================================
+// CABLE EXIT DETAIL (Qwiic)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('cable-svg');
+  const VB_W = 500, VB_H = 240;
+  const margin = 30;
+  const s = 10; // 10 px/mm zoom
+  const cx = VB_W / 2;
+  const baseY = VB_H - margin - 10;
+  // Show full housing X span
+  const x0 = -OUTER_L/2 - 2;
+  const x1 = OUTER_L/2 + 2;
+  const sx = (VB_W - 2*margin) / (x1 - x0);
+  const sy = (VB_H - 2*margin - 30) / OUTER_H;
+  const sc = Math.min(sx, sy);
+  const X = x => margin + (x - x0) * sc;
+  const Y = z => baseY - z * sc;
+
+  // Body
+  el(svg, 'rect', { x: X(-OUTER_L/2), y: Y(BODY_H),
+    width: OUTER_L*sc, height: BODY_H*sc,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5 });
+  // Cavity (no slots)
+  el(svg, 'rect', { x: X(-CAVITY_L/2), y: Y(BODY_H),
+    width: CAVITY_L*sc, height: CAVITY_H*sc,
+    fill: '#101319', stroke: 'var(--plastic-dk)', 'stroke-width': 0.6, 'stroke-dasharray': '3 3' });
+
+  // IMU PCB + standoffs
+  el(svg, 'rect', { x: X(IMU_CX - IMU_PCB_L/2), y: Y(IMU_PCB_TOP_Z),
+    width: IMU_PCB_L*sc, height: 1.6*sc,
+    fill: 'var(--pcb-imu)', stroke: '#2c4a2c' });
+  for (const s2 of [-1, 1]) {
+    el(svg, 'rect', { x: X(IMU_CX + s2*IMU_PAT_L/2)-2,
+      y: Y(BASE_H + IMU_STANDOFF_H),
+      width: 4, height: IMU_STANDOFF_H*sc,
+      fill: 'var(--brass)', stroke: '#8a6f2c', 'stroke-width': 0.6 });
+  }
+
+  // Qwiic plugs on both IMU ends
+  for (const sgn of [-1, 1]) {
+    const px = sgn === 1
+      ? IMU_CX + IMU_PCB_L/2
+      : IMU_CX - IMU_PCB_L/2 - QWIIC_PLUG_X;
+    el(svg, 'rect', { x: X(px), y: Y(IMU_PCB_TOP_Z + QWIIC_CONN_H),
+      width: QWIIC_PLUG_X*sc, height: QWIIC_CONN_H*sc,
+      fill: 'var(--metal)', stroke: '#6b7788', 'stroke-width': 0.6 });
+  }
+
+  // XIAO
+  el(svg, 'rect', { x: X(XIAO_CX - XIAO_L/2), y: Y(BASE_H + XIAO_T),
+    width: XIAO_L*sc, height: XIAO_T*sc,
+    fill: 'var(--pcb-mcu)', stroke: '#4a3818' });
+
+  // Two Qwiic cables: -X plug straight to XIAO; +X plug wraps around
+  el(svg, 'path', {
+    d: `M ${X(IMU_CX - IMU_PCB_L/2 - QWIIC_PLUG_X/2)} ${Y(QWIIC_Z_CENTER)} ` +
+       `Q ${X((IMU_CX - IMU_PCB_L/2 + XIAO_CX + XIAO_L/2)/2)} ${Y(BASE_H + 2)}, ` +
+       `${X(XIAO_CX + XIAO_L/2)} ${Y(BASE_H + XIAO_T + 0.5)}`,
+    stroke: 'var(--qwiic)', 'stroke-width': 3,
+    'stroke-linecap': 'round', fill: 'none', opacity: 0.9 });
+  el(svg, 'path', {
+    d: `M ${X(IMU_CX + IMU_PCB_L/2 + QWIIC_PLUG_X/2)} ${Y(QWIIC_Z_CENTER)} ` +
+       `L ${X(IMU_CX + IMU_PCB_L/2 + IMU_RIGHT_CLEAR - 1)} ${Y(QWIIC_Z_CENTER)} ` +
+       `Q ${X(IMU_CX + IMU_PCB_L/2 + IMU_RIGHT_CLEAR)} ${Y(BODY_H - 1)}, ` +
+       `${X(IMU_CX)} ${Y(BODY_H - 1)} ` +
+       `L ${X(XIAO_CX)} ${Y(BODY_H - 1)} ` +
+       `Q ${X(XIAO_CX - XIAO_L/2 + 2)} ${Y(BASE_H + XIAO_T + 1)}, ` +
+       `${X(XIAO_CX - XIAO_L/2 + 4)} ${Y(BASE_H + XIAO_T + 0.5)}`,
+    stroke: 'var(--qwiic)', 'stroke-width': 3,
+    'stroke-linecap': 'round', fill: 'none', opacity: 0.9 });
+
+  // Labels
+  el(svg, 'text', { x: X(IMU_CX), y: Y(BASE_H)-4,
+    'text-anchor': 'middle', class: 'dim' },
+    `IMU on ${IMU_STANDOFF_H} mm standoffs`);
+  el(svg, 'text', { x: X(XIAO_CX), y: Y(BASE_H + XIAO_T)-4,
+    'text-anchor': 'middle', class: 'dim' }, 'XIAO');
+  el(svg, 'text', { x: VB_W/2, y: 22,
+    'text-anchor': 'middle', class: 'label' }, 'Internal Qwiic routing — both ports to XIAO');
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-outer').textContent = `${OUTER_L} × ${OUTER_W} × ${OUTER_H} mm`;
+document.getElementById('s-cav').textContent   = `${CAVITY_L} × ${CAVITY_W} × ${CAVITY_H} mm`;
+document.getElementById('s-walls').textContent = `${WALL} / ${BASE_H} / ${LID_H} mm`;
+document.getElementById('s-m3').textContent    = `4× Ø${M3_D} at ${PANEL_PX} × ${PANEL_PY} mm (counterbored from inside)`;
+document.getElementById('s-imu').textContent   = `4× M2 × ${IMU_STANDOFF_H} mm standoffs at ${IMU_PAT_L} × ${IMU_PAT_W} mm (board ${IMU_PCB_L} × ${IMU_PCB_W})`;
+document.getElementById('s-xiao').textContent  = `clamp cradle ${XIAO_L} × ${XIAO_W} + ${XIAO_FIT} fit, lid down-force rib`;
+document.getElementById('s-lid').textContent   = `4× M2 heat-set inserts at corners, ${LID_INSET} mm inset`;
+document.getElementById('s-cable').textContent = `none — both IMU Qwiic ports wired internally to XIAO`;
+document.getElementById('s-gap').textContent =
+  `−X = ${IMU_LEFT_CLEAR.toFixed(2)} mm | +X = ${IMU_RIGHT_CLEAR.toFixed(2)} mm`;
+
+const minClear = QWIIC_PLUG_X + 2.0;  // plug body + a couple mm bend
+const plugTopZ = QWIIC_Z_CENTER + QWIIC_CONN_H/2;
+const lidSeatZ = OUTER_H - LID_H;
+const plugToLid = lidSeatZ - plugTopZ;
+
+const checks = [
+  { ok: IMU_LEFT_CLEAR >= minClear,
+    msg: `IMU −X clearance: ${IMU_LEFT_CLEAR.toFixed(2)} mm (≥ ${minClear} for plug + cable)` },
+  { ok: IMU_RIGHT_CLEAR >= minClear,
+    msg: `IMU +X clearance: ${IMU_RIGHT_CLEAR.toFixed(2)} mm (≥ ${minClear} for plug + cable)` },
+  { ok: Math.abs(IMU_LEFT_CLEAR - IMU_RIGHT_CLEAR) < 0.01,
+    msg: `IMU centered: −X and +X clearances equal (${IMU_LEFT_CLEAR.toFixed(2)} mm)` },
+  { ok: plugToLid >= 1.0,
+    msg: `Qwiic plug top to lid seat: ${plugToLid.toFixed(2)} mm` },
+  { ok: PANEL_PX + M3_CSK_D <= OUTER_L - 2*WALL,
+    msg: `Sub-panel mount X-pattern ${PANEL_PX} fits in ${OUTER_L - 2*WALL} cavity (csk Ø${M3_CSK_D})` },
+  { ok: IMU_PCB_W + 2*IMU_BOSS_OD < CAVITY_W,
+    msg: `IMU + standoffs (${(IMU_PCB_W + 2*IMU_BOSS_OD).toFixed(1)} mm) fits cavity width ${CAVITY_W}` },
+  { ok: XIAO_CX + XIAO_L/2 < IMU_CX - IMU_PCB_L/2,
+    msg: `XIAO and IMU do not overlap in X` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

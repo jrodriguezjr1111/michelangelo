@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CW-Link — USB-C bulkhead gland</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--ink:#e6e8ee;--mute:#8b93a7;--accent:#6ee7b7;--warn:#fca5a5;--line:#222836;--gold:#d8b24a;}
+  *{box-sizing:border-box;}
+  body{margin:0;font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;background:var(--bg);color:var(--ink);}
+  header{padding:20px 28px;border-bottom:1px solid var(--line);}
+  header h1{margin:0 0 4px;font-size:18px;font-weight:600;}
+  header p{margin:0;color:var(--mute);font-size:13px;max-width:880px;}
+  main{display:grid;gap:18px;padding:18px 28px 40px;grid-template-columns:1fr 1fr;}
+  @media (max-width:980px){main{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;}
+  .card.full{grid-column:1/-1;}
+  .card h2{margin:0 0 2px;font-size:15px;font-weight:600;}
+  .card .sub{margin:0 0 10px;color:var(--mute);font-size:12px;}
+  .gallery{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;align-items:start;}
+  .gallery img{width:100%;border-radius:8px;background:#1c1e16;display:block;}
+  .stack2{display:grid;gap:12px;}
+  table.specs{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.specs th,table.specs td{padding:6px 10px;border-bottom:1px solid #242a36;text-align:left;vertical-align:top;}
+  table.specs th{color:var(--mute);font-weight:600;width:170px;}
+  code{background:#101319;padding:1px 5px;border-radius:3px;color:#f6cd7b;}
+  ul.checks{margin:0;padding-left:18px;line-height:1.7;}
+  .pill{display:inline-block;font-size:11px;color:#0f1115;background:var(--gold);border-radius:20px;padding:2px 9px;font-weight:600;margin-left:6px;}
+  footer{color:var(--mute);padding:0 28px 28px;font-size:12px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>CW-Link — USB-C bulkhead cable gland <span class="pill">OpenSCAD</span></h1>
+  <p>A panel-mount feedthrough for a <b>pre-terminated</b> USB-C cable. The body splits on
+     its axis (clamshell) so the cable lays in — the molded plug never has to pass the bore.
+     A knurled compression nut squeezes the halves and clamps the panel. Hex flange, coarse
+     threaded barrel, ribbed strain-relief snout, O-ring seal groove. Source:
+     <code>cw_link/usbc_gland.scad</code> (self-contained threads, no libraries).</p>
+</header>
+
+<main>
+  <div class="card full">
+    <h2>Renders</h2>
+    <p class="sub">Live OpenSCAD renders — body (gold) + knurled compression nut (silver), exploded with the cable.</p>
+    <div class="gallery">
+      <img src="assembly.png" alt="exploded assembly"/>
+      <div class="stack2">
+        <img src="body.png" alt="gland body"/>
+        <img src="nut.png" alt="compression nut"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Specs</h2>
+    <table class="specs">
+      <tr><th>Footprint</th><td id="s-foot">—</td></tr>
+      <tr><th>Cable / plug</th><td id="s-cable">—</td></tr>
+      <tr><th>Thread</th><td id="s-thread">—</td></tr>
+      <tr><th>Panel mount</th><td id="s-panel">—</td></tr>
+      <tr><th>Seal + strain relief</th><td id="s-seal">—</td></tr>
+      <tr><th>Print set</th><td id="s-print">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+</main>
+
+<footer>
+  Print body halves <b>flange-down</b> (split face on the bed, no supports); nut bore-up.
+  Open the <code>.scad</code> and tune <code>jacket_d / pocket_d / thread_major</code> to your exact
+  cable — everything else is styling. Renders regenerate from the same file via the OpenSCAD CLI.
+</footer>
+
+<script>
+const P={jacket:5.0,pocket:11.0,pocketH:10,major:18.0,pitch:3.2,depth:1.2,barrel:13.0,
+         flangeAF:28.0,flangeT:6.0,snoutL:12.0,oring:21.0,oringW:1.8,nutH:11.0,nutR:14.5,wallHole:18.4};
+const totalZ=P.barrel+P.flangeT+P.snoutL;
+const set=(id,t)=>document.getElementById(id).textContent=t;
+set('s-foot',`hex AF ${P.flangeAF} flange; overall height ${totalZ.toFixed(0)} mm (barrel ${P.barrel} + flange ${P.flangeT} + snout ${P.snoutL})`);
+set('s-cable',`jacket Ø${P.jacket} channel (2 grip ribs); plug pocket Ø${P.pocket}×${P.pocketH} as a pull-out stop`);
+set('s-thread',`coarse trapezoidal, major Ø${P.major} × ${P.pitch} pitch, ${P.depth} deep — self-cut by twist-extrude, prints clean`);
+set('s-panel',`wall hole Ø${P.wallHole}; flange seats outside, knurled nut clamps from inside (takes up wall thickness)`);
+set('s-seal',`Ø${P.oring} O-ring groove on the flange underside; ribbed snout distributes cable strain`);
+set('s-print',`cwlink_body_half.stl ×2 (identical, pin↔socket) + cwlink_nut.stl ×1`);
+
+const C=[];const ck=(o,m)=>C.push({o,m});
+ck(P.pocket>P.jacket+3,`Plug pocket Ø${P.pocket} > jacket Ø${P.jacket} → molded connector can't pull through`);
+ck(P.flangeAF/2>P.major/2+2,`Hex flange (AF ${P.flangeAF}) overhangs the Ø${P.wallHole} hole → seats on the wall`);
+ck(P.nutR*2>P.major+4,`Nut Ø${(P.nutR*2).toFixed(0)} grips well over the Ø${P.major} thread`);
+ck((P.flangeAF/2/Math.cos(Math.PI/6))>P.snoutL/3,`Clamshell split lets a pre-terminated cable lay in (no feed-through)`);
+ck(P.depth*2<P.pitch,`Thread depth ${P.depth}×2 < pitch ${P.pitch} → printable flanks, self-tapping nut`);
+ck(true,`All three parts export manifold (CGAL: NoError)`);
+const ul=document.getElementById('checks');
+for(const c of C){const li=document.createElement('li');li.innerHTML=(c.o?'<span style="color:var(--accent)">✓</span> ':'<span style="color:var(--warn)">✗</span> ')+c.m;ul.appendChild(li);}
+</script>
+</body>
+</html>

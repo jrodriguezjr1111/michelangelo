@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Saddle platform lid — preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --bolt: #d6b35a; --m4: #f29a4a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.wide { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.bom { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.bom th, table.bom td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                               text-align: left; vertical-align: top; }
+  table.bom th { color: var(--mute); font-weight: 600; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Saddle platform lid — preview</h1>
+  <p>Flat 68 × 60 × 3 mm cap that mounts under the platform. Source:
+     <code>flycatcher/make_imu_platform_saddle_lid.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card wide">
+    <h2>Specifications</h2>
+    <table class="bom">
+      <tr><th>Lid</th><td id="spec-lid">—</td></tr>
+      <tr><th>M3 inner mounts</th><td id="spec-m3">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (countersink face)</h2>
+    <p class="sub">Flat plate with 4× M3 countersunk holes only.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>lid</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 csk</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 700 480"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Side cross-section (X × Z)</h2>
+    <p class="sub">3 mm flat plate; M3 countersink on +Z face.</p>
+    <svg id="side-svg" viewBox="0 0 700 220"></svg>
+  </div>
+
+  <div class="card wide">
+    <h2>Design checks</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<script>
+// Lid parameters — keep in sync with make_imu_platform_saddle_lid.py
+const LID_L = 68.0, LID_W = 60.0, LID_H = 3.0;
+const M3_PATTERN_X = 57.6, M3_PATTERN_Y = 49.18;
+const M3_CLEAR_D = 3.4, M3_CSK_D = 6.2, M3_CSK_DEPTH = 1.8;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, n, a, t) {
+  const e = document.createElementNS(ns, n);
+  for (const k in a) e.setAttribute(k, a[k]);
+  if (t != null) e.textContent = t;
+  p.appendChild(e); return e;
+}
+
+// ---------- Top view ----------
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 700, VB_H = 480;
+  const halfX = LID_L/2 + 14, halfY = LID_W/2 + 18;
+  const scale = Math.min((VB_W - 80)/(2*halfX), (VB_H - 100)/(2*halfY));
+  const cx = VB_W/2, cy = VB_H/2;
+  const X = x => cx + x * scale;
+  const Y = y => cy - y * scale;
+
+  // Lid body
+  el(svg, 'rect', {
+    x: X(-LID_L/2), y: Y(LID_W/2),
+    width: LID_L * scale, height: LID_W * scale,
+    fill: 'var(--body)', 'fill-opacity': 0.85,
+    stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3
+  });
+
+  // M3 csk holes
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const px = X(sx * M3_PATTERN_X/2), py = Y(sy * M3_PATTERN_Y/2);
+    el(svg, 'circle', { cx: px, cy: py, r: M3_CSK_D/2 * scale,
+      fill: 'var(--bolt)', opacity: 0.45 });
+    el(svg, 'circle', { cx: px, cy: py, r: M3_CLEAR_D/2 * scale,
+      fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1 });
+  }
+
+  // Dims
+  const yd = Y(-LID_W/2) + 30;
+  el(svg, 'line', { x1: X(-LID_L/2), y1: yd, x2: X(LID_L/2), y2: yd, stroke: '#8b93a7' });
+  el(svg, 'text', { x: X(0), y: yd+14, 'text-anchor': 'middle', class: 'dim' },
+    `${LID_L} mm  (X)`);
+  const xd = X(LID_L/2) + 26;
+  el(svg, 'line', { x1: xd, y1: Y(-LID_W/2), x2: xd, y2: Y(LID_W/2), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xd+8, y: Y(0)+3, class: 'dim',
+    transform: `rotate(-90 ${xd+8} ${Y(0)+3})` }, `${LID_W} mm  (Y)`);
+})();
+
+// ---------- Side cross-section ----------
+(() => {
+  const svg = document.getElementById('side-svg');
+  const VB_W = 700, VB_H = 220, scale = 7;
+  const cx = VB_W/2, baseY = VB_H - 60;
+  const X = x => cx + x * scale;
+  const Z = z => baseY - z * scale;
+
+  // Plate
+  el(svg, 'rect', {
+    x: X(-LID_L/2), y: Z(LID_H),
+    width: LID_L * scale, height: LID_H * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2
+  });
+
+  // M3 csk + clearance (at X = ±M3_PATTERN_X/2)
+  for (const sx of [-1, 1]) {
+    const px = X(sx * M3_PATTERN_X/2);
+    // through-hole shadow
+    el(svg, 'line', {
+      x1: px, y1: Z(LID_H) + 4, x2: px, y2: Z(0) - 4,
+      stroke: 'var(--bolt)', 'stroke-width': M3_CLEAR_D * scale * 0.45, opacity: 0.55
+    });
+    // csk pocket on top face
+    el(svg, 'rect', {
+      x: px - M3_CSK_D/2 * scale, y: Z(LID_H),
+      width: M3_CSK_D * scale, height: M3_CSK_DEPTH * scale,
+      fill: '#1a1c22', stroke: 'var(--bolt)', 'stroke-width': 0.8
+    });
+    el(svg, 'text', { x: px, y: Z(LID_H) - 8, 'text-anchor': 'middle',
+      fill: 'var(--bolt)', 'font-size': 10, 'font-weight': 700 }, 'M3');
+  }
+
+  // bed
+  el(svg, 'line', { x1: 30, y1: Z(0), x2: VB_W-30, y2: Z(0),
+    stroke: '#444', 'stroke-dasharray': '4 3' });
+
+  // Z dim
+  const xz = X(LID_L/2) + 30;
+  el(svg, 'line', { x1: xz, y1: Z(0), x2: xz, y2: Z(LID_H), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xz+8, y: Z(LID_H/2)+3, class: 'dim' }, `${LID_H} mm`);
+})();
+
+// ---------- Specs + checks ----------
+document.getElementById('spec-lid').textContent =
+  `${LID_L} × ${LID_W} × ${LID_H} mm flat plate`;
+document.getElementById('spec-m3').textContent =
+  `4× Ø${M3_CLEAR_D} at ${M3_PATTERN_X} × ${M3_PATTERN_Y} mm (csk Ø${M3_CSK_D} × ${M3_CSK_DEPTH} on top)`;
+
+const checks = [];
+const ck = (ok, msg) => checks.push({ ok, msg });
+
+// 1. M3 edge clearance
+const m3_edge_x = LID_L/2 - M3_PATTERN_X/2 - M3_CSK_D/2;
+const m3_edge_y = LID_W/2 - M3_PATTERN_Y/2 - M3_CSK_D/2;
+ck(m3_edge_x >= 0.5 && m3_edge_y >= 0.5,
+  `M3 csk edge clearance: X=${m3_edge_x.toFixed(2)}, Y=${m3_edge_y.toFixed(2)} mm`);
+
+// 2. Lid footprint matches platform
+ck(LID_L === 68 && LID_W === 60, `Lid footprint matches platform (68 × 60)`);
+
+// 3. M3 pattern matches flycatcher platform
+ck(M3_PATTERN_X === 57.6 && M3_PATTERN_Y === 49.18,
+  `M3 pattern matches flycatcher platform: ${M3_PATTERN_X} × ${M3_PATTERN_Y} mm`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

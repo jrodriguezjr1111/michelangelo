@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CyberWing — dual-Jetson-Nano saddle preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --plastic: #f2b84b; --plastic-dk: #b07a1c; --plastic-lt: #f7d489;
+    --tube: #4a9a8c; --bolt: #d6b35a; --nano: #94c8ef;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.wide { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .label { fill: var(--ink); font: 600 11px sans-serif; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  .ok { fill: var(--accent); font: 700 11px sans-serif; }
+  .warn { fill: var(--warn); font: 700 11px sans-serif; }
+  table.bom { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.bom th, table.bom td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                               text-align: left; vertical-align: top; }
+  table.bom th { color: var(--mute); font-weight: 600; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CyberWing — dual-Jetson-Nano saddle (fit verification)</h1>
+  <p>Rendered from the same parameters as
+     <code>nano_saddle/make_nano_saddle.py</code>. Two mirror-identical halves
+     clamp around two parallel tubes; the top surface accepts two Jetson
+     Nano-class dev kits side-by-side along Y: Jetson Nano on −Y, Jetson Nano
+     Orin on +Y. The TOP half carries 4× M3 mount holes per board.</p>
+</header>
+
+<main>
+
+  <!-- Specs -->
+  <div class="card wide">
+    <h2>Specifications</h2>
+    <table class="bom">
+      <tr><th>Block (assembled)</th><td id="spec-block">—</td></tr>
+      <tr><th>Tubes</th><td id="spec-tubes">—</td></tr>
+      <tr><th>Tube bore</th><td id="spec-bore">—</td></tr>
+      <tr><th>Clamp bolts</th><td id="spec-bolts">—</td></tr>
+      <tr><th>Half thickness</th><td id="spec-half">—</td></tr>
+      <tr><th>Top surface</th><td id="spec-surface">—</td></tr>
+      <tr><th>M3 head c'bore</th><td id="spec-m3head">—</td></tr>
+    </table>
+  </div>
+
+  <!-- Top view -->
+  <div class="card wide">
+    <h2>Top view — split face</h2>
+    <p class="sub">Looking down the Z axis at the TOP half. Tubes run along X.
+     Jetson Nano (86.14 × 58.25 mm hole pattern) on −Y; Jetson Nano Orin (92.12 × 57.59 mm) on +Y.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>plastic</span>
+      <span><span class="sw" style="background:#101319;border:1px solid #555"></span>void</span>
+      <span><span class="sw" style="background:var(--tube);opacity:0.5"></span>tube path</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M4 clamp (4×)</span>
+      <span><span class="sw" style="background:var(--nano);opacity:0.6"></span>Jetson hole pattern (4× M3 each)</span>
+      <span><span class="sw" style="background:transparent;border:1px dashed var(--nano)"></span>M3 head c'bore</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 900 380"></svg>
+  </div>
+
+  <!-- End view -->
+  <div class="card wide">
+    <h2>End view — assembled (look along X)</h2>
+    <p class="sub">Cross-section of both halves stacked, with tubes captured. Two Nanos sit on +Z face.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--plastic)"></span>upper half</span>
+      <span><span class="sw" style="background:var(--plastic-lt)"></span>lower half</span>
+      <span><span class="sw" style="background:var(--tube)"></span>tube</span>
+      <span><span class="sw" style="background:var(--nano);opacity:0.6"></span>Jetson Nano</span>
+    </div>
+    <svg id="end-svg" viewBox="0 0 900 320"></svg>
+  </div>
+
+  <!-- Fit checks -->
+  <div class="card wide">
+    <h2>Fit-check assertions</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL source of truth: <code>nano_saddle/make_nano_saddle.py</code>. Print 1× <code>nano_saddle_half.stl</code>
+  (bottom) and 1× <code>nano_saddle_top.stl</code> (top, with Jetson M3 mount holes), outer face on bed,
+  split face up, no supports. Assemble with 4× M4 × 30 mm socket caps + M4 nuts; mount each Jetson
+  with 4× M3 screws + standoffs.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_nano_saddle.py
+// =====================================================================
+const TUBE_OD          = 15.39;
+const TUBE_CENTER_SEP  = 60.17;
+const CLEARANCE        = 0.4;
+
+const BLOCK_LEN = 70.0;       // X, along tube axis
+const BLOCK_WID = 197.0;      // Y, across tubes
+const BLOCK_HT  = 28.0;
+
+const BOLT_X_OFFSET   = 25.0;
+const BOLT_Y_INBOARD  = 18.0;
+const SCREW_CLEAR_D   = 4.4;
+const SCREW_HEAD_D    = 8.0;
+const SCREW_HEAD_DEPTH = 4.5;
+
+// Jetson dev-kit M3 mount-hole patterns (Y × X)
+const NANO_PATTERN_Y = 86.14;
+const NANO_PATTERN_X = 58.25;
+const ORIN_PATTERN_Y = 92.12;
+const ORIN_PATTERN_X = 57.59;
+const M3_CLEAR_D     = 3.4;
+const M3_HEAD_D      = 5.34;   // screw-head Ø (counterbore on outer face)
+const M3_HEAD_DEPTH  = 2.94;
+const ORIN_Y_CENTER  =  197.0 / 4;                                  // +Y side
+const NANO_Y_CENTER  = -(197.0 / 2 - NANO_PATTERN_Y / 2 - 3.19);    // −Y side, ~3.19 mm edge
+
+// =====================================================================
+// Derived
+// =====================================================================
+const HALF_HT = BLOCK_HT / 2;
+const R_IN    = TUBE_OD / 2 + CLEARANCE / 2;
+const TUBE_Y  = TUBE_CENTER_SEP / 2;
+
+const BOARDS = [
+  { name: 'Nano',  py: NANO_PATTERN_Y, px: NANO_PATTERN_X, ycen: NANO_Y_CENTER },
+  { name: 'Orin',  py: ORIN_PATTERN_Y, px: ORIN_PATTERN_X, ycen: ORIN_Y_CENTER },
+];
+
+// =====================================================================
+// SVG helpers
+// =====================================================================
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, name, attrs, text) {
+  const e = document.createElementNS(ns, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// TOP VIEW (Y horizontal — long axis, X vertical)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 900, VB_H = 380;
+  const drawW = BLOCK_WID + 20;
+  const drawL = BLOCK_LEN + 30;
+  const scale = Math.min((VB_W - 80) / drawW, (VB_H - 100) / drawL);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const Y = y => cx + y * scale;
+  const X = x => cy - x * scale;
+
+  // Block outline
+  el(svg, 'rect', {
+    x: Y(-BLOCK_WID/2), y: X(BLOCK_LEN/2),
+    width: BLOCK_WID * scale, height: BLOCK_LEN * scale,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5,
+    rx: 2, opacity: 0.85
+  });
+
+  // Tube bores (visible at split face as full Ø)
+  for (const sy of [-1, 1]) {
+    el(svg, 'rect', {
+      x: Y(sy * TUBE_Y - R_IN), y: X(BLOCK_LEN/2 + 0.5),
+      width: 2 * R_IN * scale, height: BLOCK_LEN * scale + 1,
+      fill: '#101319', stroke: '#4a9a8c', 'stroke-width': 1
+    });
+    el(svg, 'line', {
+      x1: Y(sy * TUBE_Y), y1: X(BLOCK_LEN/2),
+      x2: Y(sy * TUBE_Y), y2: X(-BLOCK_LEN/2),
+      stroke: '#4a9a8c', 'stroke-dasharray': '4 4', 'stroke-width': 0.7, opacity: 0.8
+    });
+    el(svg, 'text', {
+      x: Y(sy * TUBE_Y), y: X(-BLOCK_LEN/2) + 18,
+      'text-anchor': 'middle', class: 'dim'
+    }, `tube Y=${(sy*TUBE_Y).toFixed(2)}`);
+  }
+
+  // 4× clamp bolts (inboard row only)
+  const boltYs = [-BOLT_Y_INBOARD, BOLT_Y_INBOARD];
+  for (const sx of [-1, 1]) for (const by of boltYs) {
+    el(svg, 'circle', {
+      cx: Y(by), cy: X(sx * BOLT_X_OFFSET),
+      r: SCREW_HEAD_D / 2 * scale,
+      fill: 'none', stroke: '#d6b35a', 'stroke-width': 0.8,
+      'stroke-dasharray': '2 2', opacity: 0.55
+    });
+    el(svg, 'circle', {
+      cx: Y(by), cy: X(sx * BOLT_X_OFFSET),
+      r: SCREW_CLEAR_D / 2 * scale,
+      fill: '#101319', stroke: '#d6b35a', 'stroke-width': 1
+    });
+  }
+
+  // Jetson hole patterns + footprint outlines
+  for (const b of BOARDS) {
+    el(svg, 'rect', {
+      x: Y(b.ycen - b.py/2 - 4), y: X(b.px/2 + 4),
+      width: (b.py + 8) * scale, height: (b.px + 8) * scale,
+      fill: 'var(--nano)', opacity: 0.10,
+      stroke: 'var(--nano)', 'stroke-width': 0.8, 'stroke-dasharray': '4 3', rx: 2
+    });
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+      // Head counterbore (outer face) shown as dashed outer ring
+      el(svg, 'circle', {
+        cx: Y(b.ycen + sy * b.py / 2), cy: X(sx * b.px / 2),
+        r: M3_HEAD_D / 2 * scale,
+        fill: 'none', stroke: 'var(--nano)', 'stroke-width': 0.8,
+        'stroke-dasharray': '2 2', opacity: 0.65
+      });
+      el(svg, 'circle', {
+        cx: Y(b.ycen + sy * b.py / 2), cy: X(sx * b.px / 2),
+        r: M3_CLEAR_D / 2 * scale,
+        fill: '#101319', stroke: 'var(--nano)', 'stroke-width': 1.2
+      });
+    }
+    el(svg, 'text', {
+      x: Y(b.ycen), y: X(0) + 4, 'text-anchor': 'middle',
+      fill: 'var(--nano)', 'font-size': 11, 'font-weight': 700
+    }, `Jetson ${b.name}  ${b.py}×${b.px}`);
+  }
+
+  // Y dimension (across tubes) along bottom
+  const yd = X(-BLOCK_LEN/2) + 30;
+  el(svg, 'line', { x1: Y(-BLOCK_WID/2), y1: yd, x2: Y(BLOCK_WID/2), y2: yd, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: Y(-BLOCK_WID/2), y1: yd-4, x2: Y(-BLOCK_WID/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: Y( BLOCK_WID/2), y1: yd-4, x2: Y( BLOCK_WID/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'text', { x: Y(0), y: yd+14, 'text-anchor': 'middle', class: 'dim' },
+    `${BLOCK_WID.toFixed(2)} mm  (Y, across tubes)`);
+
+  // tube center spacing
+  const ytcs = X(BLOCK_LEN/2) - 8;
+  el(svg, 'line', { x1: Y(-TUBE_Y), y1: ytcs, x2: Y(TUBE_Y), y2: ytcs, stroke: '#94efb1' });
+  el(svg, 'line', { x1: Y(-TUBE_Y), y1: ytcs-4, x2: Y(-TUBE_Y), y2: ytcs+4, stroke: '#94efb1' });
+  el(svg, 'line', { x1: Y( TUBE_Y), y1: ytcs-4, x2: Y( TUBE_Y), y2: ytcs+4, stroke: '#94efb1' });
+  el(svg, 'text', { x: Y(0), y: ytcs - 6, 'text-anchor': 'middle', class: 'ok' },
+    `tube C-C ${TUBE_CENTER_SEP.toFixed(2)} mm`);
+
+  // X dim (block length, along tubes)
+  const xd = Y(-BLOCK_WID/2) - 24;
+  el(svg, 'line', { x1: xd, y1: X(-BLOCK_LEN/2), x2: xd, y2: X(BLOCK_LEN/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: X(-BLOCK_LEN/2), x2: xd+4, y2: X(-BLOCK_LEN/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: X( BLOCK_LEN/2), x2: xd+4, y2: X( BLOCK_LEN/2), stroke: '#8b93a7' });
+  el(svg, 'text', {
+    x: xd-8, y: X(0), 'text-anchor': 'end', class: 'dim',
+    transform: `rotate(-90 ${xd-8} ${X(0)})`
+  }, `${BLOCK_LEN.toFixed(2)} mm  (X, tube axis)`);
+})();
+
+// =====================================================================
+// END VIEW (Y horizontal, Z vertical, assembled)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('end-svg');
+  const VB_W = 900, VB_H = 320;
+  const drawW = BLOCK_WID + 20;
+  const scale = Math.min((VB_W - 100) / drawW, (VB_H - 100) / (BLOCK_HT + 6));
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const Y = y => cx + y * scale;
+  const Z = z => cy - (z - HALF_HT) * scale;
+
+  // Lower half
+  el(svg, 'rect', {
+    x: Y(-BLOCK_WID/2), y: Z(HALF_HT),
+    width: BLOCK_WID * scale, height: HALF_HT * scale,
+    fill: 'var(--plastic-lt)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5
+  });
+  // Upper half
+  el(svg, 'rect', {
+    x: Y(-BLOCK_WID/2), y: Z(BLOCK_HT),
+    width: BLOCK_WID * scale, height: HALF_HT * scale,
+    fill: 'var(--plastic)', stroke: 'var(--plastic-dk)', 'stroke-width': 1.5
+  });
+  // Split line
+  el(svg, 'line', {
+    x1: Y(-BLOCK_WID/2), y1: Z(HALF_HT),
+    x2: Y( BLOCK_WID/2), y2: Z(HALF_HT),
+    stroke: '#8b93a7', 'stroke-dasharray': '5 4', 'stroke-width': 1
+  });
+
+  // Tubes
+  for (const sy of [-1, 1]) {
+    el(svg, 'circle', {
+      cx: Y(sy * TUBE_Y), cy: Z(HALF_HT), r: R_IN * scale,
+      fill: '#101319', stroke: 'none'
+    });
+    el(svg, 'circle', {
+      cx: Y(sy * TUBE_Y), cy: Z(HALF_HT), r: TUBE_OD / 2 * scale,
+      fill: '#4a9a8c', stroke: '#2c635c', 'stroke-width': 1
+    });
+    el(svg, 'circle', { cx: Y(sy * TUBE_Y), cy: Z(HALF_HT), r: 2, fill: '#fff' });
+    el(svg, 'text', {
+      x: Y(sy * TUBE_Y), y: Z(HALF_HT) + TUBE_OD/2 * scale + 14,
+      'text-anchor': 'middle', class: 'dim'
+    }, `Ø${TUBE_OD}`);
+  }
+
+  // Two Jetson boards sitting on top (drawn at hole-pattern Y span)
+  const NANO_T = 8.0;  // approximate stacked height (PCB + components)
+  for (const b of BOARDS) {
+    el(svg, 'rect', {
+      x: Y(b.ycen - b.py/2 - 4), y: Z(BLOCK_HT + NANO_T),
+      width: (b.py + 8) * scale, height: NANO_T * scale,
+      fill: 'var(--nano)', opacity: 0.4,
+      stroke: 'var(--nano)', 'stroke-width': 1
+    });
+    el(svg, 'text', {
+      x: Y(b.ycen), y: Z(BLOCK_HT + NANO_T) - 4, 'text-anchor': 'middle',
+      fill: 'var(--nano)', 'font-size': 11, 'font-weight': 700
+    }, `${b.name}`);
+  }
+
+  // M3 head counterbores on inner (split) face of upper half
+  for (const b of BOARDS) {
+    for (const sy of [-1, 1]) {
+      const my = b.ycen + sy * b.py / 2;
+      el(svg, 'rect', {
+        x: Y(my) - M3_HEAD_D/2 * scale, y: Z(HALF_HT + M3_HEAD_DEPTH),
+        width: M3_HEAD_D * scale, height: M3_HEAD_DEPTH * scale,
+        fill: '#101319', stroke: 'var(--nano)', 'stroke-width': 0.8,
+        'stroke-dasharray': '2 2', opacity: 0.85
+      });
+      el(svg, 'line', {
+        x1: Y(my), y1: Z(BLOCK_HT),
+        x2: Y(my), y2: Z(HALF_HT + M3_HEAD_DEPTH),
+        stroke: 'var(--nano)', 'stroke-width': M3_CLEAR_D * scale * 0.6, opacity: 0.55
+      });
+    }
+  }
+
+  // Clamp bolts (2 unique Y positions in the cross-section)
+  const sectionBoltYs = [-BOLT_Y_INBOARD, BOLT_Y_INBOARD];
+  for (const by of sectionBoltYs) {
+    const bx = Y(by);
+    el(svg, 'line', {
+      x1: bx, y1: Z(BLOCK_HT), x2: bx, y2: Z(0),
+      stroke: '#d6b35a', 'stroke-width': SCREW_CLEAR_D * scale * 0.6, opacity: 0.85
+    });
+    el(svg, 'rect', {
+      x: bx - SCREW_HEAD_D/2 * scale, y: Z(BLOCK_HT),
+      width: SCREW_HEAD_D * scale, height: SCREW_HEAD_DEPTH * scale,
+      fill: '#b07a1c', stroke: '#7a4f0f', 'stroke-width': 0.8
+    });
+    el(svg, 'rect', {
+      x: bx - SCREW_HEAD_D/2 * scale, y: Z(SCREW_HEAD_DEPTH),
+      width: SCREW_HEAD_D * scale, height: SCREW_HEAD_DEPTH * scale,
+      fill: '#7a4f0f', stroke: '#5a3a0c', 'stroke-width': 0.8
+    });
+    el(svg, 'text', {
+      x: bx, y: Z(0) + 14, 'text-anchor': 'middle', class: 'dim'
+    }, `M4 @Y=${by.toFixed(0)}`);
+  }
+
+  // tube center spacing dim
+  const ydim = Z(0) + 28;
+  el(svg, 'line', { x1: Y(-TUBE_Y), y1: ydim, x2: Y(TUBE_Y), y2: ydim, stroke: '#94efb1' });
+  el(svg, 'line', { x1: Y(-TUBE_Y), y1: ydim-4, x2: Y(-TUBE_Y), y2: ydim+4, stroke: '#94efb1' });
+  el(svg, 'line', { x1: Y( TUBE_Y), y1: ydim-4, x2: Y( TUBE_Y), y2: ydim+4, stroke: '#94efb1' });
+  el(svg, 'text', { x: Y(0), y: ydim+14, 'text-anchor': 'middle', class: 'ok' },
+    `tube C-C ${TUBE_CENTER_SEP.toFixed(2)} mm`);
+
+  // Z height dim on right
+  const zdim = Y(BLOCK_WID/2) + 36;
+  el(svg, 'line', { x1: zdim, y1: Z(0), x2: zdim, y2: Z(BLOCK_HT), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: zdim-4, y1: Z(0), x2: zdim+4, y2: Z(0), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: zdim-4, y1: Z(BLOCK_HT), x2: zdim+4, y2: Z(BLOCK_HT), stroke: '#8b93a7' });
+  el(svg, 'text', {
+    x: zdim+8, y: Z(HALF_HT)+4, class: 'dim',
+    transform: `rotate(-90 ${zdim+8} ${Z(HALF_HT)+4})`
+  }, `${BLOCK_HT} mm  (Z)`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('spec-block').textContent =
+  `${BLOCK_LEN} × ${BLOCK_WID} × ${BLOCK_HT} mm`;
+document.getElementById('spec-tubes').textContent =
+  `2× Ø${TUBE_OD} mm at Y = ±${TUBE_Y.toFixed(2)} (center-to-center ${TUBE_CENTER_SEP} mm)`;
+document.getElementById('spec-bore').textContent =
+  `Ø${(2*R_IN).toFixed(2)} mm  (Ø${TUBE_OD} + ${CLEARANCE} mm clearance)`;
+document.getElementById('spec-bolts').textContent =
+  `4× M4 at (±${BOLT_X_OFFSET}, ±${BOLT_Y_INBOARD}) inboard — clearance Ø${SCREW_CLEAR_D}, head/nut Ø${SCREW_HEAD_D}×${SCREW_HEAD_DEPTH}`;
+document.getElementById('spec-half').textContent =
+  `${HALF_HT} mm  (each printed half)`;
+document.getElementById('spec-m3head').textContent =
+  `Ø${M3_HEAD_D} × ${M3_HEAD_DEPTH} mm deep counterbore on inner (split) face (8× — 4 per board)`;
+document.getElementById('spec-surface').textContent =
+  `${BLOCK_LEN} × ${BLOCK_WID} mm. TOP half: 4× Ø${M3_CLEAR_D} M3 at ±${(NANO_PATTERN_X/2).toFixed(2)} (X), ${NANO_Y_CENTER}±${(NANO_PATTERN_Y/2).toFixed(2)} (Nano, −Y) and ±${(ORIN_PATTERN_X/2).toFixed(2)} (X), ${ORIN_Y_CENTER}±${(ORIN_PATTERN_Y/2).toFixed(2)} (Orin, +Y)`;
+
+const checks = [];
+function check(ok, msg) { checks.push({ ok, msg }); }
+
+const widthClr   = BLOCK_WID/2 - (TUBE_Y + R_IN);
+const heightClr  = HALF_HT - R_IN;
+const boltTubeIn = (TUBE_Y - R_IN) - (BOLT_Y_INBOARD + SCREW_CLEAR_D/2);
+const boltInBlockX = BLOCK_LEN/2 - (BOLT_X_OFFSET + SCREW_HEAD_D/2);
+
+check(widthClr  > 2, `Block-edge clearance to tube: ${widthClr.toFixed(2)} mm (> 2)`);
+check(heightClr > 2, `Half-height clearance to tube bore: ${heightClr.toFixed(2)} mm (> 2)`);
+check(boltTubeIn  > 1, `Inboard clamp-bolt to tube-bore clearance: ${boltTubeIn.toFixed(2)} mm`);
+check(boltInBlockX  > 1, `Clamp-bolt head fits in BLOCK_LEN: ${boltInBlockX.toFixed(2)} mm spare`);
+check(SCREW_HEAD_DEPTH < HALF_HT, `Counterbore depth (${SCREW_HEAD_DEPTH}) < half height (${HALF_HT})`);
+
+// Jetson hole-edge clearance vs block edges and clamp-bolt heads
+check(M3_HEAD_DEPTH + 1.0 < HALF_HT,
+  `M3 head c'bore depth (${M3_HEAD_DEPTH}) leaves ${(HALF_HT - M3_HEAD_DEPTH).toFixed(2)} mm above counterbore floor (half height ${HALF_HT})`);
+
+for (const b of BOARDS) {
+  const xClr = BLOCK_LEN/2 - (b.px/2 + M3_CLEAR_D/2);
+  const yClr = BLOCK_WID/2 - (Math.abs(b.ycen) + b.py/2 + M3_CLEAR_D/2);
+  const xHeadClr = BLOCK_LEN/2 - (b.px/2 + M3_HEAD_D/2);
+  const yHeadClr = BLOCK_WID/2 - (Math.abs(b.ycen) + b.py/2 + M3_HEAD_D/2);
+  check(xClr > 0.5, `${b.name} mount holes — X edge clearance (thru): ${xClr.toFixed(2)} mm`);
+  check(yClr > 0.5, `${b.name} mount holes — Y edge clearance (thru): ${yClr.toFixed(2)} mm`);
+  check(xHeadClr > 0.4, `${b.name} mount holes — X edge wall around head c'bore: ${xHeadClr.toFixed(2)} mm`);
+  check(yHeadClr > 0.4, `${b.name} mount holes — Y edge wall around head c'bore: ${yHeadClr.toFixed(2)} mm`);
+  let minGap = Infinity;
+  for (const bx of [-BOLT_X_OFFSET, BOLT_X_OFFSET])
+    for (const by of [-BOLT_Y_INBOARD, BOLT_Y_INBOARD])
+      for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+        const mx = sx * b.px/2;
+        const my = b.ycen + sy * b.py/2;
+        const d = Math.hypot(mx-bx, my-by) - M3_HEAD_D/2 - SCREW_HEAD_D/2;
+        if (d < minGap) minGap = d;
+      }
+  check(minGap > 0.5, `${b.name} mount holes — min head-to-clamp-head gap: ${minGap.toFixed(2)} mm`);
+}
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

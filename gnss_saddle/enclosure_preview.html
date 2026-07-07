@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>GNSS Saddle Enclosure — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --pcb:  #2a8f5a; --pcb-dk: #1d6b42;
+    --usb:  #e0a74e; --usb-dk: #a77420;
+    --gnss: #c79bf5; --gnss-dk: #7a4d9e;
+    --bolt: #d6b35a;
+    --nut:  #8893a6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px;
+            color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                                   text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 200px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GNSS Saddle Enclosure</h1>
+  <p>Enclosure that hangs <strong>under</strong> the +Y wing of <code>gnss_saddle/make_gnss_saddle_wide.py</code>.
+     Mount face is the <strong>top</strong> of the enclosure; cavity opens downward.
+     Houses the ZED-F9P breakout, with USB-C + Ø6.3 GNSS antenna passthroughs on the −X wall.
+     Source: <code>gnss_saddle/make_gnss_enclosure.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <h2>Specs</h2>
+    <table class="specs">
+      <tr><th>Footprint</th><td id="spec-foot">—</td></tr>
+      <tr><th>Floor / wall</th><td id="spec-wall">—</td></tr>
+      <tr><th>Cavity</th><td id="spec-cav">—</td></tr>
+      <tr><th>Mount pattern</th><td id="spec-m3">—</td></tr>
+      <tr><th>USB-C opening</th><td id="spec-usb">—</td></tr>
+      <tr><th>GNSS opening</th><td id="spec-gnss">—</td></tr>
+      <tr><th>Saddle alignment</th><td id="spec-saddle">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view — saddle mount face</h2>
+    <p class="sub">Looking down at the assembled top of the enclosure. The floor (mount face)
+       is uppermost. M3 thru-holes show through; hex-nut pockets are recessed into the
+       underside (cavity side) and are projected here as gray hexagons.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall (footprint)</span>
+      <span><span class="sw" style="background:#101319;border:1px solid #555"></span>Cavity interior</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 thru-hole</span>
+      <span><span class="sw" style="background:var(--nut)"></span>Hex-nut pocket</span>
+      <span><span class="sw" style="background:var(--usb)"></span>USB-C opening</span>
+      <span><span class="sw" style="background:var(--gnss)"></span>GNSS Ø6.3</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 400 380"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Bottom view — cavity opening</h2>
+    <p class="sub">Looking up into the open cavity. The board mounts up against the floor
+       (now the ceiling of the cavity). M3 thru-holes appear at the back of the
+       hex-nut pockets recessed into the floor underside.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Wall (perimeter)</span>
+      <span><span class="sw" style="background:#101319;border:1px solid #555"></span>Cavity (open)</span>
+      <span><span class="sw" style="background:var(--nut)"></span>Hex-nut pocket</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M3 thru</span>
+    </div>
+    <svg id="bot-svg" viewBox="0 0 400 380"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>End view from −X — cable openings</h2>
+    <p class="sub">Looking at the −X wall straight on (the side that carries both passthroughs).</p>
+    <svg id="end-svg" viewBox="0 0 600 280"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Side cross-section through the cable openings</h2>
+    <p class="sub">Section taken horizontally through the USB-C / GNSS height. Shows the bolt
+       path: saddle csk (bottom) → enclosure floor thru-hole → M3 nut in cavity pocket.</p>
+    <svg id="section-svg" viewBox="0 0 720 320"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL is pre-flipped for printing — floor-down on the bed, cavity-up. No supports.
+  In service, the part flips: mount face is up against the saddle, cavity opens
+  toward the ground. Press M3 nuts into the floor pockets from below, then drop
+  bolts down through the saddle's countersunk ZED holes to tighten.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — mirror gnss_saddle/make_gnss_enclosure.py
+// =====================================================================
+const ENC_L  = 52.0;    // X
+const ENC_W  = 52.0;    // Y  (sized for 45 mm ZED with 1 mm clearance per side)
+const ENC_H  = 18.0;    // Z total
+const ZED_SIZE = 45.0;  // ZED-F9P breakout (square)
+
+const FLOOR_T = 3.0;
+const WALL_T  = 2.5;
+
+const M3_PATTERN  = 37.6;
+const M3_CLEAR_D  = 3.4;
+const M3_NUT_AF   = 5.6;
+const M3_NUT_T    = 2.5;
+
+// Floor at the TOP of the enclosure (mount face on top).
+const FLOOR_Z0 = ENC_H - FLOOR_T;
+
+const USB_W = 18.0, USB_H = 9.0;
+const USB_Y = +8.0, USB_Z_CENTER = FLOOR_Z0 - 5.5;   // 5.5 mm below floor
+
+const GNSS_D = 6.3;
+const GNSS_Y = -8.0, GNSS_Z_CENTER = USB_Z_CENTER;
+
+const CAV_L = ENC_L - 2 * WALL_T;
+const CAV_W = ENC_W - 2 * WALL_T;
+const CAV_H = FLOOR_Z0;
+
+// Saddle context (Y center of the ZED pattern on saddle): Y = 75.5
+const SADDLE_Y_CENTER = 75.5;
+const SADDLE_LEN = 50.0;
+const SADDLE_WID_HALF = 98.5;  // wing extends to +98.5 in saddle coords
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(p, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  p.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// Specs
+// =====================================================================
+document.getElementById('spec-foot').textContent =
+  `${ENC_L} × ${ENC_W} × ${ENC_H} mm`;
+document.getElementById('spec-wall').textContent =
+  `floor ${FLOOR_T} mm · wall ${WALL_T} mm (top open)`;
+document.getElementById('spec-cav').textContent =
+  `${CAV_L} × ${CAV_W} × ${CAV_H} mm`;
+document.getElementById('spec-m3').textContent =
+  `4× Ø${M3_CLEAR_D} thru at ${M3_PATTERN} mm sq · M3 hex pocket AF ${M3_NUT_AF} × ${M3_NUT_T} mm (cavity side)`;
+document.getElementById('spec-usb').textContent =
+  `${USB_W} × ${USB_H} mm on −X wall at Y=${USB_Y.toFixed(1)}, Z-center=${USB_Z_CENTER.toFixed(1)}`;
+document.getElementById('spec-gnss').textContent =
+  `Ø${GNSS_D} on −X wall at Y=${GNSS_Y.toFixed(1)}, Z-center=${GNSS_Z_CENTER.toFixed(1)}`;
+document.getElementById('spec-saddle').textContent =
+  `mount centered on saddle (X=0, Y=${SADDLE_Y_CENTER}); enclosure occupies Y ∈ [${(SADDLE_Y_CENTER - ENC_W/2).toFixed(1)}, ${(SADDLE_Y_CENTER + ENC_W/2).toFixed(1)}] in saddle coords`;
+
+// =====================================================================
+// Top view — into the open cavity
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 400, VB_H = 380, margin = 30;
+  const scale = Math.min((VB_W - 2*margin) / ENC_L, (VB_H - 2*margin) / ENC_W);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  const X = x => cx + x * scale;
+  const Y = y => cy - y * scale;
+
+  // Outer footprint
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Y(ENC_W/2),
+    width: ENC_L*scale, height: ENC_W*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  // Floor (mount face) is the visible top surface
+  el(svg, 'rect', { x: X(-CAV_L/2), y: Y(CAV_W/2),
+    width: CAV_L*scale, height: CAV_W*scale,
+    fill: 'var(--body)', opacity: 0.55,
+    stroke: 'var(--body-dk)', 'stroke-width': 0.6,
+    'stroke-dasharray': '3 3' });
+
+  // M3 thru-holes + hex nut pockets recessed below (projected through floor)
+  const half = M3_PATTERN / 2;
+  const nut_r = (M3_NUT_AF/2) / Math.cos(Math.PI/6);  // circumradius
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const mx = sx * half, my = sy * half;
+    // hex pocket (recessed in underside — shown projected as ghost)
+    const pts = [];
+    for (let i = 0; i < 6; i++) {
+      const a = Math.PI/6 + i * Math.PI/3;
+      pts.push(`${X(mx + nut_r*Math.cos(a))},${Y(my + nut_r*Math.sin(a))}`);
+    }
+    el(svg, 'polygon', { points: pts.join(' '),
+      fill: 'var(--nut)', opacity: 0.45,
+      stroke: 'var(--ink)', 'stroke-width': 0.5,
+      'stroke-dasharray': '2 2' });
+    // thru-hole at the mount face
+    el(svg, 'circle', { cx: X(mx), cy: Y(my), r: M3_CLEAR_D/2 * scale,
+      fill: '#000', stroke: 'var(--bolt)', 'stroke-width': 1.2 });
+  }
+
+  // Cable openings on the −X wall — these are below the mount face, shown as
+  // ghost outlines on the wall projection.
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Y(USB_Y + USB_W/2),
+    width: WALL_T*scale, height: USB_W*scale,
+    fill: 'var(--usb)', opacity: 0.4,
+    stroke: 'var(--usb-dk)', 'stroke-width': 0.8,
+    'stroke-dasharray': '3 2' });
+  el(svg, 'text', { x: X(-ENC_L/2 + WALL_T/2), y: Y(USB_Y) + 3,
+    'text-anchor': 'middle', class: 'dim', fill: '#000' }, 'USB');
+  el(svg, 'circle', { cx: X(-ENC_L/2 + WALL_T/2), cy: Y(GNSS_Y),
+    r: GNSS_D/2 * scale,
+    fill: 'var(--gnss)', opacity: 0.4,
+    stroke: 'var(--gnss-dk)', 'stroke-width': 0.8,
+    'stroke-dasharray': '3 2' });
+  el(svg, 'text', { x: X(-ENC_L/2 + WALL_T/2), y: Y(GNSS_Y) + 3,
+    'text-anchor': 'middle', class: 'dim', fill: '#000' }, 'GPS');
+
+  // Labels
+  el(svg, 'text', { x: cx, y: Y(ENC_W/2) - 8, 'text-anchor': 'middle',
+    class: 'dim', fill: 'var(--info)' }, '+Y (toward saddle outer edge)');
+  el(svg, 'text', { x: X(ENC_L/2) + 12, y: cy + 4, class: 'dim',
+    fill: 'var(--info)' }, '+X');
+  el(svg, 'text', { x: X(-ENC_L/2) - 8, y: cy + 4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--info)' }, '−X');
+
+  // Footprint dims
+  const yd = Y(-ENC_W/2) + 20;
+  el(svg, 'line', { x1: X(-ENC_L/2), y1: yd, x2: X(ENC_L/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${ENC_L} mm`);
+  const xd = X(ENC_L/2) + 24;
+  el(svg, 'line', { x1: xd, y1: Y(-ENC_W/2), x2: xd, y2: Y(ENC_W/2),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd + 4, y: cy + 4, class: 'dim' }, `${ENC_W} mm`);
+})();
+
+// =====================================================================
+// Bottom view — mount face (looking up at the saddle-side surface)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('bot-svg');
+  const VB_W = 400, VB_H = 380, margin = 30;
+  const scale = Math.min((VB_W - 2*margin) / ENC_L, (VB_H - 2*margin) / ENC_W);
+  const cx = VB_W / 2, cy = VB_H / 2;
+  // Mirror X to show as viewed from below (looking up into the cavity)
+  const X = x => cx - x * scale;
+  const Y = y => cy - y * scale;
+
+  // Outer wall perimeter
+  el(svg, 'rect', { x: X(ENC_L/2), y: Y(ENC_W/2),
+    width: ENC_L*scale, height: ENC_W*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3 });
+
+  // Cavity opening — looking up at the underside of the floor
+  el(svg, 'rect', { x: X(CAV_L/2), y: Y(CAV_W/2),
+    width: CAV_L*scale, height: CAV_W*scale,
+    fill: '#101319', stroke: 'var(--body-dk)', 'stroke-width': 0.8 });
+
+  // ZED-F9P board ghost (45 × 45) centered on the M3 pattern
+  el(svg, 'rect', { x: X(ZED_SIZE/2), y: Y(ZED_SIZE/2),
+    width: ZED_SIZE*scale, height: ZED_SIZE*scale,
+    fill: 'var(--pcb)', opacity: 0.30,
+    stroke: 'var(--pcb-dk)', 'stroke-width': 0.8, 'stroke-dasharray': '4 3' });
+  el(svg, 'text', { x: cx, y: cy + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--pcb)' }, `ZED-F9P ${ZED_SIZE}\u00d7${ZED_SIZE}`);
+
+  // M3 thru-holes + hex-nut pockets recessed into the floor underside
+  const half = M3_PATTERN / 2;
+  const nut_r = (M3_NUT_AF/2) / Math.cos(Math.PI/6);
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const mx = sx * half, my = sy * half;
+    const pts = [];
+    for (let i = 0; i < 6; i++) {
+      const a = Math.PI/6 + i * Math.PI/3;
+      pts.push(`${X(mx + nut_r*Math.cos(a))},${Y(my + nut_r*Math.sin(a))}`);
+    }
+    el(svg, 'polygon', { points: pts.join(' '),
+      fill: 'var(--nut)', opacity: 0.7,
+      stroke: 'var(--ink)', 'stroke-width': 0.6 });
+    el(svg, 'circle', { cx: X(mx), cy: Y(my), r: M3_CLEAR_D/2 * scale,
+      fill: '#000', stroke: 'var(--bolt)', 'stroke-width': 1.2 });
+  }
+
+  // Cable cutouts on the −X wall (visible from inside the cavity)
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Y(USB_Y + USB_W/2),
+    width: WALL_T*scale, height: USB_W*scale,
+    fill: 'var(--usb)', opacity: 0.85,
+    stroke: 'var(--usb-dk)', 'stroke-width': 1 });
+  el(svg, 'circle', { cx: X(-ENC_L/2 + WALL_T/2), cy: Y(GNSS_Y),
+    r: GNSS_D/2 * scale,
+    fill: 'var(--gnss)', opacity: 0.85,
+    stroke: 'var(--gnss-dk)', 'stroke-width': 1 });
+
+  // Edge markers (mirrored: −X is on the right of this view)
+  el(svg, 'text', { x: X(-ENC_L/2) - 8, y: cy + 4, class: 'dim',
+    fill: 'var(--info)' }, '−X (cable side)');
+  el(svg, 'text', { x: cx, y: Y(ENC_W/2) - 8, 'text-anchor': 'middle',
+    class: 'dim', fill: 'var(--info)' }, '+Y');
+
+  // 37.6 sq dim
+  const sqY = Y(M3_PATTERN/2) - 8;
+  el(svg, 'line', { x1: X(M3_PATTERN/2), y1: sqY, x2: X(-M3_PATTERN/2), y2: sqY,
+    stroke: 'var(--bolt)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: sqY - 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--bolt)' }, `${M3_PATTERN} mm sq pattern`);
+})();
+
+// =====================================================================
+// End view from −X — looking at the cable wall straight on
+// Horizontal axis: Y (saddle), Vertical axis: Z
+// =====================================================================
+(() => {
+  const svg = document.getElementById('end-svg');
+  const VB_W = 600, VB_H = 280, margin = 40;
+  const scale = Math.min((VB_W - 2*margin) / ENC_W, (VB_H - 2*margin) / ENC_H);
+  const cx = VB_W / 2;
+  const floorY = VB_H - 50;
+  const X = y => cx + y * scale;
+  const Z = z => floorY - z * scale;
+
+  // Wall silhouette
+  el(svg, 'rect', { x: X(-ENC_W/2), y: Z(ENC_H),
+    width: ENC_W*scale, height: ENC_H*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.4 });
+
+  // Cavity outline (dashed — interior on this side of the wall is hidden)
+  el(svg, 'rect', { x: X(-CAV_W/2), y: Z(ENC_H),
+    width: CAV_W*scale, height: CAV_H*scale,
+    fill: 'none', stroke: 'var(--body-dk)', 'stroke-width': 0.6,
+    'stroke-dasharray': '4 3', opacity: 0.7 });
+
+  // USB-C cutout
+  el(svg, 'rect', {
+    x: X(USB_Y - USB_W/2), y: Z(USB_Z_CENTER + USB_H/2),
+    width: USB_W*scale, height: USB_H*scale,
+    fill: 'var(--usb)', opacity: 0.9,
+    stroke: 'var(--usb-dk)', 'stroke-width': 1.2 });
+  el(svg, 'text', { x: X(USB_Y), y: Z(USB_Z_CENTER) + 3,
+    'text-anchor': 'middle', class: 'dim', fill: '#000' }, 'USB-C');
+
+  // GNSS round cutout
+  el(svg, 'circle', { cx: X(GNSS_Y), cy: Z(GNSS_Z_CENTER), r: GNSS_D/2 * scale,
+    fill: 'var(--gnss)', opacity: 0.9,
+    stroke: 'var(--gnss-dk)', 'stroke-width': 1.2 });
+  el(svg, 'text', { x: X(GNSS_Y), y: Z(GNSS_Z_CENTER) + 3,
+    'text-anchor': 'middle', class: 'dim', fill: '#000' }, `Ø${GNSS_D}`);
+
+  // Floor band (now at the TOP)
+  el(svg, 'line', { x1: X(-ENC_W/2)-12, y1: Z(FLOOR_Z0), x2: X(ENC_W/2)+12, y2: Z(FLOOR_Z0),
+    stroke: 'var(--mute)', 'stroke-width': 0.6, 'stroke-dasharray': '3 3' });
+  el(svg, 'text', { x: X(ENC_W/2)+16, y: Z(FLOOR_Z0)+4, class: 'dim' },
+    `floor ${FLOOR_T} mm`);
+  el(svg, 'text', { x: X(-ENC_W/2)-16, y: Z(ENC_H)+4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--info)' }, 'mount face ↑');
+
+  // Cavity opening (bottom in service)
+  el(svg, 'line', { x1: X(-ENC_W/2)-20, y1: Z(0), x2: X(ENC_W/2)+20, y2: Z(0),
+    stroke: '#8b93a7', 'stroke-width': 0.8, 'stroke-dasharray': '4 3' });
+  el(svg, 'text', { x: X(-ENC_W/2)-16, y: Z(0)+4, 'text-anchor': 'end',
+    class: 'dim', fill: 'var(--info)' }, 'cavity opens ↓');
+
+  // Vertical dim
+  const xd = X(-ENC_W/2) - 24;
+  el(svg, 'line', { x1: xd, y1: Z(0), x2: xd, y2: Z(ENC_H),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: Z(ENC_H/2) + 4, 'text-anchor': 'end',
+    class: 'dim' }, `${ENC_H} mm`);
+
+  // Horizontal dim
+  const yd = Z(0) + 24;
+  el(svg, 'line', { x1: X(-ENC_W/2), y1: yd, x2: X(ENC_W/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: cx, y: yd + 12, 'text-anchor': 'middle', class: 'dim' },
+    `${ENC_W} mm (Y)`);
+
+  // Cutout spacing dim
+  const sd = Z(ENC_H) - 14;
+  el(svg, 'line', { x1: X(USB_Y), y1: sd, x2: X(GNSS_Y), y2: sd,
+    stroke: 'var(--info)', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: X((USB_Y + GNSS_Y) / 2), y: sd - 4,
+    'text-anchor': 'middle', class: 'dim', fill: 'var(--info)' },
+    `${(GNSS_Y - USB_Y).toFixed(1)} mm center-to-center`);
+})();
+
+// =====================================================================
+// Side cross-section — saddle ON TOP, enclosure hangs BELOW.
+// Bolt drops down from above, through saddle csk, into nut in floor pocket.
+// =====================================================================
+(() => {
+  const svg = document.getElementById('section-svg');
+  const VB_W = 720, VB_H = 320, margin = 40;
+  const SADDLE_HT = 14.0, SADDLE_X_HALF = 50/2;
+  const STACK_H = SADDLE_HT + ENC_H;
+  const STACK_L = ENC_L + 30;
+  const scale = Math.min((VB_W - 2*margin) / STACK_L, (VB_H - 2*margin) / STACK_H);
+  const cx = VB_W / 2;
+  const floorY = VB_H - 50;
+  const X = x => cx + x * scale;
+  // Z=0 is the cavity opening at the bottom (= ground in service).
+  // Enclosure occupies Z ∈ [0, ENC_H]; saddle stacks on top at Z ∈ [ENC_H, ENC_H+SADDLE_HT].
+  const Z = z => floorY - z * scale;
+
+  const sZ0 = ENC_H;                 // saddle bottom
+  const sZ1 = ENC_H + SADDLE_HT;     // saddle top
+
+  // Saddle wing on TOP
+  el(svg, 'rect', { x: X(-SADDLE_X_HALF), y: Z(sZ1),
+    width: 2*SADDLE_X_HALF*scale, height: SADDLE_HT*scale,
+    fill: '#39424f', stroke: '#222', 'stroke-width': 1.2 });
+  el(svg, 'text', { x: X(SADDLE_X_HALF) + 6, y: Z((sZ0+sZ1)/2) + 4,
+    class: 'dim' }, 'saddle wing');
+
+  // Enclosure floor (TOP of enclosure, just below saddle)
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Z(ENC_H),
+    width: ENC_L*scale, height: FLOOR_T*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+  // Left wall (−X)
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Z(FLOOR_Z0),
+    width: WALL_T*scale, height: FLOOR_Z0*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+  // Right wall (+X)
+  el(svg, 'rect', { x: X(ENC_L/2 - WALL_T), y: Z(FLOOR_Z0),
+    width: WALL_T*scale, height: FLOOR_Z0*scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2 });
+
+  // Ghost USB & GNSS cutouts (offset in Y from section plane, shown for ref)
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Z(USB_Z_CENTER + USB_H/2),
+    width: WALL_T*scale, height: USB_H*scale,
+    fill: 'var(--usb)', opacity: 0.4,
+    stroke: 'var(--usb)', 'stroke-width': 0.8, 'stroke-dasharray': '3 2' });
+  el(svg, 'rect', { x: X(-ENC_L/2), y: Z(GNSS_Z_CENTER + GNSS_D/2),
+    width: WALL_T*scale, height: GNSS_D*scale,
+    fill: 'var(--gnss)', opacity: 0.4,
+    stroke: 'var(--gnss)', 'stroke-width': 0.8, 'stroke-dasharray': '3 2' });
+
+  // Bolts at X = ±M3_PATTERN/2 — drop DOWN from saddle top csk into nut pocket
+  const half = M3_PATTERN / 2;
+  for (const sx of [-1, 1]) {
+    const bx = sx * half;
+    // Csk on saddle TOP (Ø6.2 × 1.8) — opens upward at sZ1
+    el(svg, 'polygon', {
+      points: [
+        `${X(bx) - 6.2/2*scale},${Z(sZ1)}`,
+        `${X(bx) + 6.2/2*scale},${Z(sZ1)}`,
+        `${X(bx) + M3_CLEAR_D/2*scale},${Z(sZ1 - 1.8)}`,
+        `${X(bx) - M3_CLEAR_D/2*scale},${Z(sZ1 - 1.8)}`,
+      ].join(' '),
+      fill: '#26303d', stroke: '#222', 'stroke-width': 0.6 });
+    // M3 shank from saddle top csk down through floor into nut
+    const shankTopZ = sZ1 - 1.8;     // bottom of csk
+    const shankBotZ = FLOOR_Z0 + (FLOOR_T - M3_NUT_T);  // top of nut
+    el(svg, 'rect', { x: X(bx) - (M3_CLEAR_D/2)*scale, y: Z(shankTopZ),
+      width: M3_CLEAR_D * scale, height: (shankTopZ - shankBotZ)*scale,
+      fill: 'var(--bolt)', opacity: 0.95 });
+    // Hex nut in pocket on the cavity side of the floor
+    el(svg, 'rect', { x: X(bx) - (M3_NUT_AF/2)*scale,
+      y: Z(FLOOR_Z0 + M3_NUT_T),
+      width: M3_NUT_AF * scale, height: M3_NUT_T * scale,
+      fill: 'var(--nut)', stroke: 'var(--ink)', 'stroke-width': 0.8 });
+  }
+
+  // Ground / cavity-open line
+  el(svg, 'line', { x1: X(-STACK_L/2), y1: Z(0), x2: X(STACK_L/2), y2: Z(0),
+    stroke: '#8b93a7', 'stroke-width': 0.8, 'stroke-dasharray': '4 3' });
+  el(svg, 'text', { x: X(STACK_L/2)+6, y: Z(0)+4, class: 'dim' },
+    'cavity opens (ground)');
+
+  // Annotations
+  el(svg, 'text', { x: X(0), y: Z(FLOOR_Z0/2) + 4, 'text-anchor': 'middle',
+    class: 'dim', fill: 'var(--info)' }, 'enclosure cavity');
+  el(svg, 'text', { x: X(ENC_L/2) + 6, y: Z(FLOOR_Z0 + FLOOR_T/2) + 4,
+    class: 'dim' }, `floor ${FLOOR_T}`);
+  el(svg, 'text', { x: X(half) + 6, y: Z(sZ1) - 4, class: 'dim',
+    fill: 'var(--bolt)' }, 'M3 csk bolt ↓');
+  el(svg, 'text', { x: X(-half) - 6, y: Z(FLOOR_Z0 + M3_NUT_T/2) + 4, class: 'dim',
+    'text-anchor': 'end', fill: 'var(--nut)' }, 'M3 nut');
+
+  // Vertical stack dim
+  const xd = X(-STACK_L/2) - 14;
+  el(svg, 'line', { x1: xd, y1: Z(0), x2: xd, y2: Z(sZ1),
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'text', { x: xd - 4, y: Z(sZ1/2) + 4, 'text-anchor': 'end',
+    class: 'dim' }, `${(SADDLE_HT + ENC_H).toFixed(1)} mm stack`);
+})();
+
+// =====================================================================
+// Design checks
+// =====================================================================
+const checks = [];
+function chk(ok, msg) { checks.push({ ok, msg }); }
+
+// ZED board fits inside the cavity (45 × 45 with clearance)
+const zedClearL = (CAV_L - ZED_SIZE) / 2;
+const zedClearW = (CAV_W - ZED_SIZE) / 2;
+chk(zedClearL >= 0.5 && zedClearW >= 0.5,
+  `ZED-F9P clearance: ${zedClearL.toFixed(2)} mm (X) × ${zedClearW.toFixed(2)} mm (Y) per side`);
+
+// Footprint vs saddle wing in X — overhang allowed; only M3 pattern must land on wing
+const wingHalfX = SADDLE_LEN / 2;
+const overhang = ENC_L/2 - wingHalfX;
+chk(M3_PATTERN/2 <= wingHalfX - 1.0,
+  `M3 pattern half (${M3_PATTERN/2}) lands on saddle wing half (${wingHalfX})`
+  + (overhang > 0 ? ` \u2014 enclosure overhangs ${overhang.toFixed(1)} mm/side in X (OK)` : ''));
+// In Y, the enclosure can overhang both edges of the saddle wing in service
+// (it hangs below). Only the M3 pattern (Y center ± 18.8 mm) must land on the
+// wing's solid zone.
+const wingZoneNear = 45.30;     // top-rect edge in saddle coords
+const wingZoneFar  = SADDLE_WID_HALF;
+const m3NearY = SADDLE_Y_CENTER - M3_PATTERN/2;
+const m3FarY  = SADDLE_Y_CENTER + M3_PATTERN/2;
+chk(m3NearY >= wingZoneNear + 0.5,
+  `M3 pattern −Y row (saddle Y=${m3NearY.toFixed(2)}) clears top-rect edge (${wingZoneNear})`);
+chk(m3FarY <= wingZoneFar - 0.5,
+  `M3 pattern +Y row (saddle Y=${m3FarY.toFixed(2)}) inside wing +Y edge (${wingZoneFar})`);
+const encNear = SADDLE_Y_CENTER - ENC_W/2;
+const encFar  = SADDLE_Y_CENTER + ENC_W/2;
+const yOverhangNear = wingZoneNear - encNear;
+const yOverhangFar  = encFar - wingZoneFar;
+if (yOverhangNear > 0 || yOverhangFar > 0) {
+  chk(true, `Enclosure overhangs saddle wing in Y: \u2212Y by ${Math.max(0,yOverhangNear).toFixed(1)} mm, +Y by ${Math.max(0,yOverhangFar).toFixed(1)} mm (OK \u2014 hangs free)`);
+}
+
+// M3 pattern fits inside cavity walls
+const m3ToWall = (Math.min(ENC_L, ENC_W) - M3_PATTERN) / 2 - WALL_T;
+chk(m3ToWall >= 0.5, `M3 hole to inner wall: ${m3ToWall.toFixed(2)} mm`);
+
+// Hex pocket vs M3 clearance hole (pocket diameter < cavity)
+const pocketAcrossPts = M3_NUT_AF / Math.cos(Math.PI/6);
+chk(pocketAcrossPts < CAV_L - 2 && pocketAcrossPts < CAV_W - 2,
+  `Nut pocket Ø ${pocketAcrossPts.toFixed(2)} mm fits inside cavity`);
+
+// Cutouts inside the wall in Y
+const yHalfInside = ENC_W/2 - WALL_T;
+chk(Math.abs(USB_Y)  + USB_W/2  <= yHalfInside - 0.5,
+  `USB cutout inside −X wall: |${USB_Y}|+${USB_W/2} ≤ ${yHalfInside-0.5}`);
+chk(Math.abs(GNSS_Y) + GNSS_D/2 <= yHalfInside - 0.5,
+  `GNSS cutout inside −X wall: |${GNSS_Y}|+${GNSS_D/2} ≤ ${yHalfInside-0.5}`);
+
+// Cutout separation
+const gap = Math.abs(USB_Y - GNSS_Y) - (USB_W + GNSS_D)/2;
+chk(gap >= 1.0, `Cutout edge-to-edge gap: ${gap.toFixed(2)} mm (≥ 1.0)`);
+
+// Cutouts within vertical wall range (cavity opens DOWNWARD now)
+chk(USB_Z_CENTER - USB_H/2 >= 1.0,
+  `USB cutout above cavity opening by ${(USB_Z_CENTER - USB_H/2).toFixed(2)} mm`);
+chk(USB_Z_CENTER + USB_H/2 <= FLOOR_Z0 - 0.5,
+  `USB cutout below floor by ${(FLOOR_Z0 - USB_Z_CENTER - USB_H/2).toFixed(2)} mm`);
+chk(GNSS_Z_CENTER - GNSS_D/2 >= 1.0,
+  `GNSS cutout above cavity opening by ${(GNSS_Z_CENTER - GNSS_D/2).toFixed(2)} mm`);
+chk(GNSS_Z_CENTER + GNSS_D/2 <= FLOOR_Z0 - 0.5,
+  `GNSS cutout below floor by ${(FLOOR_Z0 - GNSS_Z_CENTER - GNSS_D/2).toFixed(2)} mm`);
+
+// Printability: bridge spans on the cable cutouts
+chk(USB_W <= 20, `USB cutout bridge span ${USB_W} mm ≤ 20 mm (PLA-printable without supports)`);
+chk(GNSS_D <= 10, `GNSS cutout span ${GNSS_D} mm bridges cleanly`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

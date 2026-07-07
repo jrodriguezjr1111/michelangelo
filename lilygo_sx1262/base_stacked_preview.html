@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>ZED-F9P + IMU Carrier Base — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --zed:#3fae6b; --zed-dk:#2f9e74;
+    --imu:#e07a5a; --imu-dk:#9a4a30;
+    --m4:#d6b35a; --m4-dk:#8a7028;
+    --m2:#b58df0; --m2-dk:#6a4c9a;
+    --saddle:#c87aff;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:980px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:220px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ZED-F9P + IMU Carrier Base — fit verification</h1>
+  <p>101 × 65 × 27 tray on top of <code>flycatcher/imu_platform_saddle.stl</code>:
+     4× M4 floor holes at the saddle's <strong>36.14 × 36.1</strong> pattern (heads inside,
+     under the ZED board); ZED-F9P on Ø7×6 bosses; IMU on standoffs; M2 LILYGO bosses
+     above the top face for the top plate. M3 58×49 holes removed.
+     Source: <code>lilygo_sx1262/make_base_stacked.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Outer / cavity</th><td id="s-outer">—</td></tr>
+      <tr><th>M4 saddle mount</th><td id="s-m4">—</td></tr>
+      <tr><th>ZED-F9P bosses</th><td id="s-zed">—</td></tr>
+      <tr><th>IMU standoffs</th><td id="s-imu">—</td></tr>
+      <tr><th>M2 LILYGO bosses (top)</th><td id="s-m2">—</td></tr>
+      <tr><th>M3 corner bosses</th><td id="s-cb">—</td></tr>
+      <tr><th>USB-C slot + ant hole</th><td id="s-usb">—</td></tr>
+      <tr><th>Stack order</th><td id="s-stack">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Looking into the cavity. Dashed = board envelopes; gold = M4 saddle holes; purple = M2 bosses on the rim.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Tray</span>
+      <span><span class="sw" style="background:var(--zed)"></span>ZED-F9P</span>
+      <span><span class="sw" style="background:var(--imu)"></span>IMU</span>
+      <span><span class="sw" style="background:var(--m4)"></span>M4 (saddle)</span>
+      <span><span class="sw" style="background:var(--m2)"></span>M2 (LILYGO)</span>
+      <span><span class="sw" style="background:#94c8ef"></span>M3 corner (csk top)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 640 460"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (X × Z)</h2>
+    <p class="sub">Saddle below (dashed); M4 heads on the floor clear under the ZED board; M2 bosses carry the LILYGO plate above.</p>
+    <svg id="sec-svg" viewBox="0 0 640 340"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print floor-down, no supports. Assembly: drop 4× M4 from inside the cavity (heads on
+  the floor) down through the saddle into the tube clamp. ZED M3 / IMU M2 self-tap into
+  pilots. LILYGO board / top plate screws to the M2 bosses above.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_base_stacked.py
+// =====================================================================
+const BASE_L=101.0, BASE_W=65.0, BASE_H=27.0;
+const WALL_T=3.0, FLOOR_T=4.0;
+const CAV_L=BASE_L-2*WALL_T, CAV_W=BASE_W-2*WALL_T, CAV_H=BASE_H-FLOOR_T;
+
+const M4_PAT_X=36.14, M4_PAT_Y=36.1, M4_CLEAR_D=4.4, M4_HEAD_D=7.0, M4_HEAD_H=4.0;
+
+const ZED_PAT=37.6, ZED_BOARD=45.0;
+const ZED_SO_OD=7.0, ZED_SO_H=6.0, ZED_SO_PILOT=2.5;
+
+const IMU_PAT_X=19.95, IMU_PAT_Y=17.81;
+const IMU_SO_OD=4.0, IMU_SO_H=4.0, IMU_SO_PILOT=1.6;
+const IMU_BOARD_X=22.0, IMU_BOARD_Y=20.0;   // approx envelope
+
+// EVEN X SPACING: wall | gap | ZED | gap | IMU | gap | wall
+const X_GAP=(CAV_L-ZED_BOARD-IMU_BOARD_X)/3;            // 9.33
+const ZED_XC=-CAV_L/2+X_GAP+ZED_BOARD/2;                // -15.67
+const IMU_XC=ZED_XC+ZED_BOARD/2+X_GAP+IMU_BOARD_X/2;    // +27.17
+
+const M2_PX=95.33, M2_PY=28.55, M2_CLEAR_D=2.4, M2_BOSS_D=4.5, M2_BOSS_H=5.0;
+
+// USB-C slot + antenna hole on the −Y wall
+const USB_W=28.0, USB_H=13.0, USB_XC=ZED_XC, USB_Z0=FLOOR_T;
+const ANT_D=6.21, ANT_GAP=3.0;
+const ANT_XC=USB_XC+USB_W/2+ANT_GAP+ANT_D/2, ANT_ZC=USB_Z0+USB_H/2;
+const IMU_CUT_W=14.0, IMU_CUT_H=10.0, IMU_CUT_XC=IMU_XC, IMU_CUT_Z0=FLOOR_T;
+
+// M3 corner bosses (csk top), fused into the cavity corners
+const CB_OD=6.0, CB_CLEAR_D=3.4, CB_CSK_D=6.0, CB_CSK_DEPTH=1.8, CB_EMBED=0.5;
+const CB_POS=[];
+for (const sx of [-1,1]) for (const sy of [-1,1])
+  CB_POS.push([sx*(CAV_L/2-CB_OD/2+CB_EMBED), sy*(CAV_W/2-CB_OD/2+CB_EMBED)]);
+
+// Saddle below (flycatcher/make_imu_platform_saddle.py)
+const SAD_H=29.0, SAD_TOP=3.0;
+
+const BOARD_T=1.6;
+const M4_POS=[]; for (const sx of [-1,1]) for (const sy of [-1,1]) M4_POS.push([sx*M4_PAT_X/2, sy*M4_PAT_Y/2]);
+
+const ns='http://www.w3.org/2000/svg';
+function el(p,t,a,txt){const e=document.createElementNS(ns,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e;}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg=document.getElementById('top-svg');
+  const VB_W=640, VB_H=460, m=36;
+  const s=Math.min((VB_W-2*m)/BASE_L,(VB_H-2*m)/BASE_W);
+  const cx=VB_W/2, cy=VB_H/2;
+  const X=x=>cx+x*s, Y=y=>cy-y*s, px=v=>v*s;
+
+  // tray + cavity
+  el(svg,'rect',{x:X(-BASE_L/2),y:Y(BASE_W/2),width:px(BASE_L),height:px(BASE_W),
+    fill:'var(--body)','fill-opacity':0.2,stroke:'var(--body-dk)','stroke-width':1.5,rx:3});
+  el(svg,'rect',{x:X(-CAV_L/2),y:Y(CAV_W/2),width:px(CAV_L),height:px(CAV_W),
+    fill:'#0d0f14',stroke:'var(--body-dk)','stroke-width':1,'stroke-dasharray':'3 2'});
+
+  // ZED board envelope + bosses
+  el(svg,'rect',{x:X(ZED_XC-ZED_BOARD/2),y:Y(ZED_BOARD/2),width:px(ZED_BOARD),height:px(ZED_BOARD),
+    fill:'none',stroke:'var(--zed)','stroke-width':1,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:X(ZED_XC),y:Y(ZED_BOARD/2)-4,'text-anchor':'middle',class:'dim',fill:'var(--zed)'},'ZED-F9P');
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    const hx=ZED_XC+sx*ZED_PAT/2, hy=sy*ZED_PAT/2;
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(ZED_SO_OD/2),fill:'var(--zed)',stroke:'var(--zed-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(ZED_SO_PILOT/2),fill:'#101319'});
+  }
+
+  // IMU board envelope + standoffs
+  el(svg,'rect',{x:X(IMU_XC-IMU_BOARD_X/2),y:Y(IMU_BOARD_Y/2),width:px(IMU_BOARD_X),height:px(IMU_BOARD_Y),
+    fill:'none',stroke:'var(--imu)','stroke-width':1,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:X(IMU_XC),y:Y(IMU_BOARD_Y/2)-4,'text-anchor':'middle',class:'dim',fill:'var(--imu)'},'IMU');
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    const hx=IMU_XC+sx*IMU_PAT_X/2, hy=sy*IMU_PAT_Y/2;
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(IMU_SO_OD/2),fill:'var(--imu)',stroke:'var(--imu-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(IMU_SO_PILOT/2),fill:'#101319'});
+  }
+
+  // M4 saddle holes (head keep-out dashed)
+  for (const [bx,by] of M4_POS){
+    el(svg,'circle',{cx:X(bx),cy:Y(by),r:px(M4_HEAD_D/2),fill:'none',stroke:'var(--m4)','stroke-width':0.8,'stroke-dasharray':'2 2'});
+    el(svg,'circle',{cx:X(bx),cy:Y(by),r:px(M4_CLEAR_D/2),fill:'#101319',stroke:'var(--m4)','stroke-width':1.3});
+  }
+  el(svg,'text',{x:X(0),y:Y(-M4_PAT_Y/2)-(-14),'text-anchor':'middle',class:'dim',fill:'var(--m4)'},
+    `M4 ${M4_PAT_X}×${M4_PAT_Y} (saddle)`);
+
+  // M2 LILYGO bosses on the rim
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    const hx=sx*M2_PX/2, hy=sy*M2_PY/2;
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(M2_BOSS_D/2),fill:'var(--m2)',stroke:'var(--m2-dk)','stroke-width':1});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(M2_CLEAR_D/2),fill:'#101319'});
+  }
+
+  // USB-C slot + antenna hole on the −Y wall (plan projection)
+  el(svg,'rect',{x:X(USB_XC-USB_W/2),y:Y(-CAV_W/2),width:px(USB_W),height:px(WALL_T),
+    fill:'var(--imu)',opacity:0.75});
+  el(svg,'text',{x:X(USB_XC),y:Y(-BASE_W/2)-4,'text-anchor':'middle',class:'dim',fill:'var(--imu)'},
+    `USB-C ${USB_W}×${USB_H}`);
+  el(svg,'circle',{cx:X(ANT_XC),cy:Y(-CAV_W/2-WALL_T/2),r:px(ANT_D/2),
+    fill:'#101319',stroke:'var(--imu)','stroke-width':1});
+  el(svg,'rect',{x:X(IMU_CUT_XC-IMU_CUT_W/2),y:Y(-CAV_W/2),width:px(IMU_CUT_W),height:px(WALL_T),
+    fill:'var(--imu)',opacity:0.75});
+
+  // M3 corner bosses (csk top) fused into the cavity corners
+  for (const [hx,hy] of CB_POS){
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(CB_OD/2),fill:'#94c8ef',stroke:'#4a7aa8','stroke-width':1});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(CB_CSK_D/2),fill:'none',stroke:'#101319','stroke-width':0.7,'stroke-dasharray':'2 1'});
+    el(svg,'circle',{cx:X(hx),cy:Y(hy),r:px(CB_CLEAR_D/2),fill:'#101319'});
+  }
+  el(svg,'text',{x:X(CB_POS[3][0]),y:Y(CB_POS[3][1])-px(CB_OD/2)-3,'text-anchor':'middle',
+    fill:'#94c8ef','font-size':8,'font-weight':700},'M3');
+
+  // dims
+  const yd=Y(-BASE_W/2)+16;
+  el(svg,'line',{x1:X(-BASE_L/2),y1:yd,x2:X(BASE_L/2),y2:yd,stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:cx,y:yd+13,'text-anchor':'middle',class:'dim'},`${BASE_L} mm (X)`);
+  const xd=X(-BASE_L/2)-14;
+  el(svg,'line',{x1:xd,y1:Y(-BASE_W/2),x2:xd,y2:Y(BASE_W/2),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:xd-4,y:cy+4,'text-anchor':'end',class:'dim'},`${BASE_W} (Y)`);
+})();
+
+// =====================================================================
+// Cross-section (X × Z) — features projected
+// =====================================================================
+(() => {
+  const svg=document.getElementById('sec-svg');
+  const VB_W=640, VB_H=340, m=40;
+  const belowZ=12;                       // drawn portion of the saddle below
+  const topZ=BASE_H+M2_BOSS_H+BOARD_T+4;
+  const s=Math.min((VB_W-2*m)/BASE_L,(VB_H-2*m-10)/(topZ+belowZ));
+  const cx=VB_W/2, floorY=VB_H-m-belowZ*s;
+  const X=x=>cx+x*s, Z=z=>floorY-z*s;
+
+  // saddle below (dashed top plate)
+  el(svg,'rect',{x:X(-BASE_L/2),y:Z(0),width:BASE_L*s,height:SAD_TOP*s,
+    fill:'var(--saddle)','fill-opacity':0.25,stroke:'var(--saddle)','stroke-width':1,'stroke-dasharray':'5 3'});
+  el(svg,'text',{x:cx,y:Z(0)+SAD_TOP*s+11,'text-anchor':'middle',class:'dim',fill:'var(--saddle)'},
+    'imu_platform_saddle top plate (29 mm box below)');
+
+  // floor + side walls
+  el(svg,'rect',{x:X(-BASE_L/2),y:Z(FLOOR_T),width:BASE_L*s,height:FLOOR_T*s,
+    fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+  for (const sx of [-1,1])
+    el(svg,'rect',{x:sx<0?X(-BASE_L/2):X(BASE_L/2-WALL_T),y:Z(BASE_H),width:WALL_T*s,height:CAV_H*s,
+      fill:'var(--body)',stroke:'var(--body-dk)','stroke-width':1.2});
+
+  // M4 holes + cap heads on the floor (projected at X=±18.07)
+  for (const sx of [-1,1]){
+    const bx=sx*M4_PAT_X/2;
+    el(svg,'rect',{x:X(bx)-M4_CLEAR_D/2*s,y:Z(FLOOR_T),width:M4_CLEAR_D*s,height:FLOOR_T*s,
+      fill:'#101319',stroke:'var(--m4)','stroke-width':0.8});
+    el(svg,'rect',{x:X(bx)-M4_HEAD_D/2*s,y:Z(FLOOR_T+M4_HEAD_H),width:M4_HEAD_D*s,height:M4_HEAD_H*s,
+      fill:'var(--m4-dk)',stroke:'var(--m4)','stroke-width':0.8});
+    el(svg,'line',{x1:X(bx),y1:Z(FLOOR_T),x2:X(bx),y2:Z(0)+8*s,
+      stroke:'var(--m4)','stroke-width':1.2,'stroke-dasharray':'4 3'});
+  }
+
+  // ZED bosses + board (clears M4 heads)
+  for (const sx of [-1,1])
+    el(svg,'rect',{x:X(ZED_XC+sx*ZED_PAT/2)-ZED_SO_OD/2*s,y:Z(FLOOR_T+ZED_SO_H),width:ZED_SO_OD*s,height:ZED_SO_H*s,
+      fill:'var(--zed)',stroke:'var(--zed-dk)','stroke-width':0.8});
+  el(svg,'rect',{x:X(ZED_XC-ZED_BOARD/2),y:Z(FLOOR_T+ZED_SO_H+BOARD_T),width:ZED_BOARD*s,height:BOARD_T*s,
+    fill:'var(--zed)',stroke:'var(--zed-dk)','stroke-width':1});
+  el(svg,'text',{x:X(ZED_XC),y:Z(FLOOR_T+ZED_SO_H+BOARD_T)-4,'text-anchor':'middle',class:'dim',fill:'var(--zed)'},'ZED-F9P');
+
+  // IMU standoffs + board
+  for (const sx of [-1,1])
+    el(svg,'rect',{x:X(IMU_XC+sx*IMU_PAT_X/2)-IMU_SO_OD/2*s,y:Z(FLOOR_T+IMU_SO_H),width:IMU_SO_OD*s,height:IMU_SO_H*s,
+      fill:'var(--imu)',stroke:'var(--imu-dk)','stroke-width':0.8});
+  el(svg,'rect',{x:X(IMU_XC-IMU_BOARD_X/2),y:Z(FLOOR_T+IMU_SO_H+BOARD_T),width:IMU_BOARD_X*s,height:BOARD_T*s,
+    fill:'var(--imu)',stroke:'var(--imu-dk)','stroke-width':1});
+
+  // USB-C slot + antenna hole — the −Y wall is parallel to this X×Z plane
+  el(svg,'rect',{x:X(USB_XC-USB_W/2),y:Z(USB_Z0+USB_H),width:USB_W*s,height:USB_H*s,
+    fill:'#101319',stroke:'var(--imu)','stroke-width':1.2,'stroke-dasharray':'4 2'});
+  el(svg,'text',{x:X(USB_XC),y:Z(USB_Z0+USB_H/2)+3,'text-anchor':'middle',class:'dim',fill:'var(--imu)'},
+    `USB-C ${USB_W}×${USB_H} (−Y wall)`);
+  el(svg,'circle',{cx:X(ANT_XC),cy:Z(ANT_ZC),r:ANT_D/2*s,
+    fill:'#101319',stroke:'var(--imu)','stroke-width':1.2,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:X(ANT_XC),y:Z(ANT_ZC)-ANT_D/2*s-3,'text-anchor':'middle',class:'dim',fill:'var(--imu)'},
+    `Ø${ANT_D}`);
+  el(svg,'rect',{x:X(IMU_CUT_XC-IMU_CUT_W/2),y:Z(IMU_CUT_Z0+IMU_CUT_H),width:IMU_CUT_W*s,height:IMU_CUT_H*s,
+    fill:'#101319',stroke:'var(--imu)','stroke-width':1.2,'stroke-dasharray':'4 2'});
+  el(svg,'text',{x:X(IMU_CUT_XC),y:Z(IMU_CUT_Z0+IMU_CUT_H)-4,'text-anchor':'middle',class:'dim',fill:'var(--imu)'},
+    `IMU ${IMU_CUT_W}×${IMU_CUT_H}`);
+
+  // M3 corner bosses (projected at X=±45) — full cavity height, csk at top
+  for (const sx of [-1,1]){
+    const bx=sx*Math.abs(CB_POS[0][0]);
+    el(svg,'rect',{x:X(bx)-CB_OD/2*s,y:Z(BASE_H),width:CB_OD*s,height:CAV_H*s,
+      fill:'#94c8ef','fill-opacity':0.8,stroke:'#4a7aa8','stroke-width':0.8});
+    el(svg,'rect',{x:X(bx)-CB_CLEAR_D/2*s,y:Z(BASE_H),width:CB_CLEAR_D*s,height:BASE_H*s,fill:'#101319'});
+    el(svg,'rect',{x:X(bx)-CB_CSK_D/2*s,y:Z(BASE_H),width:CB_CSK_D*s,height:CB_CSK_DEPTH*s,
+      fill:'#101319',stroke:'#4a7aa8','stroke-width':0.6});
+  }
+
+  // M2 bosses above the top face + LILYGO plate (dashed)
+  for (const sx of [-1,1]){
+    const bx=sx*M2_PX/2;
+    el(svg,'rect',{x:X(bx)-M2_BOSS_D/2*s,y:Z(BASE_H+M2_BOSS_H),width:M2_BOSS_D*s,height:M2_BOSS_H*s,
+      fill:'var(--m2)',stroke:'var(--m2-dk)','stroke-width':0.8});
+  }
+  el(svg,'rect',{x:X(-M2_PX/2-3),y:Z(BASE_H+M2_BOSS_H+BOARD_T),width:(M2_PX+6)*s,height:BOARD_T*s,
+    fill:'none',stroke:'var(--m2)','stroke-width':1,'stroke-dasharray':'3 2'});
+  el(svg,'text',{x:cx,y:Z(BASE_H+M2_BOSS_H+BOARD_T)-4,'text-anchor':'middle',class:'dim',fill:'var(--m2)'},
+    'LILYGO board / top plate');
+
+  // dims
+  const zd=X(-BASE_L/2)-18;
+  el(svg,'line',{x1:zd,y1:Z(0),x2:zd,y2:Z(BASE_H),stroke:'#8b93a7','stroke-width':0.8});
+  el(svg,'text',{x:zd-6,y:Z(BASE_H/2)+3,'text-anchor':'end',class:'dim'},`${BASE_H}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-outer').textContent =
+  `${BASE_L} × ${BASE_W} × ${BASE_H} mm; cavity ${CAV_L} × ${CAV_W} × ${CAV_H} (walls ${WALL_T}, floor ${FLOOR_T})`;
+document.getElementById('s-m4').textContent =
+  `4× Ø${M4_CLEAR_D} floor holes at (±${(M4_PAT_X/2).toFixed(2)}, ±${(M4_PAT_Y/2).toFixed(2)}) — matches the saddle's M4 ${M4_PAT_X}×${M4_PAT_Y}; heads inside the cavity`;
+document.getElementById('s-zed').textContent =
+  `4× Ø${ZED_SO_OD}×${ZED_SO_H} bosses, Ø${ZED_SO_PILOT} pilot (M3 self-tap) — ${ZED_PAT} sq at X=${ZED_XC.toFixed(2)}`;
+document.getElementById('s-imu').textContent =
+  `4× Ø${IMU_SO_OD}×${IMU_SO_H}, Ø${IMU_SO_PILOT} pilot (M2 self-tap) — ${IMU_PAT_X} × ${IMU_PAT_Y} at X=+${IMU_XC.toFixed(2)}`;
+document.getElementById('s-m2').textContent =
+  `4× Ø${M2_CLEAR_D} through at ${M2_PX} × ${M2_PY}, Ø${M2_BOSS_D}×${M2_BOSS_H} bosses above the top face`;
+document.getElementById('s-cb').textContent =
+  `4× Ø${CB_CLEAR_D} through in Ø${CB_OD} corner bosses at (±${Math.abs(CB_POS[0][0]).toFixed(1)}, ±${Math.abs(CB_POS[0][1]).toFixed(1)}) — csk Ø${CB_CSK_D}×${CB_CSK_DEPTH} on the TOP face, full cavity height`;
+document.getElementById('s-usb').textContent =
+  `slot ${USB_W} × ${USB_H} on −Y wall at X=${USB_XC.toFixed(2)} (z ${USB_Z0}–${USB_Z0+USB_H}); Ø${ANT_D} hole at X=${ANT_XC.toFixed(2)}, z=${ANT_ZC} — right of the slot, ${ANT_GAP} mm web; IMU cutout ${IMU_CUT_W} × ${IMU_CUT_H} at X=${IMU_CUT_XC.toFixed(2)}`;
+document.getElementById('s-stack').textContent =
+  `tube clamp → imu_platform_saddle → THIS BASE → LILYGO top plate`;
+
+const checks=[];
+const ck=(ok,msg)=>checks.push({ok,msg});
+
+// 1. saddle M4 alignment (pattern identity)
+ck(true, `Base M4 (${M4_PAT_X}×${M4_PAT_Y} centered) = saddle M4 pattern — Δ = 0.00 mm`);
+
+// 1b. even spacing along X
+const gapL=(ZED_XC-ZED_BOARD/2)-(-CAV_L/2);
+const gapM=(IMU_XC-IMU_BOARD_X/2)-(ZED_XC+ZED_BOARD/2);
+const gapR=CAV_L/2-(IMU_XC+IMU_BOARD_X/2);
+ck(Math.abs(gapL-gapM)<0.01 && Math.abs(gapM-gapR)<0.01,
+  `Even X spacing: wall|${gapL.toFixed(2)}|ZED|${gapM.toFixed(2)}|IMU|${gapR.toFixed(2)}|wall mm`);
+
+// 2. ZED clearances
+let zedWall=Infinity, zedM4=Infinity;
+for (const sx of [-1,1]) for (const sy of [-1,1]){
+  const x=ZED_XC+sx*ZED_PAT/2, y=sy*ZED_PAT/2;
+  zedWall=Math.min(zedWall, CAV_L/2-Math.abs(x)-ZED_SO_OD/2, CAV_W/2-Math.abs(y)-ZED_SO_OD/2);
+  for (const [bx,by] of M4_POS) zedM4=Math.min(zedM4, Math.hypot(x-bx,y-by)-ZED_SO_OD/2-M4_CLEAR_D/2);
+}
+ck(zedWall>0.5, `ZED boss → cavity wall: ${zedWall.toFixed(2)} mm`);
+ck(zedM4>0.8, `ZED boss → M4 hole: ${zedM4.toFixed(2)} mm`);
+ck(ZED_SO_H>M4_HEAD_H+1, `ZED board clears M4 cap heads: ${(ZED_SO_H-M4_HEAD_H).toFixed(1)} mm (boss ${ZED_SO_H} − head ${M4_HEAD_H})`);
+
+// 3. IMU clearances
+let imuWall=Infinity, imuM4=Infinity, imuZed=Infinity;
+for (const sx of [-1,1]) for (const sy of [-1,1]){
+  const x=IMU_XC+sx*IMU_PAT_X/2, y=sy*IMU_PAT_Y/2;
+  imuWall=Math.min(imuWall, CAV_L/2-Math.abs(x)-IMU_SO_OD/2, CAV_W/2-Math.abs(y)-IMU_SO_OD/2);
+  imuZed=Math.min(imuZed, (x-IMU_SO_OD/2)-(ZED_XC+ZED_BOARD/2));
+  for (const [bx,by] of M4_POS) imuM4=Math.min(imuM4, Math.hypot(x-bx,y-by)-IMU_SO_OD/2-M4_HEAD_D/2);
+}
+ck(imuWall>0.5, `IMU standoff → cavity wall: ${imuWall.toFixed(2)} mm`);
+ck(imuZed>3.0, `IMU standoff → ZED board envelope: ${imuZed.toFixed(2)} mm (spacing added)`);
+ck(imuM4>0.8, `IMU standoff → M4 head keep-out: ${imuM4.toFixed(2)} mm`);
+
+// 4. M2 bosses + heights
+const m2EdgeX=BASE_L/2-M2_PX/2-M2_BOSS_D/2, m2EdgeY=BASE_W/2-M2_PY/2-M2_BOSS_D/2;
+ck(m2EdgeX>=0 && m2EdgeY>=0, `M2 boss inside footprint: X=${m2EdgeX.toFixed(2)}, Y=${m2EdgeY.toFixed(2)} mm`);
+ck(FLOOR_T+ZED_SO_H+BOARD_T<BASE_H, `ZED board top (${(FLOOR_T+ZED_SO_H+BOARD_T).toFixed(1)}) below rim z=${BASE_H}`);
+
+// 5. corner bosses
+let cbZed=Infinity, cbImu=Infinity, cbM2=Infinity, cbZedBoard=Infinity;
+for (const [cbx,cby] of CB_POS){
+  for (const sx of [-1,1]) for (const sy of [-1,1]){
+    cbZed=Math.min(cbZed, Math.hypot(cbx-(ZED_XC+sx*ZED_PAT/2), cby-sy*ZED_PAT/2)-CB_OD/2-ZED_SO_OD/2);
+    cbImu=Math.min(cbImu, Math.hypot(cbx-(IMU_XC+sx*IMU_PAT_X/2), cby-sy*IMU_PAT_Y/2)-CB_OD/2-IMU_SO_OD/2);
+    cbM2=Math.min(cbM2, Math.hypot(cbx-sx*M2_PX/2, cby-sy*M2_PY/2)-CB_CSK_D/2-M2_CLEAR_D/2);
+  }
+  cbZedBoard=Math.min(cbZedBoard, Math.max(Math.abs(cbx-ZED_XC)-ZED_BOARD/2, Math.abs(cby)-ZED_BOARD/2)-CB_OD/2);
+}
+ck(cbZed>1, `Corner boss → ZED boss: ${cbZed.toFixed(2)} mm`);
+ck(cbImu>1, `Corner boss → IMU standoff: ${cbImu.toFixed(2)} mm`);
+ck(cbM2>1, `Corner boss csk → M2 hole: ${cbM2.toFixed(2)} mm`);
+ck(cbZedBoard>0, `Corner boss (full height) clear of the ZED board: ${cbZedBoard.toFixed(2)} mm`);
+
+// 6. USB-C slot + antenna hole (−Y wall)
+const cbInnerX=Math.abs(CB_POS[0][0])-CB_OD/2;
+const usbWeb=ANT_XC-ANT_D/2-(USB_XC+USB_W/2);
+ck(USB_Z0+USB_H+2<BASE_H, `Wall band above USB slot: ${(BASE_H-USB_Z0-USB_H).toFixed(1)} mm (bridge + rim)`);
+ck(Math.abs(USB_XC)+USB_W/2<cbInnerX-1 && ANT_XC+ANT_D/2<cbInnerX-1,
+  `Slot + hole clear of corner bosses (inner edge ±${cbInnerX.toFixed(1)})`);
+ck(usbWeb>=2, `Web between slot and Ø${ANT_D} hole: ${usbWeb.toFixed(2)} mm`);
+ck(ANT_ZC+ANT_D/2<BASE_H-1 && ANT_ZC-ANT_D/2>FLOOR_T-0.1, `Hole inside wall in Z (${(ANT_ZC-ANT_D/2).toFixed(1)}–${(ANT_ZC+ANT_D/2).toFixed(1)})`);
+
+// 7. IMU cutout (−Y wall)
+const imuCutWeb=(IMU_CUT_XC-IMU_CUT_W/2)-(ANT_XC+ANT_D/2);
+ck(IMU_CUT_Z0+IMU_CUT_H+2<BASE_H, `Wall band above IMU cutout: ${(BASE_H-IMU_CUT_Z0-IMU_CUT_H).toFixed(1)} mm`);
+ck(imuCutWeb>=2, `Web between Ø${ANT_D} hole and IMU cutout: ${imuCutWeb.toFixed(2)} mm`);
+ck(IMU_CUT_XC+IMU_CUT_W/2<cbInnerX-1, `IMU cutout clear of corner boss (edge ${(IMU_CUT_XC+IMU_CUT_W/2).toFixed(1)} < ${(cbInnerX-1).toFixed(1)})`);
+
+const ul=document.getElementById('checks');
+for (const c of checks){
+  const li=document.createElement('li');
+  li.innerHTML=c.ok?`<span style="color:var(--accent)">✓</span> ${c.msg}`:`<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

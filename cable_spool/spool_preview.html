@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Cable Spool — Preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5; --info: #94c8ef;
+    --hub: #5b9bd5; --hub-dk: #3a6fa0;
+    --flange: #f2b84b; --flange-dk: #b07a1c;
+    --cable: #e06c75; --slot: #c87aff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: 1fr 1fr; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.specs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.specs th, table.specs td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                                   text-align: left; vertical-align: top; }
+  table.specs th { color: var(--mute); font-weight: 600; width: 140px; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Cable Spool — Design Preview</h1>
+  <p>Rendered from the same parameters as
+     <code>cable_spool/make_cable_spool.py</code>.
+     Single cable spool for a 45″ (1143 mm) cable, Ø5.28 mm.</p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <h2>Specifications</h2>
+    <table class="specs">
+      <tr><th>Cable</th><td id="spec-cable">—</td></tr>
+      <tr><th>Hub</th><td id="spec-hub">—</td></tr>
+      <tr><th>Flanges</th><td id="spec-flange">—</td></tr>
+      <tr><th>Winding</th><td id="spec-wind">—</td></tr>
+      <tr><th>Features</th><td id="spec-feat">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view</h2>
+    <p class="sub">Looking down at the spool. Cable entry slot on top flange shown in purple.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--flange)"></span>Flanges</span>
+      <span><span class="sw" style="background:var(--hub)"></span>Hub</span>
+      <span><span class="sw" style="background:var(--slot)"></span>Cable slot</span>
+      <span><span class="sw" style="background:var(--cable)"></span>Cable (wound)</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 400 400"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (side view)</h2>
+    <p class="sub">Cut through center showing hub wall, flanges, winding area, and cable layers.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--flange)"></span>Flange</span>
+      <span><span class="sw" style="background:var(--hub)"></span>Hub wall</span>
+      <span><span class="sw" style="background:var(--cable);opacity:0.5"></span>Cable wraps</span>
+    </div>
+    <svg id="side-svg" viewBox="0 0 400 300"></svg>
+  </div>
+
+  <div class="card full">
+    <h2>Design checks</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL source: <code>cable_spool/make_cable_spool.py</code>.
+  Print flat (no supports). Use <code>--fast</code> flag for ~1 hr print.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — keep in sync with make_cable_spool.py
+// =====================================================================
+const CABLE_D   = 5.28;
+const CABLE_LEN = 45 * 25.4;     // mm
+
+const HUB_OD    = 50.0;
+const HUB_ID    = 38.0;
+const FLANGE_OD = 85.0;
+const FLANGE_T  = 2.0;
+const SPOOL_W   = 25.0;
+const HUB_H     = SPOOL_W + 2 * FLANGE_T;
+
+const SLOT_W     = CABLE_D + 1.5;
+const SLOT_DEPTH = (FLANGE_OD - HUB_OD) / 2 + 2;
+
+const NOTCH_W     = CABLE_D + 1.0;
+const NOTCH_DEPTH = 3.0;
+
+// Derived
+const HUB_CIRC       = Math.PI * HUB_OD;
+const WRAPS_PER_LAYER = Math.floor(SPOOL_W / CABLE_D);
+const LAYERS_NEEDED   = Math.ceil(CABLE_LEN / (HUB_CIRC * WRAPS_PER_LAYER));
+const MAX_WOUND_OD    = HUB_OD + 2 * CABLE_D * LAYERS_NEEDED;
+const MIN_BEND_RATIO  = (HUB_OD / 2) / CABLE_D;
+
+// =====================================================================
+// SVG helpers
+// =====================================================================
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+
+// =====================================================================
+// TOP VIEW
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB = 400, cx = VB / 2, cy = VB / 2;
+  const scale = (VB - 60) / FLANGE_OD;
+
+  const R = r => r * scale;
+
+  // Flange (outer circle)
+  el(svg, 'circle', { cx, cy, r: R(FLANGE_OD/2),
+    fill: 'var(--flange)', stroke: 'var(--flange-dk)', 'stroke-width': 1.5 });
+
+  // Cable wraps visualization (wound cable area)
+  for (let layer = 0; layer < LAYERS_NEEDED; layer++) {
+    const layerR = HUB_OD/2 + CABLE_D/2 + layer * CABLE_D;
+    el(svg, 'circle', { cx, cy, r: R(layerR),
+      fill: 'none', stroke: 'var(--cable)', 'stroke-width': R(CABLE_D) * 0.8,
+      opacity: 0.3 - layer * 0.08 });
+  }
+
+  // Hub outer
+  el(svg, 'circle', { cx, cy, r: R(HUB_OD/2),
+    fill: 'var(--hub)', stroke: 'var(--hub-dk)', 'stroke-width': 1.5 });
+
+  // Hub inner (hollow)
+  el(svg, 'circle', { cx, cy, r: R(HUB_ID/2),
+    fill: '#101319', stroke: 'var(--hub-dk)', 'stroke-width': 1 });
+
+  // Cable entry slot (radial rectangle on top flange)
+  const slotX = cx + R(HUB_OD/2) - R(2);
+  const slotY = cy - R(SLOT_W/2);
+  el(svg, 'rect', {
+    x: slotX, y: slotY,
+    width: R(SLOT_DEPTH), height: R(SLOT_W),
+    fill: 'var(--slot)', opacity: 0.7, rx: 1
+  });
+
+  // Clip notches on flange edge (bottom flange, shown as marks)
+  for (const angle of [0, Math.PI]) {
+    const nx = cx + R(FLANGE_OD/2 - NOTCH_DEPTH/2) * Math.cos(angle);
+    const ny = cy - R(FLANGE_OD/2 - NOTCH_DEPTH/2) * Math.sin(angle);
+    el(svg, 'rect', {
+      x: nx - R(NOTCH_DEPTH/2), y: ny - R(NOTCH_W/2),
+      width: R(NOTCH_DEPTH), height: R(NOTCH_W),
+      fill: '#101319', stroke: 'var(--mute)', 'stroke-width': 0.5,
+      'stroke-dasharray': '2 1'
+    });
+  }
+
+  // Dimension: flange diameter
+  const dy = cy + R(FLANGE_OD/2) + 18;
+  el(svg, 'line', { x1: cx - R(FLANGE_OD/2), y1: dy, x2: cx + R(FLANGE_OD/2), y2: dy,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: cx - R(FLANGE_OD/2), y1: dy-3, x2: cx - R(FLANGE_OD/2), y2: dy+3,
+    stroke: '#8b93a7' });
+  el(svg, 'line', { x1: cx + R(FLANGE_OD/2), y1: dy-3, x2: cx + R(FLANGE_OD/2), y2: dy+3,
+    stroke: '#8b93a7' });
+  el(svg, 'text', { x: cx, y: dy + 14, 'text-anchor': 'middle', class: 'dim' },
+    `Ø${FLANGE_OD} mm`);
+
+  // Dimension: hub diameter
+  el(svg, 'line', { x1: cx - R(HUB_OD/2), y1: cy, x2: cx + R(HUB_OD/2), y2: cy,
+    stroke: '#ccc', 'stroke-width': 0.5, 'stroke-dasharray': '3 2' });
+  el(svg, 'text', { x: cx, y: cy - 6, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--info)' }, `Hub Ø${HUB_OD}`);
+
+  // Labels
+  el(svg, 'text', { x: cx + R(HUB_OD/2 + SLOT_DEPTH/2), y: slotY - 6,
+    'text-anchor': 'middle', class: 'dim', fill: 'var(--slot)' }, 'cable slot');
+
+  // Center mark
+  el(svg, 'circle', { cx, cy, r: 2, fill: '#fff' });
+})();
+
+// =====================================================================
+// SIDE VIEW (cross-section)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('side-svg');
+  const VB_W = 400, VB_H = 300;
+  const scale = Math.min((VB_W - 80) / FLANGE_OD, (VB_H - 80) / HUB_H);
+  const cx = VB_W / 2, cy = VB_H / 2;
+
+  const X = x => cx + x * scale;
+  const Y = y => cy - y * scale;  // Y up
+
+  // Background: spool winding area (between flanges, outside hub)
+  el(svg, 'rect', {
+    x: X(-FLANGE_OD/2), y: Y(HUB_H),
+    width: FLANGE_OD * scale, height: HUB_H * scale,
+    fill: '#0d0f14', stroke: 'none'
+  });
+
+  // Bottom flange
+  el(svg, 'rect', {
+    x: X(-FLANGE_OD/2), y: Y(FLANGE_T),
+    width: FLANGE_OD * scale, height: FLANGE_T * scale,
+    fill: 'var(--flange)', stroke: 'var(--flange-dk)', 'stroke-width': 1
+  });
+
+  // Top flange
+  el(svg, 'rect', {
+    x: X(-FLANGE_OD/2), y: Y(HUB_H),
+    width: FLANGE_OD * scale, height: FLANGE_T * scale,
+    fill: 'var(--flange)', stroke: 'var(--flange-dk)', 'stroke-width': 1
+  });
+
+  // Hub walls (left and right in cross-section)
+  const hubWall = (HUB_OD - HUB_ID) / 2;
+  // Left wall
+  el(svg, 'rect', {
+    x: X(-HUB_OD/2), y: Y(HUB_H),
+    width: hubWall * scale, height: HUB_H * scale,
+    fill: 'var(--hub)', stroke: 'var(--hub-dk)', 'stroke-width': 0.8
+  });
+  // Right wall
+  el(svg, 'rect', {
+    x: X(HUB_ID/2), y: Y(HUB_H),
+    width: hubWall * scale, height: HUB_H * scale,
+    fill: 'var(--hub)', stroke: 'var(--hub-dk)', 'stroke-width': 0.8
+  });
+
+  // Hollow core
+  el(svg, 'rect', {
+    x: X(-HUB_ID/2), y: Y(HUB_H),
+    width: HUB_ID * scale, height: HUB_H * scale,
+    fill: '#101319'
+  });
+
+  // Winding area fill (cable layers)
+  for (let layer = 0; layer < LAYERS_NEEDED; layer++) {
+    const xStart = HUB_OD/2 + layer * CABLE_D;
+    const wrapCount = Math.min(WRAPS_PER_LAYER,
+      Math.ceil((CABLE_LEN - layer * WRAPS_PER_LAYER * Math.PI * (HUB_OD + 2 * layer * CABLE_D)) /
+                (Math.PI * (HUB_OD + 2 * layer * CABLE_D))));
+    const fillH = Math.min(WRAPS_PER_LAYER * CABLE_D, SPOOL_W);
+
+    // Left side wraps
+    el(svg, 'rect', {
+      x: X(-xStart - CABLE_D), y: Y(FLANGE_T + fillH),
+      width: CABLE_D * scale, height: fillH * scale,
+      fill: 'var(--cable)', opacity: 0.35 - layer * 0.1,
+      stroke: 'var(--cable)', 'stroke-width': 0.5
+    });
+    // Right side wraps (mirror)
+    el(svg, 'rect', {
+      x: X(xStart), y: Y(FLANGE_T + fillH),
+      width: CABLE_D * scale, height: fillH * scale,
+      fill: 'var(--cable)', opacity: 0.35 - layer * 0.1,
+      stroke: 'var(--cable)', 'stroke-width': 0.5
+    });
+  }
+
+  // Cable slot in top flange (right side)
+  el(svg, 'rect', {
+    x: X(HUB_OD/2 - 2), y: Y(HUB_H),
+    width: (SLOT_DEPTH) * scale, height: FLANGE_T * scale,
+    fill: 'var(--slot)', opacity: 0.6
+  });
+
+  // Dimension: total height (right side)
+  const xd = X(FLANGE_OD/2) + 16;
+  el(svg, 'line', { x1: xd, y1: Y(0), x2: xd, y2: Y(HUB_H), stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xd-3, y1: Y(0), x2: xd+3, y2: Y(0), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-3, y1: Y(HUB_H), x2: xd+3, y2: Y(HUB_H), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xd + 6, y: Y(HUB_H/2) + 4, class: 'dim',
+    transform: `rotate(-90 ${xd+6} ${Y(HUB_H/2)+4})` }, `${HUB_H} mm`);
+
+  // Dimension: flange OD (bottom)
+  const yd = Y(0) + 18;
+  el(svg, 'line', { x1: X(-FLANGE_OD/2), y1: yd, x2: X(FLANGE_OD/2), y2: yd,
+    stroke: '#8b93a7', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: X(-FLANGE_OD/2), y1: yd-3, x2: X(-FLANGE_OD/2), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(FLANGE_OD/2), y1: yd-3, x2: X(FLANGE_OD/2), y2: yd+3, stroke: '#8b93a7' });
+  el(svg, 'text', { x: cx, y: yd + 14, 'text-anchor': 'middle', class: 'dim' },
+    `Ø${FLANGE_OD} mm`);
+
+  // Dimension: spool width (winding area, left side)
+  const xl = X(-FLANGE_OD/2) - 16;
+  el(svg, 'line', { x1: xl, y1: Y(FLANGE_T), x2: xl, y2: Y(FLANGE_T + SPOOL_W),
+    stroke: 'var(--info)', 'stroke-width': 0.8 });
+  el(svg, 'line', { x1: xl-3, y1: Y(FLANGE_T), x2: xl+3, y2: Y(FLANGE_T), stroke: 'var(--info)' });
+  el(svg, 'line', { x1: xl-3, y1: Y(FLANGE_T + SPOOL_W), x2: xl+3, y2: Y(FLANGE_T + SPOOL_W),
+    stroke: 'var(--info)' });
+  el(svg, 'text', { x: xl - 6, y: Y(FLANGE_T + SPOOL_W/2) + 4, class: 'dim', fill: 'var(--info)',
+    transform: `rotate(-90 ${xl-6} ${Y(FLANGE_T + SPOOL_W/2)+4})` }, `${SPOOL_W} mm wind`);
+
+  // Labels
+  el(svg, 'text', { x: cx, y: Y(HUB_H/2) + 4, 'text-anchor': 'middle', class: 'dim',
+    fill: 'var(--hub)' }, 'hollow hub');
+})();
+
+// =====================================================================
+// Specs
+// =====================================================================
+document.getElementById('spec-cable').textContent =
+  `${CABLE_LEN.toFixed(0)} mm (${(CABLE_LEN/25.4).toFixed(0)}″), Ø${CABLE_D} mm`;
+document.getElementById('spec-hub').textContent =
+  `Ø${HUB_OD} mm outer, Ø${HUB_ID} mm inner (wall ${(HUB_OD-HUB_ID)/2} mm), bend ratio ${MIN_BEND_RATIO.toFixed(1)}× cable diameter`;
+document.getElementById('spec-flange').textContent =
+  `Ø${FLANGE_OD} mm × ${FLANGE_T} mm thick (×2)`;
+document.getElementById('spec-wind').textContent =
+  `${SPOOL_W} mm width, ${WRAPS_PER_LAYER} wraps/layer × ${LAYERS_NEEDED} layers = ${WRAPS_PER_LAYER * LAYERS_NEEDED} total wraps (${(WRAPS_PER_LAYER * LAYERS_NEEDED * HUB_CIRC / 25.4).toFixed(0)}″ capacity)`;
+document.getElementById('spec-feat').textContent =
+  `Cable entry slot (${SLOT_W.toFixed(1)} mm) through top flange · clip notches (×2) on bottom flange edges · hollow core`;
+
+// =====================================================================
+// Design checks
+// =====================================================================
+const checks = [];
+function check(ok, msg) { checks.push({ ok, msg }); }
+
+check(MIN_BEND_RATIO >= 4,
+  `Bend radius: ${MIN_BEND_RATIO.toFixed(1)}× cable diameter — ${MIN_BEND_RATIO >= 6 ? 'generous' : MIN_BEND_RATIO >= 4 ? 'adequate' : 'tight!'} (≥ 4× recommended)`);
+
+check(MAX_WOUND_OD < FLANGE_OD,
+  `Max wound OD: ${MAX_WOUND_OD.toFixed(0)} mm < flange Ø${FLANGE_OD} mm — ${(FLANGE_OD - MAX_WOUND_OD).toFixed(0)} mm clearance`);
+
+const totalCapacity = WRAPS_PER_LAYER * LAYERS_NEEDED * HUB_CIRC;
+check(totalCapacity >= CABLE_LEN,
+  `Winding capacity: ${totalCapacity.toFixed(0)} mm ≥ cable ${CABLE_LEN.toFixed(0)} mm — ${((totalCapacity / CABLE_LEN - 1) * 100).toFixed(0)}% headroom`);
+
+check(SLOT_W > CABLE_D,
+  `Slot width: ${SLOT_W.toFixed(1)} mm > cable Ø${CABLE_D} mm — ${(SLOT_W - CABLE_D).toFixed(1)} mm clearance`);
+
+check(FLANGE_T >= 1.5,
+  `Flange thickness: ${FLANGE_T} mm — ${FLANGE_T >= 2 ? 'sturdy' : 'thin but printable'}`);
+
+const hubWall = (HUB_OD - HUB_ID) / 2;
+check(hubWall >= 4,
+  `Hub wall: ${hubWall} mm — ${hubWall >= 5 ? 'solid' : hubWall >= 3 ? 'adequate' : 'thin'}`);
+
+check(SPOOL_W >= WRAPS_PER_LAYER * CABLE_D,
+  `Winding width: ${SPOOL_W} mm fits ${WRAPS_PER_LAYER} wraps of Ø${CABLE_D} (needs ${(WRAPS_PER_LAYER * CABLE_D).toFixed(1)} mm)`);
+
+check(HUB_H <= 40,
+  `Total height: ${HUB_H} mm — compact, printable without supports`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

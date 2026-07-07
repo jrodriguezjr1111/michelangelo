@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Flycatcher platform preview</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --ink: #e6e8ee; --mute: #8b93a7;
+    --accent: #6ee7b7; --warn: #fca5a5;
+    --body: #5b9bd5; --body-dk: #3a6fa0;
+    --bolt: #d6b35a; --slot: #a070d4;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background: var(--bg); color: var(--ink); }
+  header { padding: 20px 28px; border-bottom: 1px solid #222836; }
+  header h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  header p { margin: 0; color: var(--mute); font-size: 13px; }
+  main { display: grid; gap: 18px; padding: 18px 28px 40px;
+         grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .card { background: var(--panel); border: 1px solid #222836; border-radius: 10px;
+          padding: 16px 16px 12px; }
+  .card.wide { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 2px; font-size: 15px; font-weight: 600; }
+  .card .sub { margin: 0 0 10px; color: var(--mute); font-size: 12px; }
+  svg { width: 100%; height: auto; display: block; background: #101319; border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 8px 0 4px; color: var(--mute); font-size: 12px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px;
+                display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .dim { fill: var(--mute); font: 500 10px ui-monospace, monospace; }
+  table.bom { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.bom th, table.bom td { padding: 6px 10px; border-bottom: 1px solid #242a36;
+                               text-align: left; vertical-align: top; }
+  table.bom th { color: var(--mute); font-weight: 600; }
+  code { background: #101319; padding: 1px 5px; border-radius: 3px; color: #f6cd7b; }
+  footer { color: var(--mute); padding: 0 28px 28px; font-size: 12px; }
+  ul.checks { margin: 0; padding-left: 18px; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Flycatcher platform — fit verification</h1>
+  <p>Hollow <span id="hdr-dims"></span> mm box with 4× M3 holes
+     (58 × 49 mm, centered) + 4× M4 holes (36.14 × 36.1 mm, centered)
+     and cable openings on ±X walls.
+     Source: <code>flycatcher/make_imu_platform_saddle.py</code>.</p>
+</header>
+
+<main>
+
+  <div class="card wide">
+    <h2>Specifications</h2>
+    <table class="bom">
+      <tr><th>Plate (external)</th><td id="spec-plate">—</td></tr>
+      <tr><th>Cavity (internal)</th><td id="spec-cavity">—</td></tr>
+      <tr><th>Mount holes (M3)</th><td id="spec-m3">—</td></tr>
+      <tr><th>Mount holes (M4)</th><td id="spec-m4">—</td></tr>
+      <tr><th>Cable slots</th><td id="spec-slot">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">Looking down Z. Solid outline = plate; dashed inner rectangle = cavity wall.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>plate top</span>
+      <span><span class="sw" style="background:#c87aff"></span>M3</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M4</span>
+      <span><span class="sw" style="background:var(--slot)"></span>cable slot</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 700 480"></svg>
+  </div>
+
+  <div class="card">
+    <h2>End view (X × Z)</h2>
+    <p class="sub">Cross-section showing hollow plate, cavity, cable slots, and through-holes.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>plate</span>
+      <span><span class="sw" style="background:var(--bolt)"></span>M4 bolt</span>
+      <span><span class="sw" style="background:var(--slot)"></span>cable slot</span>
+    </div>
+    <svg id="end-svg" viewBox="0 0 700 360"></svg>
+  </div>
+
+  <div class="card wide">
+    <h2>Fit-check assertions</h2>
+    <ul class="checks" id="fit-checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  STL source: <code>flycatcher/make_imu_platform_saddle.py</code>.
+</footer>
+
+<script>
+// =====================================================================
+// Plate parameters — keep in sync with make_imu_platform_saddle.py
+// =====================================================================
+const PLATE_L = 101.0;
+const INNER_W = 60.0;
+const TOP_T = 3.0, WALL_T = 2.5;
+const PLATE_W = INNER_W + 2 * WALL_T;   // 65.0
+const PLATE_H = 29.0;
+
+// Cable slots on ±X walls, Y-centered (parallel to tubes)
+const SLOT_W = 38.0, SLOT_H = 7.8;
+const SLOT_Z_CENTER = (PLATE_H - TOP_T) / 2 - 2.0;  // shifted -Z by 2 mm
+
+// 4× M3 holes, 58 × 49 mm pattern, centered
+const M3_PAT_X = 58.0, M3_PAT_Y = 49.0, M3_D = 3.4;
+
+// 4× M4 holes, 36.14 × 36.1 mm pattern, centered
+const M4_PAT_X = 36.14, M4_PAT_Y = 36.1, M4_D = 4.4;
+const M4_DY = 0.0;  // centered (no +Y offset)
+
+// =====================================================================
+// Helpers
+// =====================================================================
+function el(parent, tag, attrs, text) {
+  const n = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (text != null) n.textContent = text;
+  parent.appendChild(n);
+  return n;
+}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 700, VB_H = 480;
+  const halfX = PLATE_L/2 + 14, halfY = PLATE_W/2 + 18;
+  const scale = Math.min((VB_W - 80)/(2*halfX), (VB_H - 100)/(2*halfY));
+  const cx = VB_W/2, cy = VB_H/2;
+  const X = x => cx + x * scale;
+  const Y = y => cy - y * scale;
+
+  // Plate body
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Y(PLATE_W/2),
+    width: PLATE_L * scale, height: PLATE_W * scale,
+    fill: 'var(--body)', 'fill-opacity': 0.18,
+    stroke: 'var(--body-dk)', 'stroke-width': 1.5, rx: 3
+  });
+  // Cavity outline (dashed)
+  const cavL = PLATE_L - 2*WALL_T, cavW = INNER_W;
+  el(svg, 'rect', {
+    x: X(-cavL/2), y: Y(cavW/2),
+    width: cavL * scale, height: cavW * scale,
+    fill: 'none', stroke: 'var(--body-dk)', 'stroke-width': 1, 'stroke-dasharray': '4 3'
+  });
+
+  // Cable slots on ±X walls
+  for (const sx of [-1, 1]) {
+    const xWall = sx < 0 ? -PLATE_L/2 : PLATE_L/2 - WALL_T;
+    el(svg, 'rect', {
+      x: X(xWall), y: Y(SLOT_W/2),
+      width: WALL_T * scale, height: SLOT_W * scale,
+      fill: 'var(--slot)', opacity: 0.7,
+      stroke: 'var(--slot)', 'stroke-width': 1
+    });
+  }
+
+  // 4× M3 holes (purple)
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const px = X(sx * M3_PAT_X/2), py = Y(sy * M3_PAT_Y/2);
+    el(svg, 'circle', { cx: px, cy: py, r: M3_D/2 * scale,
+      fill: '#101319', stroke: '#c87aff', 'stroke-width': 1.4 });
+    el(svg, 'text', { x: px, y: py - M3_D/2 * scale - 4,
+      'text-anchor': 'middle', fill: '#c87aff',
+      'font-size': 9, 'font-weight': 700 }, 'M3');
+  }
+
+  // 4× M4 holes (gold), centered
+  for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+    const px = X(sx * M4_PAT_X/2), py = Y(M4_DY + sy * M4_PAT_Y/2);
+    el(svg, 'circle', { cx: px, cy: py, r: M4_D/2 * scale,
+      fill: '#101319', stroke: 'var(--bolt)', 'stroke-width': 1.4 });
+    el(svg, 'text', { x: px + M4_D/2 * scale + 6, y: py + 3,
+      fill: 'var(--bolt)', 'font-size': 9, 'font-weight': 700 }, 'M4');
+  }
+
+  // Dimensions
+  const yd = Y(-PLATE_W/2) + 30;
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: yd, x2: X(PLATE_L/2), y2: yd, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X(-PLATE_L/2), y1: yd-4, x2: X(-PLATE_L/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'line', { x1: X( PLATE_L/2), y1: yd-4, x2: X( PLATE_L/2), y2: yd+4, stroke: '#8b93a7' });
+  el(svg, 'text', { x: X(0), y: yd+14, 'text-anchor': 'middle', class: 'dim' },
+    `${PLATE_L} mm  (X)`);
+  const xd = X(PLATE_L/2) + 26;
+  el(svg, 'line', { x1: xd, y1: Y(-PLATE_W/2), x2: xd, y2: Y(PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: Y(-PLATE_W/2), x2: xd+4, y2: Y(-PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: Y( PLATE_W/2), x2: xd+4, y2: Y( PLATE_W/2), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xd+8, y: Y(0)+3, class: 'dim' }, `${PLATE_W} mm  (Y)`);
+})();
+
+// =====================================================================
+// End view (X × Z) — cross-section through plate at Y=0
+// =====================================================================
+(() => {
+  const svg = document.getElementById('end-svg');
+  const VB_W = 700, VB_H = 360;
+  const halfX = PLATE_L/2 + 18;
+  const scale = Math.min((VB_W - 100)/(2*halfX), (VB_H - 80)/PLATE_H);
+  const cx = VB_W/2, baseY = VB_H - 40;
+  const X = x => cx + x * scale;
+  const Z = z => baseY - z * scale;
+
+  // Plate cross-section: top + side walls
+  const pTop = PLATE_H;
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Z(pTop),
+    width: PLATE_L * scale, height: TOP_T * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2
+  });
+  el(svg, 'rect', {
+    x: X(-PLATE_L/2), y: Z(PLATE_H - TOP_T),
+    width: WALL_T * scale, height: (PLATE_H - TOP_T) * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2
+  });
+  el(svg, 'rect', {
+    x: X(PLATE_L/2 - WALL_T), y: Z(PLATE_H - TOP_T),
+    width: WALL_T * scale, height: (PLATE_H - TOP_T) * scale,
+    fill: 'var(--body)', stroke: 'var(--body-dk)', 'stroke-width': 1.2
+  });
+
+  // Cable slots on ±X walls (visible as cutouts in the side walls)
+  const slotZbot = SLOT_Z_CENTER - SLOT_H/2;
+  for (const sx of [-1, 1]) {
+    const xWall = sx<0 ? -PLATE_L/2 : PLATE_L/2 - WALL_T;
+    el(svg, 'rect', {
+      x: X(xWall), y: Z(slotZbot + SLOT_H),
+      width: WALL_T * scale, height: SLOT_H * scale,
+      fill: '#101319', stroke: 'var(--slot)', 'stroke-width': 1, 'stroke-dasharray': '2 2'
+    });
+  }
+
+  // M3 bolts (purple) at X=±M3_PAT_X/2
+  for (const sx of [-1, 1]) {
+    const px = X(sx * M3_PAT_X/2);
+    el(svg, 'line', {
+      x1: px, y1: Z(pTop) + 6, x2: px, y2: Z(0) - 6,
+      stroke: '#c87aff', 'stroke-width': M3_D * scale * 0.6, opacity: 0.85
+    });
+    el(svg, 'text', { x: px, y: Z(pTop) - 8,
+      'text-anchor': 'middle', fill: '#c87aff', 'font-size': 10, 'font-weight': 700
+    }, 'M3');
+  }
+  // M4 bolts (gold) at X=±M4_PAT_X/2
+  for (const sx of [-1, 1]) {
+    const px = X(sx * M4_PAT_X/2);
+    el(svg, 'line', {
+      x1: px, y1: Z(pTop) + 6, x2: px, y2: Z(0) - 6,
+      stroke: 'var(--bolt)', 'stroke-width': M4_D * scale * 0.6, opacity: 0.9
+    });
+    el(svg, 'text', { x: px, y: Z(0) + 16,
+      'text-anchor': 'middle', fill: 'var(--bolt)', 'font-size': 10, 'font-weight': 700
+    }, 'M4');
+  }
+
+  // Z-dimension on the right
+  const xd = X(PLATE_L/2) + 26;
+  el(svg, 'line', { x1: xd, y1: Z(0), x2: xd, y2: Z(PLATE_H), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: Z(0), x2: xd+4, y2: Z(0), stroke: '#8b93a7' });
+  el(svg, 'line', { x1: xd-4, y1: Z(PLATE_H), x2: xd+4, y2: Z(PLATE_H), stroke: '#8b93a7' });
+  el(svg, 'text', { x: xd+8, y: Z(PLATE_H/2)+3, class: 'dim' }, `${PLATE_H} mm  (Z)`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('hdr-dims').textContent =
+  `${PLATE_L} × ${PLATE_W} × ${PLATE_H}`;
+document.getElementById('spec-plate').textContent =
+  `${PLATE_L} × ${PLATE_W} × ${PLATE_H} mm — top ${TOP_T}, walls ${WALL_T} (hollow underside, no post)`;
+document.getElementById('spec-cavity').textContent =
+  `${PLATE_L - 2*WALL_T} × ${INNER_W} × ${PLATE_H - TOP_T} mm`;
+document.getElementById('spec-m3').textContent =
+  `4× Ø${M3_D} at X=±${M3_PAT_X/2}, Y=±${M3_PAT_Y/2} — ${M3_PAT_X} × ${M3_PAT_Y} mm, centered`;
+document.getElementById('spec-m4').textContent =
+  `4× Ø${M4_D} at X=±${M4_PAT_X/2}, Y=±${M4_PAT_Y/2} — ${M4_PAT_X} × ${M4_PAT_Y} mm, centered`;
+document.getElementById('spec-slot').textContent =
+  `${SLOT_W} × ${SLOT_H} mm on ±X walls, Y-centered — cables exit parallel to long axis (Z-center ${SLOT_Z_CENTER.toFixed(1)})`;
+
+const checks = [];
+const ck = (ok, msg) => checks.push({ ok, msg });
+
+// 1. M3 edge clearance
+const m3_edge_x = PLATE_L/2 - M3_PAT_X/2 - M3_D/2;
+const m3_edge_y = PLATE_W/2 - M3_PAT_Y/2 - M3_D/2;
+ck(m3_edge_x >= 0.5 && m3_edge_y >= 0.5,
+  `M3 edge clearance: X=${m3_edge_x.toFixed(2)}, Y=${m3_edge_y.toFixed(2)} mm`);
+
+// 2. M4 edge clearance (centered, symmetric in Y)
+const m4_edge_x = PLATE_L/2 - M4_PAT_X/2 - M4_D/2;
+const m4_edge_y = PLATE_W/2 - (Math.abs(M4_DY) + M4_PAT_Y/2) - M4_D/2;
+ck(m4_edge_x >= 0.5,
+  `M4 X edge clearance: ${m4_edge_x.toFixed(2)} mm`);
+ck(m4_edge_y >= 0.5,
+  `M4 Y edge clearance: ${m4_edge_y.toFixed(2)} mm`);
+
+// 3. M3 vs M4 minimum gap
+let min_gap = Infinity;
+for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+  for (const tx of [-1, 1]) for (const ty of [-1, 1]) {
+    const dx = sx*M3_PAT_X/2 - tx*M4_PAT_X/2;
+    const dy = sy*M3_PAT_Y/2 - (M4_DY + ty*M4_PAT_Y/2);
+    min_gap = Math.min(min_gap, Math.hypot(dx, dy) - M3_D/2 - M4_D/2);
+  }
+}
+ck(min_gap > 0.5, `Min M3–M4 edge gap: ${min_gap.toFixed(2)} mm`);
+
+// 3. Cable slot fits in ±X walls (Y-extent inside cavity)
+ck(SLOT_W/2 < INNER_W/2,
+  `Cable slot Y extent (±${SLOT_W/2}) fits inside cavity (±${INNER_W/2})`);
+ck(SLOT_Z_CENTER + SLOT_H/2 < PLATE_H - TOP_T,
+  `Cable slot Z extent (top ${(SLOT_Z_CENTER + SLOT_H/2).toFixed(2)}) below ceiling (${PLATE_H - TOP_T})`);
+
+const ul = document.getElementById('fit-checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>

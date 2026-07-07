@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>SmallRig Riser 101 mm — Preview</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --ink:#e6e8ee; --mute:#8b93a7;
+    --accent:#6ee7b7; --warn:#fca5a5;
+    --body:#5b9bd5; --body-dk:#3a6fa0;
+    --hole:#d6b35a; --hole-dk:#8a7028;
+    --pocket:#e07a5a; --pocket-dk:#9a4a30;
+    --inner:#6ee7b7; --inner-dk:#2f9e74;
+    --outer:#b58df0; --outer-dk:#6a4c9a;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:20px 28px; border-bottom:1px solid #222836; }
+  header h1 { margin:0 0 4px; font-size:18px; font-weight:600; }
+  header p { margin:0; color:var(--mute); font-size:13px; }
+  main { display:grid; gap:18px; padding:18px 28px 40px; grid-template-columns:1fr 1fr; }
+  @media (max-width:900px){ main{ grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #222836; border-radius:10px; padding:16px 16px 12px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 2px; font-size:15px; font-weight:600; }
+  .card .sub { margin:0 0 10px; color:var(--mute); font-size:12px; }
+  svg { width:100%; height:auto; display:block; background:#101319; border-radius:6px; }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; margin:8px 0 4px; color:var(--mute); font-size:12px; }
+  .legend .sw { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:6px; }
+  .dim { fill:var(--mute); font:500 10px ui-monospace, monospace; }
+  table.specs { width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.specs th, table.specs td { padding:6px 10px; border-bottom:1px solid #242a36; text-align:left; vertical-align:top; }
+  table.specs th { color:var(--mute); font-weight:600; width:220px; }
+  code { background:#101319; padding:1px 5px; border-radius:3px; color:#f6cd7b; }
+  footer { color:var(--mute); padding:0 28px 28px; font-size:12px; }
+  ul.checks { margin:0; padding-left:18px; line-height:1.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SmallRig Riser — 101 mm variant</h1>
+  <p>Standoff block with Ø3.80 (straight through), inner Ø4.90, and outer Ø6.20 (bottom pocket) hole groups.
+     Source: <code>smallrig_riser/make_riser_101.py</code></p>
+</header>
+
+<main>
+
+  <div class="card full">
+    <table class="specs">
+      <tr><th>Block</th><td id="s-block">—</td></tr>
+      <tr><th>Ø3.80 holes (straight thru)</th><td id="s-holes">—</td></tr>
+      <tr><th>Inner Ø4.90 holes</th><td id="s-inner">—</td></tr>
+      <tr><th>Outer Ø6.20 holes (bottom pocket)</th><td id="s-outer">—</td></tr>
+      <tr><th>Material above bottom pocket</th><td id="s-floor">—</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Top view (X × Y)</h2>
+    <p class="sub">All holes along X, centered in Y. Dotted ring = Ø11 bottom-face pocket (far side).</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--body)"></span>Block</span>
+      <span><span class="sw" style="background:var(--hole)"></span>Ø3.80</span>
+      <span><span class="sw" style="background:var(--inner)"></span>Inner Ø4.90</span>
+      <span><span class="sw" style="background:var(--outer)"></span>Outer Ø6.20</span>
+      <span><span class="sw" style="background:var(--pocket)"></span>Ø11 pocket</span>
+    </div>
+    <svg id="top-svg" viewBox="0 0 560 240"></svg>
+  </div>
+
+  <div class="card">
+    <h2>Cross-section (X × Z)</h2>
+    <p class="sub">All holes through the full height; Ø11 × 4 pocket cut from the bottom (outer holes).</p>
+    <svg id="sec-svg" viewBox="0 0 560 220"></svg>
+    <h2 style="margin-top:14px">Design checks</h2>
+    <ul class="checks" id="checks"></ul>
+  </div>
+
+</main>
+
+<footer>
+  Print flat on the bed, pocket face DOWN — no supports. 31 mm of material remains
+  above each bottom pocket; bolt heads recess into the bottom face.
+</footer>
+
+<script>
+// =====================================================================
+// Parameters — sync with make_riser_101.py
+// =====================================================================
+const BLOCK_L = 80.0, BLOCK_W = 16.0, BLOCK_H = 35.0;
+const HOLE_SPACING = 58.49, HOLE_D = 3.80;
+const INNER_SPACING = 17.97, INNER_D = 4.90;
+const OUTER_SPACING = 35.72, OUTER_D = 6.20;
+const BOT_HEAD_D = 11.0, BOT_HEAD_DEPTH = 4.0;
+
+const ns = 'http://www.w3.org/2000/svg';
+function el(parent, tag, attrs, text){
+  const e = document.createElementNS(ns, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  parent.appendChild(e); return e;
+}
+
+// =====================================================================
+// Top view (X × Y)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('top-svg');
+  const VB_W = 560, VB_H = 240, margin = 40;
+  const s = Math.min((VB_W - 2*margin)/BLOCK_L, (VB_H - 2*margin)/BLOCK_W);
+  const cx = VB_W/2, cy = VB_H/2;
+  const X = x => cx + x*s;
+  const Y = y => cy - y*s;
+
+  el(svg, 'rect', { x:X(-BLOCK_L/2), y:Y(BLOCK_W/2), width:BLOCK_L*s, height:BLOCK_W*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5, rx:3 });
+
+  for (const sx of [-1,1]) {
+    // Ø3.80 straight through
+    el(svg, 'circle', { cx:X(sx*HOLE_SPACING/2), cy:Y(0), r:HOLE_D/2*s,
+      fill:'#101319', stroke:'var(--hole-dk)', 'stroke-width':1 });
+    // outer Ø6.20 + bottom pocket (dotted ring = pocket on far face)
+    el(svg, 'circle', { cx:X(sx*OUTER_SPACING/2), cy:Y(0), r:BOT_HEAD_D/2*s,
+      fill:'none', stroke:'var(--pocket)', 'stroke-width':0.9, 'stroke-dasharray':'1 3' });
+    el(svg, 'circle', { cx:X(sx*OUTER_SPACING/2), cy:Y(0), r:OUTER_D/2*s,
+      fill:'#101319', stroke:'var(--outer-dk)', 'stroke-width':1 });
+    // inner Ø4.90
+    el(svg, 'circle', { cx:X(sx*INNER_SPACING/2), cy:Y(0), r:INNER_D/2*s,
+      fill:'#101319', stroke:'var(--inner-dk)', 'stroke-width':1 });
+  }
+
+  // spacing dim
+  el(svg, 'line', { x1:X(-HOLE_SPACING/2), y1:Y(0), x2:X(HOLE_SPACING/2), y2:Y(0),
+    stroke:'#8b93a7', 'stroke-width':0.6, 'stroke-dasharray':'4 3' });
+  el(svg, 'text', { x:cx, y:Y(0)-6, 'text-anchor':'middle', class:'dim' }, `${HOLE_SPACING} mm`);
+
+  // block dims
+  const yd = Y(-BLOCK_W/2) + 18;
+  el(svg, 'line', { x1:X(-BLOCK_L/2), y1:yd, x2:X(BLOCK_L/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${BLOCK_L} mm (X)`);
+  const xd = X(-BLOCK_L/2) - 16;
+  el(svg, 'line', { x1:xd, y1:Y(-BLOCK_W/2), x2:xd, y2:Y(BLOCK_W/2), stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:xd-4, y:cy+4, 'text-anchor':'end', class:'dim' }, `${BLOCK_W} (Y)`);
+})();
+
+// =====================================================================
+// Cross-section (X × Z)
+// =====================================================================
+(() => {
+  const svg = document.getElementById('sec-svg');
+  const VB_W = 560, VB_H = 220, margin = 40;
+  const s = Math.min((VB_W - 2*margin)/BLOCK_L, (VB_H - 2*margin - 20)/(BLOCK_H*1.6));
+  const cx = VB_W/2, floorY = VB_H - margin - 10;
+  const X = x => cx + x*s;
+  const Z = z => floorY - z*s;
+
+  el(svg, 'rect', { x:X(-BLOCK_L/2), y:Z(BLOCK_H), width:BLOCK_L*s, height:BLOCK_H*s,
+    fill:'var(--body)', stroke:'var(--body-dk)', 'stroke-width':1.5 });
+
+  for (const sx of [-1,1]) {
+    // Ø3.80 straight through
+    el(svg, 'rect', { x:X(sx*HOLE_SPACING/2)-HOLE_D/2*s, y:Z(BLOCK_H), width:HOLE_D*s, height:BLOCK_H*s,
+      fill:'#101319', stroke:'var(--hole)', 'stroke-width':1 });
+    // outer Ø6.20 through + bottom pocket
+    el(svg, 'rect', { x:X(sx*OUTER_SPACING/2)-OUTER_D/2*s, y:Z(BLOCK_H), width:OUTER_D*s, height:BLOCK_H*s,
+      fill:'#101319', stroke:'var(--outer)', 'stroke-width':1 });
+    el(svg, 'rect', { x:X(sx*OUTER_SPACING/2)-BOT_HEAD_D/2*s, y:Z(BOT_HEAD_DEPTH), width:BOT_HEAD_D*s, height:BOT_HEAD_DEPTH*s,
+      fill:'#1a1c22', stroke:'var(--pocket)', 'stroke-width':1 });
+    // inner Ø4.90 through
+    el(svg, 'rect', { x:X(sx*INNER_SPACING/2)-INNER_D/2*s, y:Z(BLOCK_H), width:INNER_D*s, height:BLOCK_H*s,
+      fill:'#101319', stroke:'var(--inner)', 'stroke-width':1 });
+  }
+
+  // dims
+  const yd = Z(0) + 22;
+  el(svg, 'line', { x1:X(-BLOCK_L/2), y1:yd, x2:X(BLOCK_L/2), y2:yd, stroke:'#8b93a7', 'stroke-width':0.8 });
+  el(svg, 'text', { x:cx, y:yd+13, 'text-anchor':'middle', class:'dim' }, `${BLOCK_L} mm`);
+  el(svg, 'text', { x:X(BLOCK_L/2)-4, y:Z(BLOCK_H)-3, 'text-anchor':'end', class:'dim' }, `H ${BLOCK_H}`);
+})();
+
+// =====================================================================
+// Specs + checks
+// =====================================================================
+document.getElementById('s-block').textContent  = `${BLOCK_L} × ${BLOCK_W} × ${BLOCK_H} mm`;
+document.getElementById('s-holes').textContent  = `2× Ø${HOLE_D} straight through at X = ±${(HOLE_SPACING/2).toFixed(3)} (${HOLE_SPACING} mm)`;
+document.getElementById('s-inner').textContent  = `2× Ø${INNER_D} through at X = ±${(INNER_SPACING/2).toFixed(3)} (${INNER_SPACING} mm)`;
+document.getElementById('s-outer').textContent  = `2× Ø${OUTER_D} through at X = ±${(OUTER_SPACING/2).toFixed(3)} (${OUTER_SPACING} mm); bottom pocket Ø${BOT_HEAD_D} × ${BOT_HEAD_DEPTH}`;
+document.getElementById('s-floor').textContent  = `${(BLOCK_H - BOT_HEAD_DEPTH).toFixed(2)} mm above bottom pocket`;
+
+const yEdge = BLOCK_W/2 - BOT_HEAD_D/2;
+const holeEdge = BLOCK_L/2 - HOLE_SPACING/2 - HOLE_D/2;
+const outerEdge = BLOCK_L/2 - OUTER_SPACING/2 - OUTER_D/2;
+const innerGap = (OUTER_SPACING - INNER_SPACING)/2 - (BOT_HEAD_D + INNER_D)/2;
+
+const checks = [
+  { ok: holeEdge >= 0.5, msg: `Ø3.80 hole → X edge: ${holeEdge.toFixed(2)} mm` },
+  { ok: yEdge >= 0.5, msg: `Ø11 bottom pocket → Y edge: ${yEdge.toFixed(2)} mm` },
+  { ok: outerEdge >= 0.5, msg: `Outer hole → X edge: ${outerEdge.toFixed(2)} mm` },
+  { ok: innerGap >= 0.3, msg: `Inner hole ↔ outer bottom pocket gap: ${innerGap.toFixed(2)} mm` },
+  { ok: BLOCK_H - BOT_HEAD_DEPTH >= 1.0, msg: `Material above bottom pocket: ${(BLOCK_H-BOT_HEAD_DEPTH).toFixed(2)} mm` },
+];
+
+const ul = document.getElementById('checks');
+for (const c of checks) {
+  const li = document.createElement('li');
+  li.innerHTML = c.ok
+    ? `<span style="color:var(--accent)">✓</span> ${c.msg}`
+    : `<span style="color:var(--warn)">✗</span> ${c.msg}`;
+  ul.appendChild(li);
+}
+</script>
+</body>
+</html>
