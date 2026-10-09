@@ -1,0 +1,5 @@
+key,what,measured,note
+F3,SMA jack centres from own edge (mirror-symmetric),13.25 / 13.25,left jack from left edge; right jack from right edge -> 51.68 from left (64.93 wide)
+F8,LNA button centres down from the top edge,4.46 / 4.46,replaces 3.85; left-edge centres still EST 23.1 / 33.7
+F9,LED cluster centre from left edge / top edge,28.10 / 18.61,both MEAS
+F10,Micro-USB centres (ADS-B OUT from left edge / UAT OUT from right edge),21.15 / 21.15,UAT OUT -> 43.78 from left

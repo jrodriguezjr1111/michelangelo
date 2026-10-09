@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T1 Flight-Print Measurements</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #151515; --ink2: #55544f; --muted: #8b8a84;
+  --line: #d9d7d0; --draw: #2b2b2b; --dim: #1f6fd1; --accent: #f2b705; --accent-ink: #1a1400;
+  --p1: #c2410c; --ok: #1a7f4b; --field: #fbfbf9; --ref: #6b6a64;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151514; --panel: #1f1f1d; --ink: #f2f1ec; --ink2: #c3c2b7; --muted: #8f8e87;
+    --line: #3a3936; --draw: #e6e4dc; --dim: #6aa8ff; --accent: #f2b705; --accent-ink: #1a1400;
+    --p1: #fb8a4c; --ok: #4fc58a; --field: #262624; --ref: #a3a299;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151514; --panel: #1f1f1d; --ink: #f2f1ec; --ink2: #c3c2b7; --muted: #8f8e87;
+  --line: #3a3936; --draw: #e6e4dc; --dim: #6aa8ff; --accent: #f2b705; --accent-ink: #1a1400;
+  --p1: #fb8a4c; --ok: #4fc58a; --field: #262624; --ref: #a3a299;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+header { border-bottom: 3px solid var(--accent); padding-bottom: 12px; margin-bottom: 20px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: .02em; }
+h2 { font-size: 18px; margin: 32px 0 8px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+h2 .tag { font-size: 12px; font-weight: 600; color: var(--accent-ink); background: var(--accent); padding: 2px 8px; border-radius: 3px; }
+p.lead, .note { color: var(--ink2); margin: 4px 0; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; position: sticky; top: 0; background: var(--bg); padding: 8px 0; z-index: 2; }
+button { font: inherit; font-size: 15px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 8px 14px; border-radius: 4px; cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+nav a { color: var(--dim); margin-right: 12px; font-size: 14px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; margin: 10px 0; }
+.draw { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.draw figure { margin: 0; }
+.draw figcaption { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px; }
+svg { width: 100%; height: auto; display: block; }
+svg .o { fill: none; stroke: var(--draw); stroke-width: 1.6; }
+svg .t { fill: none; stroke: var(--draw); stroke-width: 1; stroke-dasharray: 3 3; }
+svg .d { fill: none; stroke: var(--dim); stroke-width: 1; }
+svg .f { fill: var(--draw); opacity: .12; stroke: none; }
+svg .n circle { fill: var(--dim); } svg .n text { fill: #fff; font: 700 10px sans-serif; text-anchor: middle; dominant-baseline: central; }
+svg .lbl { fill: var(--muted); font: 11px sans-serif; }
+.wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
+th, td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+td.no { width: 46px; font-weight: 700; color: var(--dim); }
+td.est { width: 130px; font-variant-numeric: tabular-nums; color: var(--ink2); }
+td.est b { color: var(--ink); }
+td.m { width: 120px; }
+td.drv { color: var(--ink2); font-size: 13px; width: 190px; }
+td.tol { font-size: 13px; width: 130px; }
+td.how { font-size: 14px; }
+tr.ref td { color: var(--ref); } tr.ref td.no { color: var(--ref); }
+.p1 { color: var(--p1); font-weight: 700; }
+td input { width: 100%; min-width: 96px; font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; padding: 7px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--field); color: var(--ink); }
+td input.filled { border-color: var(--ok); }
+.check label { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.check input[type=checkbox] { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+.check input[type=text] { flex: 1; font: inherit; padding: 5px 7px; border: 1px solid var(--line); border-radius: 4px; background: var(--field); color: var(--ink); min-width: 120px; }
+.status { font-size: 13px; color: var(--muted); align-self: center; }
+footer { margin-top: 36px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+@media print {
+  body { background: #fff; color: #000; } .bar, .status, nav { display: none; } .panel { border: none; padding: 0; }
+  td input { border: none; border-bottom: 1px solid #999; border-radius: 0; background: none; }
+  h2 { break-after: avoid; } figure, tr { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>T1: what to caliper before the flight prints</h1>
+  <p class="lead">Every value below still gates a <b>flight</b> print (ASA / PA12-CF). Grey rows are already measured and are shown only as a reference, so you can check your technique against them. Units are mm unless a row says otherwise. Blue numbers on the drawings match the row numbers.</p>
+  <p class="note"><b>Now</b> is the value the model uses today. EST = estimated from photos, PUB = datasheet, MEAS = you already measured it. <span class="p1">Red</span> in <b>Matters</b> marks rows where being off breaks the fit.</p>
+  <div class="bar">
+    <button class="primary" id="csv">Copy as CSV</button>
+    <button id="dl">Export CSV</button>
+    <button id="print">Print</button>
+    <button id="clear">Clear my entries</button>
+    <span class="status" id="status"></span>
+  </div>
+  <nav><a href="#fc">1 FlyCatcher</a><a href="#hub">2 UHR204 hub</a><a href="#mti">3 MTi</a><a href="#cage">4 Cage</a><a href="#chk">5 Printed-part checks</a></nav>
+</header>
+
+<!-- =================================================================== 1. FLYCATCHER -->
+<h2 id="fc">1. FlyCatcher window unit <span class="tag">flycatcher_window/</span></h2>
+<div class="panel">
+  <div class="draw">
+    <figure>
+      <svg viewBox="0 0 340 300" aria-label="FlyCatcher board front with callouts">
+        <rect class="o" x="70" y="50" width="200" height="232" rx="3"/>
+        <circle class="t" cx="82" cy="62" r="5"/><circle class="t" cx="258" cy="62" r="5"/><circle class="t" cx="82" cy="270" r="5"/><circle class="t" cx="258" cy="270" r="5"/>
+        <rect class="o" x="104" y="44" width="24" height="6"/><rect class="o" x="212" y="44" width="24" height="6"/>
+        <line class="o" x1="116" y1="20" x2="116" y2="44"/><line class="o" x1="224" y1="20" x2="224" y2="44"/>
+        <circle class="o" cx="153" cy="66" r="11"/><circle class="o" cx="190" cy="66" r="11"/>
+        <rect class="t" x="156" y="108" width="28" height="22"/><circle class="f" cx="162" cy="114" r="3"/><circle class="f" cx="178" cy="114" r="3"/><circle class="f" cx="164" cy="126" r="3"/><circle class="f" cx="176" cy="126" r="3"/>
+        <rect class="o" x="128" y="270" width="28" height="12"/><rect class="o" x="184" y="270" width="28" height="12"/>
+        <rect class="t" x="252" y="80" width="14" height="180"/>
+        <path class="d" d="M70 26 H116 M70 20 v12"/>
+        <path class="d" d="M40 50 V66 M34 66 h12"/>
+        <path class="d" d="M70 296 H142 M142 290 v12"/>
+        <path class="d" d="M290 62 V270 M284 62 h12 M284 270 h12"/>
+        <path class="d" d="M82 300 H258"/>
+        <path class="d" d="M50 50 V119 M44 119 h12 M70 119 H156"/>
+        <g class="n"><circle cx="92" cy="14" r="9"/><text x="92" y="14">F3</text></g>
+        <g class="n"><circle cx="24" cy="58" r="9"/><text x="24" y="58">F8</text></g>
+        <g class="n"><circle cx="153" cy="90" r="9"/><text x="153" y="90">F7</text></g>
+        <g class="n"><circle cx="34" cy="100" r="9"/><text x="34" y="100">F9</text></g>
+        <g class="n"><circle cx="104" cy="290" r="9"/><text x="104" y="290">F10</text></g>
+        <g class="n"><circle cx="312" cy="166" r="9"/><text x="312" y="166">F6</text></g>
+        <g class="n"><circle cx="224" cy="252" r="9"/><text x="224" y="252">F4</text></g>
+        <text class="lbl" x="170" y="160" text-anchor="middle">BOARD FRONT</text>
+        <text class="lbl" x="170" y="175" text-anchor="middle">(component side, SMA edge up)</text>
+        <text class="lbl" x="259" y="250" text-anchor="end">header</text>
+      </svg>
+      <figcaption>Board front: SMA x, LNA buttons, LED cluster, micro-USB x, hole pattern</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 340 300" aria-label="Section through an SMA jack at the board top edge">
+        <rect class="f" x="150" y="190" width="40" height="90"/><rect class="o" x="164" y="190" width="12" height="90"/>
+        <rect class="o" x="146" y="176" width="48" height="14"/>
+        <rect class="o" x="152" y="110" width="36" height="66"/>
+        <path class="t" d="M152 120 H188 M152 130 H188 M152 140 H188 M152 150 H188 M152 160 H188 M152 170 H188"/>
+        <rect class="o" x="138" y="60" width="64" height="50" rx="3"/><path class="t" d="M142 64 V106 M150 64 V106 M158 64 V106 M182 64 V106 M190 64 V106 M198 64 V106"/>
+        <rect class="o" x="150" y="10" width="40" height="50"/>
+        <text class="lbl" x="206" y="88">antenna nut</text><text class="lbl" x="206" y="145">exposed thread</text><text class="lbl" x="206" y="186">jack body</text><text class="lbl" x="206" y="240">board (edge-on)</text>
+        <path class="d" d="M120 110 V176 M114 110 h12 M114 176 h12"/>
+        <path class="d" d="M120 176 V190 M114 190 h12"/>
+        <path class="d" d="M100 60 V10 M94 10 h12 M94 60 h12"/>
+        <g class="n"><circle cx="104" cy="143" r="9"/><text x="104" y="143">F2</text></g>
+        <g class="n"><circle cx="104" cy="183" r="9"/><text x="104" y="183">F1</text></g>
+        <g class="n"><circle cx="84" cy="35" r="9"/><text x="84" y="35">F23</text></g>
+        <path class="d" d="M164 296 H176"/><g class="n"><circle cx="150" cy="292" r="9"/><text x="150" y="292">F5</text></g>
+        <text class="lbl" x="196" y="296">standoff (behind)</text>
+      </svg>
+      <figcaption>Top edge, edge-on: F1 sets the wall's inner face; F2 = 6.16 (reference)</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 340 300" aria-label="Suction base side view and flange top view">
+        <path class="o" d="M40 270 H200 L170 210 H70 Z"/>
+        <rect class="o" x="85" y="150" width="70" height="60"/>
+        <rect class="o" x="60" y="138" width="120" height="12"/>
+        <rect class="o" x="98" y="130" width="44" height="8"/>
+        <rect class="o" x="114" y="104" width="12" height="26"/><rect class="o" x="108" y="96" width="24" height="8"/>
+        <path class="d" d="M22 138 V270 M16 138 h12 M16 270 h12"/>
+        <path class="d" d="M196 138 V150 M190 138 h12 M190 150 h12"/>
+        <path class="d" d="M196 130 V138 M190 130 h12"/>
+        <path class="d" d="M228 96 V130 M222 96 h12 M222 130 h12"/>
+        <g class="n"><circle cx="22" cy="204" r="9"/><text x="22" y="204">F20</text></g>
+        <g class="n"><circle cx="214" cy="146" r="9"/><text x="214" y="146">F17</text></g>
+        <g class="n"><circle cx="214" cy="128" r="9"/><text x="214" y="128">F19</text></g>
+        <g class="n"><circle cx="246" cy="112" r="9"/><text x="246" y="112">F21</text></g>
+        <text class="lbl" x="120" y="290" text-anchor="middle">SIDE (cup rim on the table)</text>
+        <path class="o" d="M250 168 A 20 20 0 0 1 290 168 L 300 238 A 10 10 0 0 1 240 238 Z" transform="translate(-10 -6)"/>
+        <circle class="o" cx="260" cy="200" r="13"/>
+        <path class="d" d="M318 152 V246 M312 152 h12 M312 246 h12"/>
+        <path class="d" d="M232 200 H288"/>
+        <g class="n"><circle cx="330" cy="200" r="9"/><text x="330" y="200">F14</text></g>
+        <g class="n"><circle cx="246" cy="272" r="9"/><text x="246" y="272">F16</text></g>
+        <g class="n"><circle cx="292" cy="272" r="9"/><text x="292" y="272">F18</text></g>
+        <text class="lbl" x="270" y="140" text-anchor="middle">FLANGE TOP</text>
+      </svg>
+      <figcaption>Suction base: cup height, flange outline and thickness, disc, screw</figcaption>
+    </figure>
+  </div>
+  <div class="wrap"><table>
+    <tr><th>#</th><th>Measure (where the jaws go)</th><th>Now</th><th>Measured</th><th>Drives</th><th>Matters</th></tr>
+    <tr><td class="no">F1</td><td class="how">SMA jack body height: depth rod from the flat top of the gold jack body down to the board's top edge (each jack)</td><td class="est"><b>1.3</b> EST</td><td class="m"><input data-k="F1"></td><td class="drv">top-wall inner face (the wall sits on the jack bodies)</td><td class="tol"><span class="p1">±0.2</span></td></tr>
+    <tr class="ref"><td class="no">F2</td><td class="how">Reference: exposed SMA thread with an antenna fully seated (jack body to the antenna nut face)</td><td class="est"><b>6.16</b> MEAS</td><td class="m"><input data-k="F2"></td><td class="drv">wall 5.6 + 0.5 nylon washer</td><td class="tol">must stay ≥ 6.1</td></tr>
+    <tr><td class="no">F3</td><td class="how">SMA jack centres from the board's left edge (front view): both jacks, jaws on the edge to the thread's centre</td><td class="est"><b>12.4 / 43.6</b> EST</td><td class="m"><input data-k="F3"></td><td class="drv">split-bulkhead holes 6.6</td><td class="tol"><span class="p1">±0.3</span></td></tr>
+    <tr><td class="no">F4</td><td class="how">Standoff thread: try an M2.5 screw in a standoff's free end; if it is loose, try M3</td><td class="est"><b>M2.5</b> EST</td><td class="m"><input data-k="F4"></td><td class="drv">base holes 2.9 (M3 → 3.4)</td><td class="tol"><span class="p1">exact</span></td></tr>
+    <tr><td class="no">F5</td><td class="how">Standoff length: board back face to the standoff's free end</td><td class="est"><b>11</b> EST</td><td class="m"><input data-k="F5"></td><td class="drv">board-to-back-wall gap, M6 head clearance (3.4)</td><td class="tol"><span class="p1">±0.3</span></td></tr>
+    <tr class="ref"><td class="no">F6</td><td class="how">Reference: hole pattern centre-to-centre, along the header and across</td><td class="est"><b>58 × 49</b> MEAS</td><td class="m"><input data-k="F6"></td><td class="drv">base screw holes</td><td class="tol">±0.3</td></tr>
+    <tr><td class="no">F7</td><td class="how">LNA button height: top of each white cap above the board front face</td><td class="est"><b>9.5</b> EST</td><td class="m"><input data-k="F7"></td><td class="drv">lid clearance (10.5 to the inner face)</td><td class="tol"><span class="p1">must be ≤ 10</span></td></tr>
+    <tr><td class="no">F8</td><td class="how">LNA button centres: from the left edge (both) and down from the top edge</td><td class="est"><b>23.1, 33.7 / 4.5</b> EST</td><td class="m"><input data-k="F8"></td><td class="drv">Ø 7.4 button holes in the lid</td><td class="tol">±0.5</td></tr>
+    <tr><td class="no">F9</td><td class="how">LED cluster round the airplane icon: centre from the left edge / top edge. Easier: <b>photograph the board powered on</b>, square-on, with a ruler beside it</td><td class="est"><b>27.9 / 19.6</b> EST</td><td class="m"><input data-k="F9"></td><td class="drv">LED window 12 × 9 + 4 light pipes</td><td class="tol">±0.5</td></tr>
+    <tr><td class="no">F10</td><td class="how">Micro-USB receptacle centres from the left edge (ADS-B OUT, UAT OUT)</td><td class="est"><b>20.95 / 35.05</b> EST</td><td class="m"><input data-k="F10"></td><td class="drv">bottom-wall openings, hood pockets</td><td class="tol"><span class="p1">±0.3</span></td></tr>
+    <tr><td class="no">F11</td><td class="how">Micro-USB plug body: widest W × thickest T of the moulding (both leads)</td><td class="est"><b>10.5 × 6.5</b> EST</td><td class="m"><input data-k="F11"></td><td class="drv">openings 10.9 × 6.9, hood pockets</td><td class="tol"><span class="p1">+0.4 max</span></td></tr>
+    <tr><td class="no">F12</td><td class="how">Micro-USB plug body length: from where the metal shell enters the moulding to the end of the boot</td><td class="est"><b>14</b> EST</td><td class="m"><input data-k="F12"></td><td class="drv">hood pocket depth (traps the plug), tie position</td><td class="tol">±1</td></tr>
+    <tr><td class="no">F13</td><td class="how">Micro-USB lead diameter, just behind the boot</td><td class="est"><b>3.5</b> EST</td><td class="m"><input data-k="F13"></td><td class="drv">hood lead slots 4.0</td><td class="tol">slot ≥ lead + 0.3</td></tr>
+    <tr><td class="no">F14</td><td class="how">Flange overall length, over both screw lobes</td><td class="est"><b>61</b> EST</td><td class="m"><input data-k="F14"></td><td class="drv">adapter pocket (outline + 0.4)</td><td class="tol"><span class="p1">±0.3</span></td></tr>
+    <tr><td class="no">F15</td><td class="how">Flange screw centres: countersunk head to countersunk head, centre to centre</td><td class="est"><b>48</b> EST</td><td class="m"><input data-k="F15"></td><td class="drv">pocket lobe positions</td><td class="tol">±0.3</td></tr>
+    <tr><td class="no">F16</td><td class="how">Flange width across the centre, square to F14</td><td class="est"><b>34</b> EST</td><td class="m"><input data-k="F16"></td><td class="drv">pocket width</td><td class="tol"><span class="p1">±0.3</span></td></tr>
+    <tr><td class="no">F17</td><td class="how">Flange plate thickness at a lobe edge</td><td class="est"><b>4.5</b> EST (pocket 3.5)</td><td class="m"><input data-k="F17"></td><td class="drv">pocket depth (keys the outline)</td><td class="tol">≥ 3.5</td></tr>
+    <tr><td class="no">F18</td><td class="how">Raised centre disc diameter</td><td class="est"><b>27</b> EST</td><td class="m"><input data-k="F18"></td><td class="drv">disc relief Ø 27.8</td><td class="tol"><span class="p1">must be ≤ 27.6</span></td></tr>
+    <tr><td class="no">F19</td><td class="how">Disc height above the flange plate (depth rod)</td><td class="est"><b>2.0</b> EST (relief 1.7)</td><td class="m"><input data-k="F19"></td><td class="drv">the disc bears, the plate runs 0.3 clear</td><td class="tol"><span class="p1">±0.2</span></td></tr>
+    <tr><td class="no">F20</td><td class="how">Cup height: cup rim flat on the table, up to the flange top face</td><td class="est"><b>62</b> EST</td><td class="m"><input data-k="F20"></td><td class="drv">glass-to-antenna standoff (82)</td><td class="tol">±2</td></tr>
+    <tr><td class="no">F21</td><td class="how">Cup screw (M6 × 19): threaded length under the head. Fully threaded, or a plain shank first?</td><td class="est"><b>19</b> assumed</td><td class="m"><input data-k="F21"></td><td class="drv">11.0 engaged, 1.34 to the bottom</td><td class="tol"><span class="p1">thread ≥ 11</span></td></tr>
+    <tr class="ref"><td class="no">F22</td><td class="how">Reference: cup thread depth (19 − 6.66 left showing when bottomed)</td><td class="est"><b>12.34</b> MEAS</td><td class="m"><input data-k="F22"></td><td class="drv">grip stack 8.0</td><td class="tol">—</td></tr>
+    <tr><td class="no">F23</td><td class="how">Antenna length, nut face to tip (straight)</td><td class="est"><b>78</b> EST</td><td class="m"><input data-k="F23"></td><td class="drv">clearance under the window frame</td><td class="tol">±3</td></tr>
+    <tr><td class="no">F24</td><td class="how">In the aircraft: window spot to the lanyard anchor (seat-belt anchor or cage), tape measure</td><td class="est">—</td><td class="m"><input data-k="F24"></td><td class="drv">lanyard length (≤ ~100 slack)</td><td class="tol">±20</td></tr>
+  </table></div>
+</div>
+
+<!-- =================================================================== 2. HUB -->
+<h2 id="hub">2. UHR204 USB hub <span class="tag">hub_mount/</span></h2>
+<div class="panel">
+  <div class="draw">
+    <figure>
+      <svg viewBox="0 0 340 260" aria-label="Hub end face with the four holes, terminal block and jack">
+        <rect class="o" x="120" y="20" width="70" height="200" rx="3"/>
+        <circle class="o" cx="155" cy="38" r="4"/><circle class="o" cx="155" cy="58" r="4"/><circle class="o" cx="155" cy="180" r="4"/><circle class="o" cx="155" cy="200" r="4"/>
+        <rect class="o" x="138" y="114" width="34" height="38"/><circle class="o" cx="155" cy="90" r="11"/>
+        <text class="lbl" x="200" y="136">terminal block</text><text class="lbl" x="200" y="92">barrel jack</text>
+        <text class="lbl" x="155" y="14" text-anchor="middle">PORT FACE (top)</text><text class="lbl" x="155" y="240" text-anchor="middle">back face</text>
+        <path class="d" d="M100 58 V180 M94 58 h12 M94 180 h12"/>
+        <path class="d" d="M80 180 V200 M74 200 h12"/>
+        <path class="d" d="M60 200 V220 M54 220 h12 M54 200 h12"/>
+        <path class="d" d="M230 114 V220 M224 114 h12 M224 220 h12"/>
+        <path class="d" d="M260 90 V220"/>
+        <path class="d" d="M120 248 H190"/>
+        <g class="n"><circle cx="100" cy="120" r="9"/><text x="100" y="120">H4</text></g>
+        <g class="n"><circle cx="80" cy="168" r="9"/><text x="80" y="168">H5</text></g>
+        <g class="n"><circle cx="40" cy="210" r="9"/><text x="40" y="210">H6</text></g>
+        <g class="n"><circle cx="245" cy="168" r="9"/><text x="245" y="168">H11</text></g>
+        <g class="n"><circle cx="275" cy="160" r="9"/><text x="275" y="160">H12</text></g>
+        <g class="n"><circle cx="205" cy="200" r="9"/><text x="205" y="200">H1</text></g>
+        <g class="n"><circle cx="100" cy="248" r="9"/><text x="100" y="248">H9</text></g>
+      </svg>
+      <figcaption>End face (TB end): holes on the mid-thickness line, measured from the back face</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 340 260" aria-label="Hub port face with plugs">
+        <rect class="o" x="20" y="150" width="300" height="80" rx="3"/>
+        <rect class="o" x="34" y="110" width="30" height="40"/><text class="lbl" x="49" y="104" text-anchor="middle">host B</text>
+        <rect class="o" x="160" y="114" width="28" height="36"/><rect class="o" x="196" y="114" width="28" height="36"/><rect class="o" x="232" y="114" width="28" height="36"/><rect class="o" x="268" y="114" width="28" height="36"/>
+        <path class="t" d="M170 114 V40 M178 114 V40"/><path class="t" d="M208 114 V40 M214 114 V40"/>
+        <text class="lbl" x="174" y="34" text-anchor="middle">p1</text><text class="lbl" x="210" y="34" text-anchor="middle">p2</text>
+        <path class="d" d="M310 114 V150 M304 114 h12 M304 150 h12"/>
+        <path class="d" d="M20 244 H320 M20 238 v12 M320 238 v12"/>
+        <path class="d" d="M20 136 H174"/>
+        <path class="d" d="M8 150 V230 M2 150 h12 M2 230 h12"/>
+        <g class="n"><circle cx="328" cy="132" r="9"/><text x="328" y="132">H14</text></g>
+        <g class="n"><circle cx="170" cy="252" r="9"/><text x="170" y="252">H7</text></g>
+        <g class="n"><circle cx="100" cy="128" r="9"/><text x="100" y="128">H18</text></g>
+        <g class="n"><circle cx="20" cy="190" r="9"/><text x="20" y="190">H8</text></g>
+        <g class="n"><circle cx="192" cy="70" r="9"/><text x="192" y="70">H15</text></g>
+        <text class="lbl" x="170" y="196" text-anchor="middle">PORT FACE UP, TB end on the left</text>
+      </svg>
+      <figcaption>Port face: case length and height, plug heights, port-1 position, lead sections</figcaption>
+    </figure>
+  </div>
+  <div class="wrap"><table>
+    <tr><th>#</th><th>Measure (where the jaws go)</th><th>Now</th><th>Measured</th><th>Drives</th><th>Matters</th></tr>
+    <tr><td class="no">H1</td><td class="how">End-hole thread: remove one factory bracket screw and identify it (M3 × 0.5 or #4-40; a thread gauge, or test-fit an M3 nut)</td><td class="est"><b>?</b> not published</td><td class="m"><input data-k="H1"></td><td class="drv">cheek screws (holes 3.4 pass both)</td><td class="tol"><span class="p1">exact</span></td></tr>
+    <tr><td class="no">H2</td><td class="how">End-hole depth: depth rod into an empty end hole</td><td class="est"><b>?</b></td><td class="m"><input data-k="H2"></td><td class="drv">maximum screw length</td><td class="tol"><span class="p1">screw ≤ depth + 5.1</span></td></tr>
+    <tr><td class="no">H3</td><td class="how">Factory bracket screw length under the head</td><td class="est"><b>?</b></td><td class="m"><input data-k="H3"></td><td class="drv">our screw = it + 4 (cheek 5.6 vs bracket 1.6)</td><td class="tol">exact</td></tr>
+    <tr><td class="no">H4</td><td class="how">Inner hole pair centre-to-centre on one end face (check against the datasheet)</td><td class="est"><b>51.33</b> PUB</td><td class="m"><input data-k="H4"></td><td class="drv">cheek holes</td><td class="tol">±0.3</td></tr>
+    <tr><td class="no">H5</td><td class="how">Outer hole to its neighbouring inner hole, centre-to-centre (both pairs, both ends)</td><td class="est"><b>9.1</b> EST</td><td class="m"><input data-k="H5"></td><td class="drv">cheek holes</td><td class="tol"><span class="p1">±0.3</span></td></tr>
+    <tr><td class="no">H6</td><td class="how">Back face (opposite the ports) to the nearest hole's centre</td><td class="est"><b>8.4</b> EST</td><td class="m"><input data-k="H6"></td><td class="drv">hole heights above the ledges</td><td class="tol"><span class="p1">±0.3</span></td></tr>
+    <tr><td class="no">H7</td><td class="how">Case length, end face to end face, brackets off</td><td class="est"><b>138.24</b> PUB / 138.7</td><td class="m"><input data-k="H7"></td><td class="drv">cheek pocket 139.04</td><td class="tol"><span class="p1">must be ≤ 139.0</span></td></tr>
+    <tr><td class="no">H8</td><td class="how">Case height, port face to back face</td><td class="est"><b>86.92</b> PUB / 86.34</td><td class="m"><input data-k="H8"></td><td class="drv">ledge-to-lip gap 87.42</td><td class="tol"><span class="p1">must be ≤ 87.3</span></td></tr>
+    <tr><td class="no">H9</td><td class="how">Case thickness, big face to big face</td><td class="est"><b>35.0</b> PUB ±0.51</td><td class="m"><input data-k="H9"></td><td class="drv">cheek reach, ports centred</td><td class="tol">±0.5</td></tr>
+    <tr><td class="no">H10</td><td class="how">Mass, kitchen scale, no cables</td><td class="est"><b>640 / 380 g</b> PUB</td><td class="m"><input data-k="H10"></td><td class="drv">strap and screw load (sized at 640)</td><td class="tol">±20 g</td></tr>
+    <tr><td class="no">H11</td><td class="how">Terminal block with its plug in: lowest and highest edge, measured from the back face</td><td class="est"><b>26–42</b> EST</td><td class="m"><input data-k="H11"></td><td class="drv">cheek gap 23.2–63.1</td><td class="tol"><span class="p1">inside the gap</span></td></tr>
+    <tr><td class="no">H12</td><td class="how">Barrel jack: lowest and highest edge from the back face</td><td class="est"><b>48–58</b> EST</td><td class="m"><input data-k="H12"></td><td class="drv">cheek gap</td><td class="tol"><span class="p1">inside the gap</span></td></tr>
+    <tr><td class="no">H13</td><td class="how">Far end face: slotted screw centre from the back face, and how far its head stands proud</td><td class="est"><b>~43 / 2.5</b> EST</td><td class="m"><input data-k="H13"></td><td class="drv">cheek gap</td><td class="tol">inside the gap</td></tr>
+    <tr><td class="no">H14</td><td class="how">Plug body heights above the port face, fully inserted: yellow, black, host B (the tallest one)</td><td class="est"><b>30</b> EST</td><td class="m"><input data-k="H14"></td><td class="drv">comb bar 4–10 above the plugs</td><td class="tol"><span class="p1">±2</span></td></tr>
+    <tr><td class="no">H15</td><td class="how">Yellow flat tuner lead: width × thickness</td><td class="est"><b>8 × 2.5</b> EST</td><td class="m"><input data-k="H15"></td><td class="drv">comb slots 8.6</td><td class="tol">slot ≥ W + 0.4</td></tr>
+    <tr><td class="no">H16</td><td class="how">Round leads: CO, vib, host diameters</td><td class="est"><b>4.6 / 4.6 / 5.5</b> EST</td><td class="m"><input data-k="H16"></td><td class="drv">comb slots 5.2 / 6.0</td><td class="tol">slot ≥ Ø + 0.4</td></tr>
+    <tr><td class="no">H17</td><td class="how">USB-A plug body: width × thickness (yellow and black)</td><td class="est"><b>16 × 8.5</b> EST</td><td class="m"><input data-k="H17"></td><td class="drv">lip / comb-leg clearance (4.5)</td><td class="tol">T ≤ 12</td></tr>
+    <tr><td class="no">H18</td><td class="how">Port 1 centre from the terminal-block end face</td><td class="est"><b>71.1</b> EST</td><td class="m"><input data-k="H18"></td><td class="drv">comb slot positions (pitch 17.25)</td><td class="tol">±0.5</td></tr>
+  </table></div>
+</div>
+
+<!-- =================================================================== 3. MTi -->
+<h2 id="mti">3. MTi 1-s DEV board <span class="tag">mti_mount/</span></h2>
+<div class="panel">
+  <div class="draw">
+    <figure>
+      <svg viewBox="0 0 340 250" aria-label="MTi board viewed from the component side, USB-C bottom-left">
+        <rect class="o" x="70" y="40" width="220" height="180" rx="3"/>
+        <circle class="o" cx="276" cy="52" r="5"/><circle class="o" cx="276" cy="210" r="5"/><circle class="o" cx="96" cy="82" r="5"/>
+        <rect class="o" x="62" y="176" width="22" height="30"/><text class="lbl" x="92" y="196">USB-C</text>
+        <path class="d" d="M276 30 H290 M276 24 v12 M290 24 v12"/>
+        <path class="d" d="M306 40 V52 M300 40 h12 M300 52 h12"/>
+        <path class="d" d="M40 191 V220 M34 191 h12 M34 220 h12"/>
+        <path class="d" d="M70 236 H290 M70 230 v12 M290 230 v12"/>
+        <path class="d" d="M320 40 V220 M314 40 h12 M314 220 h12"/>
+        <g class="n"><circle cx="283" cy="18" r="9"/><text x="283" y="18">M2</text></g>
+        <g class="n"><circle cx="306" cy="66" r="9"/><text x="306" y="66">M3</text></g>
+        <g class="n"><circle cx="40" cy="176" r="9"/><text x="40" y="176">M5</text></g>
+        <g class="n"><circle cx="180" cy="236" r="9"/><text x="180" y="236">M6</text></g>
+        <g class="n"><circle cx="252" cy="52" r="9"/><text x="252" y="52">M1</text></g>
+        <text class="lbl" x="180" y="130" text-anchor="middle">component side up, USB-C bottom-left</text>
+        <text class="lbl" x="180" y="146" text-anchor="middle">UR (0,0) · LR (0,−47.75) · UL (−47.95,−9.03) MEAS</text>
+      </svg>
+      <figcaption>MTi board: hole size, edge offsets, USB-C position, outline</figcaption>
+    </figure>
+  </div>
+  <div class="wrap"><table>
+    <tr><th>#</th><th>Measure (where the jaws go)</th><th>Now</th><th>Measured</th><th>Drives</th><th>Matters</th></tr>
+    <tr><td class="no">M1</td><td class="how">Mounting hole diameter (inside jaws or a drill-bit gauge), all three holes</td><td class="est"><b>3.2</b> EST</td><td class="m"><input data-k="M1"></td><td class="drv">M3 standoffs pass</td><td class="tol">≥ 3.1</td></tr>
+    <tr><td class="no">M2</td><td class="how">Upper-right hole centre to the board's right edge</td><td class="est"><b>~3.5</b> EST</td><td class="m"><input data-k="M2"></td><td class="drv">board outline on the plate, USB-C hood position</td><td class="tol"><span class="p1">±0.5</span></td></tr>
+    <tr><td class="no">M3</td><td class="how">Upper-right hole centre to the board's top edge</td><td class="est"><b>~2.8</b> EST</td><td class="m"><input data-k="M3"></td><td class="drv">same</td><td class="tol"><span class="p1">±0.5</span></td></tr>
+    <tr><td class="no">M4</td><td class="how">Header pin tails: how far they stick out under the board</td><td class="est"><b>10.5</b> EST</td><td class="m"><input data-k="M4"></td><td class="drv">clearance over the relief grooves (12 standoffs)</td><td class="tol"><span class="p1">must be ≤ 11.2</span></td></tr>
+    <tr><td class="no">M5</td><td class="how">USB-C receptacle centre up from the board's bottom edge</td><td class="est"><b>~8.4</b> EST</td><td class="m"><input data-k="M5"></td><td class="drv">USB-C hood tunnel</td><td class="tol"><span class="p1">±0.5</span></td></tr>
+    <tr><td class="no">M6</td><td class="how">Board outline: width × height, widest points</td><td class="est"><b>58.1 × 53.3</b> EST</td><td class="m"><input data-k="M6"></td><td class="drv">plate window, hood, render</td><td class="tol">±0.5</td></tr>
+    <tr><td class="no">M7</td><td class="how">USB-C plug body (your cable): width × thickness</td><td class="est"><b>12.4 × 6.4</b> EST</td><td class="m"><input data-k="M7"></td><td class="drv">hood tunnel 12.8 × 6.8</td><td class="tol"><span class="p1">+0.4 max</span></td></tr>
+  </table></div>
+</div>
+
+<!-- =================================================================== 4. CAGE -->
+<h2 id="cage">4. Cage frame (as built, photo 39) <span class="tag">t1_panels/ · hub_mount/ · mti_mount/</span></h2>
+<div class="panel">
+  <div class="draw">
+    <figure>
+      <svg viewBox="0 0 340 260" aria-label="Cage long face with rails and gussets">
+        <rect class="o" x="30" y="40" width="10" height="190"/><rect class="o" x="300" y="40" width="10" height="190"/>
+        <rect class="o" x="30" y="40" width="280" height="10"/><rect class="o" x="30" y="120" width="280" height="10"/><rect class="o" x="30" y="220" width="280" height="10"/>
+        <path class="o" d="M30 230 H70 V220 L52 194 H30"/><path class="o" d="M30 40 H70 V50 L52 72 H30"/>
+        <path class="o" d="M30 108 H44 L70 120 V130 L44 142 H30"/>
+        <path class="d" d="M30 248 H310 M30 242 v12 M310 242 v12"/>
+        <path class="d" d="M326 125 V225 M320 125 h12 M320 225 h12"/>
+        <path class="d" d="M326 45 V125"/>
+        <path class="d" d="M30 182 H70"/>
+        <g class="n"><circle cx="170" cy="248" r="9"/><text x="170" y="248">C1</text></g>
+        <g class="n"><circle cx="326" cy="175" r="9"/><text x="326" y="175">C3</text></g>
+        <g class="n"><circle cx="326" cy="85" r="9"/><text x="326" y="85">C4</text></g>
+        <g class="n"><circle cx="86" cy="206" r="9"/><text x="86" y="206">C5</text></g>
+        <g class="n"><circle cx="86" cy="140" r="9"/><text x="86" y="140">C6</text></g>
+        <text class="lbl" x="170" y="20" text-anchor="middle">LONG FACE (front or back), slot centres</text>
+      </svg>
+      <figcaption>Width, rail slot pitches (slot centre to slot centre), gussets</figcaption>
+    </figure>
+  </div>
+  <div class="wrap"><table>
+    <tr><th>#</th><th>Measure (where the jaws go)</th><th>Now</th><th>Measured</th><th>Drives</th><th>Matters</th></tr>
+    <tr><td class="no">C1</td><td class="how">Long face width, outside of post to outside of post (tape measure)</td><td class="est"><b>444.5</b> EST (17.5 in; the deck model is 406)</td><td class="m"><input data-k="C1"></td><td class="drv">panel widths, hub (x 295) and MTi (x 83) positions</td><td class="tol"><span class="p1">±2</span></td></tr>
+    <tr><td class="no">C2</td><td class="how">Depth, front face to back face, outside</td><td class="est"><b>279</b> EST</td><td class="m"><input data-k="C2"></td><td class="drv">back-band space</td><td class="tol">±2</td></tr>
+    <tr><td class="no">C3</td><td class="how">Deck rail → mid rail: slot centre to slot centre on the back face</td><td class="est"><b>125.5</b> photo</td><td class="m"><input data-k="C3"></td><td class="drv">MTi bridge SPAN + hub backplate SPAN (both bolt to these slots)</td><td class="tol"><span class="p1">±0.5</span></td></tr>
+    <tr><td class="no">C4</td><td class="how">Mid rail → top rail: slot centre to slot centre</td><td class="est"><b>86</b> photo</td><td class="m"><input data-k="C4"></td><td class="drv">upper panels</td><td class="tol">±0.5</td></tr>
+    <tr><td class="no">C5</td><td class="how">Corner gusset legs: along the rail × along the post</td><td class="est"><b>62 × 60</b> EST</td><td class="m"><input data-k="C5"></td><td class="drv">panel corner notches</td><td class="tol">±1</td></tr>
+    <tr><td class="no">C6</td><td class="how">Mid-rail T-plate: leg along the rail × reach above and below the rail centre</td><td class="est"><b>62 × ±30</b> EST</td><td class="m"><input data-k="C6"></td><td class="drv">castellated ears, notches</td><td class="tol">±1</td></tr>
+    <tr><td class="no">C7</td><td class="how">Gusset plate thickness</td><td class="est"><b>3.2</b> EST</td><td class="m"><input data-k="C7"></td><td class="drv">panel standoff off the face</td><td class="tol">±0.3</td></tr>
+    <tr><td class="no">C8</td><td class="how">Gusset bolt head height above the plate</td><td class="est"><b>?</b></td><td class="m"><input data-k="C8"></td><td class="drv">panel back clearance</td><td class="tol">±0.5</td></tr>
+    <tr><td class="no">C9</td><td class="how">Back rail inner face to the backs of the two cases (lower bay)</td><td class="est"><b>83</b> EST</td><td class="m"><input data-k="C9"></td><td class="drv">hub (41 mm aisle) + MTi depth</td><td class="tol"><span class="p1">≥ 60</span></td></tr>
+    <tr><td class="no">C10</td><td class="how">Antenna plate back edge to the back rail inner face</td><td class="est"><b>39</b> EST</td><td class="m"><input data-k="C10"></td><td class="drv">hub comb bar (2.6 clear), plug column</td><td class="tol"><span class="p1">≥ 37</span></td></tr>
+  </table></div>
+</div>
+
+<!-- =================================================================== 5. CHECKS -->
+<h2 id="chk">5. Already-printed PLA parts: check against the frame <span class="tag">no calipers</span></h2>
+<div class="panel check">
+  <label><input type="checkbox" data-k="P1"> <span><b>P1</b> Panel halves sit flat on their rails, holes on the slot lines, no rocking</span> <input type="text" data-k="P1n" placeholder="note"></label>
+  <label><input type="checkbox" data-k="P2"> <span><b>P2</b> Ears on the shared mid rail interleave (upper and lower panel), no overlap or gap</span> <input type="text" data-k="P2n" placeholder="note"></label>
+  <label><input type="checkbox" data-k="P3"> <span><b>P3</b> Seam tongue between the two halves slides in by hand, no gap at the seam</span> <input type="text" data-k="P3n" placeholder="note"></label>
+  <label><input type="checkbox" data-k="P4"> <span><b>P4</b> MTi bridge (PLA) on the back deck + mid rails: holes on both slots, skirt flat against the rail face, board on its 3 standoffs</span> <input type="text" data-k="P4n" placeholder="note"></label>
+  <label><input type="checkbox" data-k="P5"> <span><b>P5</b> Cup screw test: M6 × 19 through one fender washer + 4 mm + 2.4 mm of plastic (the printed base + adapter, or a stack of spacers), tightens on the part <b>before</b> it bottoms in the cup</span> <input type="text" data-k="P5n" placeholder="note"></label>
+</div>
+
+<footer>
+  59 measurement rows (3 of them references: F2, F6, F22) + 5 checks. Sources: <code>flycatcher_window/README.md</code>, <code>hub_mount/README.md</code>, <code>mti_mount/README.md</code>, <code>t1_panels/README.md</code>, <code>t1_params.py</code>. Sheet dated 2026-09-30. When done, use Export CSV and send the file back.
+</footer>
+</main>
+<script>
+(function () {
+  var KEY = "t1_measure_2026_09_30_v1";
+  var inputs = Array.prototype.slice.call(document.querySelectorAll("input[data-k]"));
+  var status = document.getElementById("status");
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
+  function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); status.textContent = "saved in this browser"; } catch (e) { status.textContent = "not saved (storage blocked) - use Export CSV"; } }
+  var data = load();
+  function val(el) { return el.type === "checkbox" ? (el.checked ? "yes" : "") : el.value; }
+  inputs.forEach(function (el) {
+    el.setAttribute("aria-label", el.getAttribute("data-k"));
+    var v = data[el.dataset.k];
+    if (v) { if (el.type === "checkbox") el.checked = v === "yes"; else { el.value = v; el.classList.add("filled"); } }
+    el.addEventListener(el.type === "checkbox" ? "change" : "input", function () {
+      data[el.dataset.k] = val(el); if (el.type !== "checkbox") el.classList.toggle("filled", el.value.trim() !== ""); save(data);
+    });
+  });
+  function csv() {
+    var rows = [["key", "group", "what", "now", "measured", "drives", "matters"]];
+    inputs.forEach(function (el) {
+      var tr = el.closest("tr");
+      if (tr) rows.push([el.dataset.k, tr.closest(".panel").previousElementSibling.textContent.trim(), tr.querySelector(".how").textContent.trim(),
+                         tr.querySelector(".est").textContent.trim(), el.value.trim(), tr.querySelector(".drv").textContent.trim(), tr.querySelector(".tol").textContent.trim()]);
+      else rows.push([el.dataset.k, "5. checks", el.closest("label").querySelector("span").textContent.trim(), "", val(el), "", ""]);
+    });
+    return rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","); }).join("\n");
+  }
+  document.getElementById("csv").onclick = function () {
+    var t = csv();
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { status.textContent = "CSV copied"; }, function () { status.textContent = "copy blocked - use Export CSV"; });
+    else status.textContent = "copy unavailable - use Export CSV";
+  };
+  document.getElementById("dl").onclick = function () {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv()], { type: "text/csv" }));
+    a.download = "t1_measurements_2026-09-30.csv"; a.click();
+  };
+  document.getElementById("print").onclick = function () { window.print(); };
+  document.getElementById("clear").onclick = function () {
+    if (!confirm("Clear every entry on this sheet?")) return;
+    inputs.forEach(function (el) { if (el.type === "checkbox") el.checked = false; else { el.value = ""; el.classList.remove("filled"); } });
+    data = {}; save(data);
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+part_number,description,length_mm_per_piece,qty,unit_price_usd,line_total_usd,notes
+20-2020-Black-FB,"antenna-level POSTS, cut to 100 (E06-E09) — the deck itself is already built from stock",100,4,3.28,13.12,$0.0328/mm; +4 cut charges; verified 8020.net 2026-09-21
+CUT,cut charge per piece,,4,3.00,12.00,cut tolerance not on the product page - VERIFY on the order form
+20-4119-Black,2-hole inside corner bracket: 2 per post foot (both planes) = 8,,8,7.55,60.40,"verified 8020.net; the owner's existing corner gussets look like GENERIC 2020 flat corner plates (3 holes/leg) - 80/20's own are 20-4081 'L' flat plate $11.23 and 20-4080 'T' flat plate $12.05 (60 x 60, 5-hole, 4 mm) - keep his if the bolts are M5 and the plate is >= 3 mm"
+12004,"20 Series reduction T-slot cover, black PP, 2 m length - cable runs in the outer side slots + posts",2000,1,5.40,5.40,"verified 8020.net; deck perimeter + centre + posts = 1.93 m -> one length; 80/20 has NO 20-series ECONOMY cover (economy covers exist for 10/25, 15/40, 45 only)"
+14122,M5 slide-in economy T-nut block - 2 trays x 6 + IMU plate 4 + V-plate frame 2 + yokes 4 + post brackets 16 + 10 % = 40,,40,0.37,14.80,verified 8020.net; PRE-LOAD the tray rows before the posts/end caps go on (no 20-series drop-in exists on 8020.net)
+75-3581,M5 x 8 black BHSCS + 14122 assembly - post brackets 16 + 10 %,,18,0.90,16.20,verified 8020.net
+11-5312,"M5 x 12 BHSCS black - tray ears through 7 mm flange + washer (bay L), yokes, IMU plate",,20,0.59,11.80,"verified 8020.net; bay R tray uses 6 captive knurled M5 x 12 thumbscrews (generic, not 80/20)"
+12305,"20 Series end cap, black - 4 post tops",,6,1.12,6.72,verified 8020.net; +2 spare
+VERIFY: V-mount plate,"V-mount FEMALE plate with D-Tap out (COTS): SmallRig 3203B class (D-Tap 14.8 V + 8 V/12 V DC, 1/4-20 + rod-clamp threads) or a bare V-lock plate + own D-Tap pigtail",,1,0.00,0.00,"not an 80/20 item; SmallRig 3203B verified to exist with D-Tap + DC outputs (smallrig.com), price/dims not shown - VERIFY; bare plates (SmallRig 2988, $~40) have no power port"
+VERIFY: threaded USB-A bulkhead,panel-mount IP67 threaded USB-A bulkhead (vib node port) + threaded DC bulkhead,,2,0.00,0.00,generic (Bulgin/Amphenol class) - VERIFY
+TOTAL (80/20 items only),delta on top of the deck the owner already has,,,,140.44,8020.net prices read 2026-09-21/25; black posts/brackets carry the anodizing lead time

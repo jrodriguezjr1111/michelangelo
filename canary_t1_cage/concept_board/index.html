@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>T1 Cage Concepts</title>
+<meta name="description" content="Canary T1 cage: three swap concepts, massing level. Internal concept tool.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Saira+Condensed:wght@400;500;600;700&family=Saira+Stencil+One&display=swap" rel="stylesheet">
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+}}
+</script>
+<style>
+/* One deliberate dark world. Every colour is painted explicitly from these tokens. */
+:root{
+  --bg:#07090D; --bg2:#0A0D12; --panel:#0E1219; --panel2:#121823; --line:#1E2633; --line2:#2B3646;
+  --ink:#E6EBF2; --ink2:#A9B4C4; --ink3:#6F7C8F;
+  --amber:#F0AA3C; --amber-dim:#7A5A24; --yellow:#F5B81C;
+  --green:#4FD08A; --red:#F0605A; --cyan:#5CD6E8;
+  --mono:"B612 Mono","IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --ui:"Saira Condensed","Arial Narrow",system-ui,sans-serif;
+  --stencil:"Saira Stencil One","Saira Condensed",Impact,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.35;overflow-x:hidden}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:2px}
+.micro{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.mono{font-family:var(--mono)}
+
+/* ---------- header */
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--bg2);flex-wrap:wrap}
+header svg{width:30px;height:30px;flex:none}
+.brand{font-family:var(--stencil);font-size:20px;letter-spacing:.16em;color:var(--ink);line-height:1}
+.brand b{color:var(--amber);font-weight:400}
+.hsub{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase}
+.hflags{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.flag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line2);color:var(--ink2);padding:3px 7px;background:var(--panel)}
+.flag.am{border-color:var(--amber-dim);color:var(--amber)}
+
+/* ---------- layout */
+main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(360px,1fr);gap:0;align-items:start}
+.stagecol{position:sticky;top:0;min-width:0;border-right:1px solid var(--line)}
+.panelcol{min-width:0;background:var(--bg2);min-height:100vh}
+@media (max-width:979px){
+  main{grid-template-columns:minmax(0,1fr)}
+  .stagecol{position:relative;border-right:0}
+  .panelcol{min-height:0}
+}
+
+/* ---------- stage */
+#stage{position:relative;height:min(68vh,760px);min-height:340px;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 46%,#1B2433 0%,#0E131C 46%,#07090D 100%)}
+@media (max-width:979px){#stage{height:56vh}}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#gl:active{cursor:grabbing}
+#gl:focus-visible{outline:2px solid var(--amber);outline-offset:-3px}
+#overlay{position:absolute;inset:0;pointer-events:none}
+#overlay svg{position:absolute;inset:0;width:100%;height:100%}
+.corner{position:absolute;width:22px;height:22px;border:1px solid var(--amber-dim);opacity:.9}
+.corner.tl{left:10px;top:10px;border-right:0;border-bottom:0}.corner.tr{right:10px;top:10px;border-left:0;border-bottom:0}
+.corner.bl{left:10px;bottom:10px;border-right:0;border-top:0}.corner.br{right:10px;bottom:10px;border-left:0;border-top:0}
+.hud-tl{position:absolute;left:22px;top:18px;max-width:70%}
+.hud-tl .cl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--amber)}
+.hud-tl .cn{font-family:var(--stencil);font-size:clamp(22px,3.4vw,38px);letter-spacing:.06em;line-height:1;margin-top:2px;color:var(--ink)}
+.hud-tl .cb{font-size:14px;color:var(--ink2);margin-top:4px;max-width:44ch}
+.hud-tr{position:absolute;right:22px;top:18px;text-align:right;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--ink3);line-height:1.7}
+.hud-tr b{color:var(--ink2);font-weight:400}
+.hud-bl{position:absolute;left:22px;bottom:16px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--ink3);line-height:1.6}
+.hud-bl b{color:var(--ink);font-weight:400}
+@media (max-width:620px){.hud-tr{display:none}.hud-tl .cb{display:none}}
+.tag{position:absolute;left:0;top:0;transform:translate(-999px,-999px);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(10,13,18,.88);border:1px solid var(--amber);color:var(--ink);padding:5px 8px;white-space:nowrap;will-change:transform}
+.tag small{display:block;color:var(--amber);font-size:9.5px;letter-spacing:.12em;margin-top:2px}
+.tag.cy{border-color:var(--cyan)}.tag.cy small{color:var(--cyan)}
+#fallback{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--ink2);font-family:var(--mono);font-size:12px;letter-spacing:.06em}
+#hint{position:absolute;right:22px;bottom:16px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
+@media (max-width:620px){#hint{display:none}}
+
+/* ---------- control bar */
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--panel)}
+.seg{display:inline-flex;border:1px solid var(--line2)}
+.seg button{background:transparent;border:0;border-right:1px solid var(--line2);padding:7px 12px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--ink2);text-transform:uppercase;min-height:36px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"],.seg button[aria-selected="true"]{background:var(--amber);color:#0A0D12}
+.seg button b{font-family:var(--stencil);font-weight:400;font-size:14px;margin-right:6px;letter-spacing:.04em}
+@media (max-width:620px){.seg .long{display:none}}
+.tog{background:transparent;border:1px solid var(--line2);padding:7px 10px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--ink2);text-transform:uppercase;min-height:36px}
+.tog[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
+.tog.cy[aria-pressed="true"]{border-color:var(--cyan);color:var(--cyan)}
+.tog.solid{background:var(--ink);color:#0A0D12;border-color:var(--ink)}
+.slider{display:flex;align-items:center;gap:8px;flex:1 1 180px;min-width:160px}
+.slider label{white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;width:100%;height:28px;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line2)}
+input[type=range]::-moz-range-track{height:2px;background:var(--line2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:22px;margin-top:-10px;background:var(--amber);border:0;clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%)}
+input[type=range]::-moz-range-thumb{width:14px;height:22px;background:var(--amber);border:0;border-radius:0}
+
+/* ---------- rules strip */
+.rules{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--line);scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.rule{flex:none;max-width:230px;border:1px solid var(--line);border-left:2px solid var(--amber);padding:6px 10px;background:var(--panel)}
+.rule b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--amber);font-weight:400;text-transform:uppercase}
+.rule span{font-size:13.5px;color:var(--ink2);line-height:1.25;display:block;margin-top:2px}
+.rule.cy{border-left-color:var(--cyan)}.rule.cy b{color:var(--cyan)}
+.rule.rd{border-left-color:var(--red)}.rule.rd b{color:var(--red)}
+
+/* ---------- panels */
+.lean{margin:14px 16px 0;border:1px solid var(--amber-dim);background:linear-gradient(180deg,rgba(240,170,60,.08),rgba(240,170,60,.02));padding:10px 12px}
+.lean h3{margin:0 0 4px;font-family:var(--mono);font-weight:400;font-size:10.5px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase}
+.lean p{margin:0;font-size:14.5px;color:var(--ink2)}
+.lean p b{color:var(--ink);font-weight:600}.lean p i{color:var(--cyan);font-style:normal}
+.tabs{display:flex;margin:14px 16px 0;border:1px solid var(--line2)}
+.tabs button{flex:1;background:transparent;border:0;border-right:1px solid var(--line2);padding:9px 4px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);min-height:40px}
+.tabs button:last-child{border-right:0}
+.tabs button[aria-selected="true"]{background:var(--panel2);color:var(--amber);box-shadow:inset 0 -2px 0 var(--amber)}
+.tabpanel{padding:14px 16px 40px}
+.tabpanel[hidden]{display:none}
+h2{font-family:var(--stencil);font-weight:400;font-size:20px;letter-spacing:.06em;margin:0 0 2px}
+.sub{color:var(--ink3);font-size:13.5px;margin:0 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.chip{background:var(--panel);border:1px solid var(--line2);color:var(--ink2);padding:6px 9px;cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;min-height:34px}
+.chip[aria-pressed="true"]{border-color:var(--amber);color:#0A0D12;background:var(--amber)}
+.card{border:1px solid var(--line);background:var(--panel);padding:12px}
+.card + .card{margin-top:10px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:10px 0}
+.kv div{background:var(--panel2);padding:8px 10px;min-width:0}
+.kv .v{font-family:var(--mono);font-size:17px;color:var(--ink);margin-top:2px;overflow-wrap:anywhere}
+.kv .v.am{color:var(--amber)}
+@media (max-width:620px){.kv .v{font-size:14px}}
+@media (max-width:979px){.dec input[type=text]{font-size:16px}}
+.tgt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--amber);text-transform:uppercase;border:1px dashed var(--amber-dim);padding:4px 7px;display:inline-block;margin-bottom:8px}
+ol.steps{list-style:none;margin:8px 0 0;padding:0;counter-reset:s}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:8px;padding:8px 8px;border-top:1px solid var(--line);font-size:15px;color:var(--ink2)}
+ol.steps li::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--ink3);padding-top:2px}
+ol.steps li.on{background:rgba(240,170,60,.10);color:var(--ink);box-shadow:inset 2px 0 0 var(--amber)}
+ol.steps li.on::before{color:var(--amber)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.note{font-size:13.5px;color:var(--ink3);margin-top:10px}
+.note b{color:var(--ink2);font-weight:600}
+.env{font-family:var(--mono);font-size:11.5px;color:var(--ink2);margin-top:6px;line-height:1.6}
+.env em{font-style:normal;color:var(--ink3)}
+
+/* scorecard */
+.sc{border-top:1px solid var(--line);padding:10px 0}
+.sc:first-of-type{border-top:0}
+.sc h4{margin:0 0 6px;font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.bars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bar{display:flex;align-items:center;gap:6px;opacity:.5}
+.bar.cur{opacity:1}
+.bar .l{font-family:var(--stencil);font-size:14px;width:12px;color:var(--ink2)}
+.bar.cur .l{color:var(--amber)}
+.pips{display:flex;gap:2px;flex:1}
+.pips i{height:8px;flex:1;background:var(--line2)}
+.pips i.f{background:var(--ink2)}
+.bar.cur .pips i.f{background:var(--amber)}
+.sc p{margin:6px 0 0;font-size:14.5px;color:var(--ink2)}
+.sc p b{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--amber);letter-spacing:.08em;margin-right:6px}
+
+/* decisions */
+.dgroup{margin-top:16px}
+.dgroup > h3{font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line2)}
+.dec{border:1px solid var(--line);background:var(--panel);padding:10px;margin-bottom:8px}
+.dec.pinned{border-color:var(--amber-dim)}
+.dec h4{margin:0 0 2px;font-size:16px;font-weight:600;color:var(--ink);display:flex;gap:8px;align-items:baseline}
+.dec h4 .st{margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--ink3);font-weight:400}
+.dec.pinned h4 .st{color:var(--green)}
+.dec .why{font-size:13.5px;color:var(--ink3);margin:0 0 8px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{background:var(--bg2);border:1px solid var(--line2);color:var(--ink2);padding:6px 9px;cursor:pointer;font-size:14px;min-height:34px;text-align:left}
+.opt[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#0A0D12;font-weight:600}
+.dec input[type=text]{width:100%;margin-top:8px;background:var(--bg2);border:1px solid var(--line);border-bottom-color:var(--line2);padding:7px 8px;color:var(--ink);font-family:var(--mono);font-size:12px}
+.dec input[type=text]::placeholder{color:var(--ink3)}
+.dbar{position:sticky;top:0;z-index:2;background:var(--bg2);padding:8px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line)}
+.dbar .count{font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.08em;margin-right:auto}
+#copyOut{width:100%;height:180px;margin-top:10px;background:var(--bg);border:1px solid var(--line2);color:var(--ink2);font-family:var(--mono);font-size:11.5px;padding:8px;display:none;resize:vertical}
+#copyOut.show{display:block}
+.toast{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--green);text-transform:uppercase}
+footer{padding:14px 16px 28px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink3);line-height:1.7;background:var(--bg2)}
+
+/* ---------- concept D additions */
+.tag.rd{border-color:var(--red)}.tag.rd small{color:var(--red)}
+.tgt.rd{color:var(--red);border-color:var(--red)}
+.gate{display:block;width:100%;background:linear-gradient(90deg,rgba(240,96,90,.14),rgba(240,96,90,.03));border:0;border-top:1px solid var(--red);border-bottom:1px solid var(--line);border-left:3px solid var(--red);color:var(--ink);padding:8px 16px;text-align:left;cursor:pointer;font-family:var(--ui);font-size:14px;line-height:1.3}
+.gate b{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--red);font-weight:400;text-transform:uppercase;margin-right:10px}
+.gate span{color:var(--ink2)}
+.gate:hover{background:rgba(240,96,90,.18)}
+@media (max-width:620px){.gate{font-size:13px}.gate .long{display:none}}
+.dfacts{margin:10px 16px 0;border:1px solid var(--line2);background:var(--panel);padding:10px 12px}
+.dfacts h3{margin:0 0 8px;font-family:var(--mono);font-weight:400;font-size:10.5px;letter-spacing:.16em;color:var(--amber);text-transform:uppercase}
+.dfacts .kv{margin:0 0 8px}
+.dfacts .kv .v{font-size:14px}
+.dfacts ul{margin:0;padding:0;list-style:none}
+.dfacts li{font-size:14px;color:var(--ink2);padding:5px 0;border-top:1px solid var(--line)}
+.dfacts li b{color:var(--ink);font-weight:600}
+.dfacts li i{font-style:normal;color:var(--red)}
+.bom{margin-top:8px;padding:6px 8px;border:1px dashed var(--line2);font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--ink3);line-height:1.6}
+.bom b{color:var(--ink2);font-weight:400}
+.dec.decided{border-color:var(--amber);background:linear-gradient(180deg,rgba(240,170,60,.08),transparent)}
+.dec.decided h4 .st{color:var(--amber)}
+.dec .decnote{color:var(--ink2)}
+.opt:disabled{opacity:.35;cursor:default}
+.gt{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--red);border:1px solid var(--red);padding:1px 5px;font-weight:400;white-space:nowrap}
+.bars{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:620px){.bars{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.seg button .dot{display:inline-block;width:6px;height:6px;background:var(--amber);margin-left:6px;vertical-align:middle}
+.seg button[aria-pressed="true"] .dot{background:#0A0D12}
+/* ---------- beauty mode */
+#beautyCap,#beautyExit{display:none}
+body.beauty header,body.beauty .controls,body.beauty .rules,body.beauty .panelcol,body.beauty footer,
+body.beauty .hud-tr,body.beauty .hud-bl,body.beauty #hint,body.beauty .hud-tl,body.beauty #tagDatum{display:none !important}
+body.beauty{overflow:hidden}
+body.beauty .stagecol{position:fixed;inset:0;z-index:10;border:0}
+body.beauty #stage{height:100vh;height:100dvh;min-height:0}
+body.beauty #beautyCap{display:block;position:absolute;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom));text-align:center;pointer-events:none}
+#beautyCap .b1{font-family:var(--stencil);font-size:clamp(20px,3.2vw,34px);letter-spacing:.2em;color:var(--ink)}
+#beautyCap .b1 b{color:var(--amber);font-weight:400}
+#beautyCap .b2{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;color:var(--ink3);margin-top:6px;text-transform:uppercase}
+body.beauty #beautyExit{display:block;position:absolute;right:16px;top:16px;opacity:0;transition:opacity .2s;pointer-events:auto}
+body.beauty #beautyExit.show,body.beauty #beautyExit:focus-visible{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<header>
+  <svg viewBox="12 12 176 176" aria-hidden="true"><g fill="none" stroke="#8A94A6" stroke-width="14">
+    <path d="M177.8 105.4 A78 78 0 0 1 170.1 134.2"/><path d="M164.7 143.6 A78 78 0 0 1 143.6 164.7"/><path d="M134.2 170.1 A78 78 0 0 1 105.4 177.8"/>
+    <path d="M94.6 177.8 A78 78 0 0 1 65.8 170.1"/><path d="M56.4 164.7 A78 78 0 0 1 35.3 143.6"/><path d="M29.9 134.2 A78 78 0 0 1 22.2 105.4"/>
+    <path d="M22.2 94.6 A78 78 0 0 1 29.9 65.8"/><path d="M35.3 56.4 A78 78 0 0 1 56.4 35.3"/><path d="M65.8 29.9 A78 78 0 0 1 94.6 22.2"/>
+    <path d="M105.4 22.2 A78 78 0 0 1 134.2 29.9"/><path d="M170.1 65.8 A78 78 0 0 1 177.8 94.6"/></g>
+    <circle cx="155.2" cy="44.8" r="8" fill="#F0AA3C"/><path d="M100 44 L52 142 L100 128 Z" fill="#FFFFFF"/><path d="M100 44 L100 128 L148 142 Z" fill="#5B6572"/>
+    <path d="M52 142 L100 128 L100 160 Z" fill="#D5DAE1"/><path d="M100 128 L148 142 L100 160 Z" fill="#A8B0BD"/></svg>
+  <div>
+    <div class="brand">CANARY <b>T1</b> CAGE</div>
+    <div class="hsub">Three swap concepts &middot; decision board</div>
+  </div>
+  <div class="hflags">
+    <span class="flag am">Massing &mdash; not hardened dimensions</span>
+    <span class="flag">Internal concept tool</span>
+    <span class="flag">Patent pending</span>
+    <span class="flag am">Structure decided 2026-09-21 &middot; D</span>
+  </div>
+</header>
+
+<main>
+  <section class="stagecol" aria-label="3D concept viewer">
+    <div id="stage">
+      <canvas id="gl" tabindex="0" aria-label="3D model of the selected cage concept. Drag to orbit, scroll or pinch to zoom, arrow keys to rotate, plus and minus to zoom. Use the module buttons in the Swap panel to select parts."></canvas>
+      <div id="overlay" aria-hidden="true">
+        <svg><line id="leadSel" stroke="#F0AA3C" stroke-width="1" x1="-9" y1="-9" x2="-9" y2="-9"/><line id="leadDatum" stroke="#5CD6E8" stroke-width="1" x1="-9" y1="-9" x2="-9" y2="-9"/></svg>
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="hud-tl"><div class="cl" id="hudLetter">CONCEPT A</div><div class="cn" id="hudName">CARTRIDGE RACK</div><div class="cb" id="hudBlurb"></div></div>
+        <div class="hud-tr"><div>AZ <b id="rAz">---</b>&deg; &nbsp;EL <b id="rEl">--</b>&deg;</div><div>RANGE <b id="rD">----</b> mm</div><div>EXPLODE <b id="rEx">0</b>%</div></div>
+        <div class="hud-bl"><div>MASSING ENVELOPE incl. rods</div><div><b id="rEnv">&mdash;</b></div><div>approximate &middot; not hardened</div></div>
+        <div id="hint">drag orbit &middot; scroll / pinch zoom &middot; click a module</div>
+        <div class="tag" id="tagSel"></div>
+        <div class="tag cy" id="tagDatum">IMU datum<small>rigid &middot; keyed &middot; never on a rail</small></div>
+        <div id="beautyCap"><div class="b1">CANARY <b>T1</b> CAGE</div><div class="b2" id="beautyLine">Concept A &middot; Cartridge Rack &middot; concept massing</div></div>
+      </div>
+      <button class="tog" id="beautyExit" type="button">Exit beauty mode (Esc)</button>
+
+      <div id="fallback">3D VIEW UNAVAILABLE &mdash; the 3D library could not load (offline?) or WebGL is off.<br>The scorecard and decision panels below still work.</div>
+    </div>
+<button class="gate" id="gateBtn" type="button" hidden><b>Hardening gate &middot; Core removal path</b>Core was opened often in T0. <span>As drawn, the 80 mm opening between the set-back top longs does not pass the 81 mm compute board or the 87 mm hub.<span class="long"> Click to run the Core swap and see it stop.</span></span></button>
+    <div class="controls" role="group" aria-label="Viewer controls">
+      <div class="seg" role="group" aria-label="Concept">
+        <button type="button" data-concept="A" aria-pressed="true"><b>A</b><span class="long">Cartridge rack</span></button>
+        <button type="button" data-concept="B" aria-pressed="false"><b>B</b><span class="long">Open book</span></button>
+        <button type="button" data-concept="C" aria-pressed="false"><b>C</b><span class="long">Rod pods</span></button>
+        <button type="button" data-concept="D" aria-pressed="false"><b>D</b><span class="long">Extrusion frame</span><i class="dot" title="decided direction"></i></button>
+      </div>
+      <div class="slider"><label class="micro" for="explode">Exploded</label><input id="explode" type="range" min="0" max="100" value="0" step="1" aria-label="Exploded view amount"></div>
+      <button class="tog cy" id="btnAir" type="button" aria-pressed="false">Airflow</button>
+      <button class="tog" id="btnLid" type="button" aria-pressed="true" hidden>Lid open</button>
+      <button class="tog" id="btnReset" type="button">Reset view</button>
+      <button class="tog solid" id="btnBeauty" type="button">Beauty mode</button>
+    </div>
+    <div class="rules" aria-label="Rules every concept obeys" tabindex="0">
+      <div class="rule"><b>Restraint</b><span>Straps and the seat belt go around the metal rods, never the plastic.</span></div>
+      <div class="rule"><b>Six directions</b><span>Every part retained in all six directions. Nothing gravity-seated.</span></div>
+      <div class="rule"><b>Locking only</b><span>Every connector locks. Friction-fit has failed in flight.</span></div>
+      <div class="rule cy"><b>IMU datum</b><span>Rigid keyed datum tied to the rods, captive screws. Never a sliding rail.</span></div>
+      <div class="rule rd"><b>Not sealed</b><span>About 25 W inside (est). A sealed box is thermally impossible: air in, air out.</span></div>
+      <div class="rule rd"><b>PLA never flies</b><span>ASA or PA12-CF for anything in the aircraft.</span></div>
+      <div class="rule"><b>305 mm bed</b><span>Parts split at planned seams to fit the printer.</span></div>
+      <div class="rule"><b>Honest label</b><span>Massing only. Not hardened dimensions, not a design of record.</span></div>
+    </div>
+  </section>
+
+  <section class="panelcol">
+    <div class="lean" role="note">
+      <h3>Decided 2026-09-21 &mdash; structure = D, the 80/20 20-series frame</h3>
+      <p><b>Recommendation to harden: D frame + A cartridges + bolted-and-dowelled IMU.</b> A, B and C stay on the board as the printed-shell alternatives D was chosen over. <i>The IMU is never on a sliding rail</i> &mdash; in every concept it seats on a rigid keyed datum (the cyan block). Still open on D: the Core removal path is a <span style="color:var(--red)">hardening gate</span>.</p>
+    </div>
+    <div class="dfacts" id="dfacts" hidden>
+      <h3>Concept D &mdash; frame facts (class figures from the input kit)</h3>
+      <div class="kv"><div><div class="micro">Frame</div><div class="v">1.67 kg</div></div><div><div class="micro">Gross</div><div class="v am">~4.5 kg</div></div><div><div class="micro">Printed</div><div class="v">~0.42 kg &middot; ~41 h</div></div></div>
+      <ul>
+        <li><b>Loading.</b> Peripherals drop in from the top between vertical 20-2020 mullions on printed T-keys; the battery slides in along X from the end; each cartridge held by one captive M5 thumbscrew into a slide-in T-nut.</li>
+        <li><b>Restraint.</b> Belt / strap round the bottom long members. Rods are handle + antenna rail only, out of the restraint path.</li>
+        <li><b>IMU datum.</b> 2 &times; M5 + a dowel into the extrusion cross member.</li>
+        <li><b>Thermal.</b> Open top over the fan; printed louvered T-key inserts in the open slots (rear exhaust, &minus;X intake).</li>
+        <li><b>T-key.</b> Neck 5.6 / head 10.4 &times; 2.0 in an 11.0 cavity (cavity CONFIRM from the 80/20 CAD), 88 mm engaged.</li>
+        <li><b>Joints.</b> M5 8.8 at 4.5 N&middot;m + Loctite 243 + torque stripe.</li>
+        <li><b>Mass.</b> ~4.5 kg gross vs the earlier 3.7 kg &mdash; <i>3.7 was the heaviest printed concept; ceiling to be restated by the owner.</i> Load cases still close at 4.52 kg (18 g fwd = 798 N, rod MS 1.5).</li>
+        <li><b>Core.</b> Opened often in T0 &rarr; first-class swap. <i>Removal path not met as drawn: hardening gate.</i></li>
+      </ul>
+      <div class="bom"><b>BOM strip (class):</b> 20-2020-Black-FB class, 2.58 m in 17 cuts (0.4411 g/mm) &middot; 20-4119-Black class corner brackets &times;24 &middot; M5 slide-in T-nut (14122 class) &times;40 &middot; M5&times;10 8.8 &times;~64 &middot; plain 20-2020 for the fit-check frame &middot; frame + hardware ~$270 black / ~$230 plain</div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Panels">
+      <button role="tab" id="tab-swap" aria-controls="p-swap" aria-selected="true" type="button">Swap</button>
+      <button role="tab" id="tab-score" aria-controls="p-score" aria-selected="false" type="button" tabindex="-1">Scorecard</button>
+      <button role="tab" id="tab-dec" aria-controls="p-dec" aria-selected="false" type="button" tabindex="-1">Decisions <span id="tabCount"></span></button>
+    </div>
+
+    <div class="tabpanel" id="p-swap" role="tabpanel" aria-labelledby="tab-swap">
+      <h2>SWAP A MODULE</h2>
+      <p class="sub">"I need a solution that allows me to quickly swap components if they fail or need inspection." Pick a module here or click it in the model.</p>
+      <div class="chips" id="modChips" role="group" aria-label="Modules in this concept"></div>
+      <div class="card" id="swapCard" aria-live="polite"></div>
+    </div>
+
+    <div class="tabpanel" id="p-score" role="tabpanel" aria-labelledby="tab-score" hidden>
+      <h2>SCORECARD</h2>
+      <p class="sub">These are <b style="color:var(--ink2)">judgments, not measurements</b> &mdash; one designer's read of the massing models, five pips = better. Nothing here has been built or timed. Argue with them. No totals on purpose.</p>
+      <div id="scoreBody"></div>
+    </div>
+
+    <div class="tabpanel" id="p-dec" role="tabpanel" aria-labelledby="tab-dec" hidden>
+      <h2>DECISIONS TO PIN</h2>
+      <p class="sub">The open choices a CAD lead has to settle before geometry gets hardened. Pick an option, add a note, copy the summary back to the team. Saved in this browser only.</p>
+      <div class="dbar">
+        <span class="count" id="decCount">0 pinned</span>
+        <button class="tog solid" id="btnCopy" type="button">Copy decisions</button>
+        <button class="tog" id="btnClear" type="button">Clear all</button>
+        <span class="toast" id="toast" role="status"></span>
+      </div>
+      <textarea id="copyOut" readonly aria-label="Decision summary text"></textarea>
+      <div id="decBody"></div>
+    </div>
+  </section>
+</main>
+<footer>
+  CANARY T1 CAGE &middot; CONCEPT STUDY 2026-09-21 &middot; Geometry mirrors the OpenSCAD massing models (t1_concepts.scad / t1_params.py). Component envelopes are measured or estimated as tagged; structure is a design option, not a decision.
+  Swap times are targets. Scores are judgments. Nothing here is a performance claim and nothing here is final. Internal use &mdash; the founder decides and logs any external share.
+</footer>
+
+<!-- =====================================================================
+     1) DATA + PANELS  (classic script: works even if the 3D library cannot load)
+     ===================================================================== -->
+<script>
+(function(){
+'use strict';
+var CONCEPTS={
+ A:{name:'CARTRIDGE RACK',blurb:'Core chassis on the two-rod spine. Peripherals and the battery are keyed, front-loading cartridges: one captive thumbscrew, one locking pigtail.',mods:['traffic','lte','rtk','co','spare','battery','core','imu','vib']},
+ B:{name:'OPEN BOOK',blurb:'Shallow faceted tray, hinged lid. Everything on one visible plane on a 10 mm M3 grid, each part on its own quick-release carrier plate.',mods:['core','hub','battery','traffic','lte','rtk','co','pdb','imu','vib']},
+ C:{name:'ROD PODS',blurb:'No big shell. One small faceted pod per function, clamped to the rods and plugged into a harness trunk by one locking connector.',mods:['core','hub','battery','traffic','rtk','lte','co','imu','vib']},
+ D:{name:'EXTRUSION FRAME',decided:true,blurb:'80/20 20-series black T-slot frame, printed ASA cartridges and bezels. Peripherals drop in from the top between mullions on printed T-keys; the battery slides in along X. Belt round the bottom members.',mods:['traffic','lte','rtk','co','spare','battery','core','louver','imu','vib']}
+};
+var MODS={
+ core:{label:'CANARY CORE',what:'Compute module, top-draw fan',env:'~100 &times; 81 &times; 36 <em>meas / height est</em> &middot; nothing may sit over the fan'},
+ hub:{label:'CORE &middot; HUB',what:'Industrial 4-port USB hub (part of Canary Core)',env:'139 &times; 87 &times; 35 <em>published drawing</em>'},
+ pdb:{label:'POWER DIST',what:'Fusing and power distribution (part of Canary Core)',env:'~60 &times; 40 &times; 20 <em>est</em>'},
+ battery:{label:'POWER',what:'V-mount battery pack',env:'~107 &times; 74 &times; 64 <em>est, vendor-class figure</em>'},
+ traffic:{label:'TRAFFIC',what:'Canary Traffic &mdash; ADS-B / UAT receiver',env:'64.93 &times; 56.03 &times; 27 <em>meas</em>'},
+ co:{label:'CABIN CO',what:'Canary Cabin CO &mdash; dated consumable sensor stick',env:'114.00 &times; 20.92 &times; 15.12 <em>meas</em>'},
+ rtk:{label:'RTK',what:'Precision GNSS receiver',env:'43.5 &times; 43.5 &times; ~12&ndash;20 <em>meas / height est</em>'},
+ lte:{label:'LTE',what:'LTE modem on carrier',env:'~80 &times; 35 &times; 12&ndash;24 <em>est</em>'},
+ spare:{label:'SPARE',what:'Empty keyed bay for the next module',env:'bay 30 &times; 42 &times; 74 <em>design option</em>'},
+ imu:{label:'IMU',what:'Primary IMU (+ second IMU) on the rigid keyed datum',env:'~26 &times; 24 &times; 5 and 25.4 sq <em>meas / heights est</em>'},
+ louver:{label:'LOUVERED INSERTS',what:'Printed louvered T-key inserts: rear exhaust + end intake',env:'rear 158 &times; 96 &middot; end 138 &times; 96 <em>design option</em>'},
+ vib:{label:'VIBRATION',what:'Canary Vibration &mdash; EXTERNAL seat-rail node. The cage only gives it a locking port.',env:'port only &middot; node lives on the seat rail'}
+};
+function S(ph,t){return {ph:ph,t:t};}
+var IMU_STEPS=[S('unlock','Back off the two captive screws (they stay in the carrier).'),S('out','Lift the IMU carrier straight off the two asymmetric dowels. It never slides.'),S('hold','Inspect or replace the board. The datum block itself stays tied to the rods.'),S('in','Seat on the dowels (only fits one way), run the captive screws down, then do the alignment check.')];
+var VIB_STEPS=[S('unlock','Release the connector locking ring.'),S('out','Unmate the vibration cable from the cage port.'),S('hold','The node itself stays clamped to the seat rail &mdash; its mount is a separate work item.'),S('in','Mate and lock. Tug-test the connector.')];
+function cart(name){return [S('unlock','Back off the ONE captive thumbscrew. It stays in the faceplate.'),S('out','Pull the yellow tab: the cartridge rides out on its keyed rail and the pigtail comes into reach.'),S('hold','Unmate the locking pigtail. '+name+' is in your hand.'),S('in','Reverse: mate and lock the pigtail, slide home (the key rib only fits its own bay), thumbscrew down.')];}
+function cartD(name){return [S('unlock','Back off the ONE captive M5 thumbscrew (into a slide-in T-nut in the mullion). It stays in the faceplate.'),S('out','Pull the yellow tab UP: the cartridge lifts out between the mullions on its printed T-keys (88 mm engaged).'),S('hold','Unmate the locking pigtail at the Core-tray patch point. '+name+' is in your hand.'),S('in','Reverse: mate and lock, drop in (a bay-specific rib stops a wrong cartridge 4 mm proud so the thumbscrew cannot reach its T-nut), thumbscrew down.')];}
+function carrier(name){return [S('lid','Open the lid (two captive thumbscrews on the free edge).'),S('unlock','Back off the carrier\'s TWO captive thumbscrews.'),S('out','Lift the carrier plate off the grid; the pigtail comes up with it.'),S('hold','Unmate the locking pigtail. '+name+' and its plate are out; everything else stays visible and untouched.'),S('in','Reverse: mate, seat the plate on its grid position, thumbscrews down, close the lid.')];}
+function pod(name,below){return [S('unlock','Unmate the pod\'s one locking connector from the harness trunk.'),S('unlock','Back off the four knurled cap screws on the rod clamps.'),S('out',(below?'Drop the pod away from under the rods (unit on its side or on a bench stand).':'Lift the pod straight up off the rods.')),S('hold',name+' is off the spine. The other pods never moved.'),S('in','Reverse: seat the saddles on both rods, caps down evenly, connector mated and locked.')];}
+var SWAP={
+ A:{traffic:{tools:0,target:'&le; 30 s',steps:cart('Traffic')},lte:{tools:0,target:'&le; 30 s',steps:cart('LTE')},rtk:{tools:0,target:'&le; 30 s',steps:cart('RTK')},
+    co:{tools:0,target:'&le; 30 s',steps:cart('The dated CO stick'),note:'The CO stick is a dated consumable: this is the swap that will happen on a calendar, not just on failure.'},
+    spare:{tools:0,target:'&le; 30 s',steps:cart('The blank')},
+    battery:{tools:0,target:'&le; 20 s',steps:[S('unlock','Back off the battery cartridge thumbscrew.'),S('out','Pull the tab: the battery cartridge rides out of its larger bay.'),S('hold','Swap the pack. Power contact style is an open decision.'),S('in','Slide home until the key seats, thumbscrew down.')]},
+    core:{tools:0,target:'&le; 3 min',steps:[S('unlock','Back off the four captive lid thumbscrews.'),S('out','Lift the lid a few mm and slide it rearward, out from under the rod spine.'),S('hold','Core is open for inspection from above. OPEN ISSUE: one rod runs over the core bay, so the path for lifting the compute OUT is not settled &mdash; see Decisions.'),S('in','Lid back under the rods, four thumbscrews down.')],note:'Honest gap: with the rods on top, the Core inspects easily but does not yet have a clean removal path.'},
+    imu:{tools:1,target:'&le; 2 min + alignment check',steps:IMU_STEPS},vib:{tools:0,target:'&le; 15 s',steps:VIB_STEPS}},
+ B:{core:{tools:0,target:'&le; 90 s',steps:carrier('The compute module')},hub:{tools:0,target:'&le; 90 s',steps:carrier('The hub')},battery:{tools:0,target:'&le; 45 s',steps:carrier('The battery')},
+    traffic:{tools:0,target:'&le; 60 s',steps:carrier('Traffic')},lte:{tools:0,target:'&le; 60 s',steps:carrier('LTE')},rtk:{tools:0,target:'&le; 60 s',steps:carrier('RTK')},
+    co:{tools:0,target:'&le; 60 s',steps:carrier('The dated CO stick')},pdb:{tools:0,target:'&le; 90 s',steps:carrier('Power distribution')},
+    imu:{tools:1,target:'&le; 2 min + alignment check',steps:[S('lid','Open the lid.')].concat(IMU_STEPS)},vib:{tools:0,target:'&le; 15 s',steps:VIB_STEPS}},
+ C:{core:{tools:0,target:'&le; 90 s',steps:pod('The Core pod',false)},hub:{tools:0,target:'&le; 90 s',steps:pod('The hub pod',true)},battery:{tools:0,target:'&le; 60 s',steps:pod('The battery pod',false)},
+    traffic:{tools:0,target:'&le; 60 s',steps:pod('Traffic',false)},rtk:{tools:0,target:'&le; 60 s',steps:pod('RTK',true)},lte:{tools:0,target:'&le; 60 s',steps:pod('LTE',true)},
+    co:{tools:0,target:'&le; 60 s',steps:pod('The dated CO stick',true)},imu:{tools:1,target:'&le; 2 min + alignment check',steps:IMU_STEPS},vib:{tools:0,target:'&le; 15 s',steps:VIB_STEPS}},
+ D:{traffic:{tools:0,target:'&le; 2 min',steps:cartD('Traffic')},lte:{tools:0,target:'&le; 2 min',steps:cartD('LTE')},rtk:{tools:0,target:'&le; 2 min',steps:cartD('RTK')},
+    co:{tools:0,target:'&le; 2 min',steps:cartD('The dated CO stick'),note:'The CO stick is a dated consumable: this swap happens on a calendar, not just on failure.'},spare:{tools:0,target:'&le; 2 min',steps:cartD('The blank')},
+    battery:{tools:0,target:'&le; 1 min',steps:[S('unlock','Release the secondary strap, then back off the end-plate M5 thumbscrew.'),S('out','Slide the battery carrier out along X from the end, on the bottom longs\' inner slots.'),S('hold','Swap the pack.'),S('in','Slide home to the stop, thumbscrew down, strap on. Latch and strap each hold 131 N at 18 g on their own.')]},
+    core:{tools:1,gate:true,target:'&le; 10 min &mdash; not met as drawn',steps:[S('unlock','Back off the four yoke-plate thumbscrews and lift the rods + yoke plates off (handle + antenna rail only).'),S('unlock','Undo the 4 &times; M5 tray bolts (one driver).'),S('out','Lift the Core tray through the open top. BLOCKED as drawn: 80 mm between the set-back top longs vs the 81 mm compute board and 87 mm hub.'),S('hold','HARDENING GATE. Widen the top longs, move the rods, or give the Core an X-slide before this is drawn for real (decision d_core).'),S('in','Reverse once the path exists: tray bolts to 4.5 N&middot;m, Loctite 243, torque stripe; yoke plates back.')],note:'Owner 2026-09-21: the Core was opened OFTEN in T0, so Core access is a first-class swap. The set-back top longs give an 80 mm opening as drawn; the compute board is 81 and the hub 87. Nothing lifts straight out yet.'},
+    louver:{tools:0,target:'&le; 2 min',steps:[S('unlock','Retention of the inserts is not settled (decision d_insert): as drawn they sit on their T-keys only.'),S('out','Lift the louvered insert out of the mullion slots, exactly like a cartridge.'),S('hold','Clear the louvres; the rear of the Core is exposed for inspection.'),S('in','Drop back in on its keys.')]},
+    imu:{tools:1,target:'&le; 5 min + recal',steps:[S('unlock','Back off the 2 &times; M5 (into T-nuts in the cross member\'s top slot).'),S('out','Lift the seat off its dowel. The dowel in the drilled extrusion sets repeatability, not print tolerance.'),S('hold','Inspect or replace the board.'),S('in','Seat on the dowel, 2 &times; M5 to 4.5 N&middot;m, then the mandatory pitch-offset recal.')]},
+    vib:{tools:0,target:'&le; 15 s',steps:VIB_STEPS}}
+};
+var AXES=[
+ ['Swap speed',{A:[5,'One thumbscrew, one tab, one pigtail. The failing part leaves without disturbing anything else.'],B:[3,'Lid first, then two thumbscrews per carrier. Simple, but always two stages.'],C:[4,'One connector and four cap screws; nothing else moves. Bottom pods need the unit turned.'],D:[5,'Three steps, no tools: M5 thumbscrew, lift out between the mullions, unlock the pigtail. The Core is the exception (gate).']}],
+ ['Inspection visibility',{A:[2,'Parts live in dark bays; you see a module only after you pull it.'],B:[5,'Lid open and every component, connector and cable is on one plane in front of you.'],C:[4,'Every pod is visible on the spine, but each pod is its own closed box.'],D:[3,'Core visible through the open top; bays only by pulling a cartridge.']}],
+ ['IMU mount rigidity',{A:[4,'Datum sits on a yoke clamped to both rods. The printed shell is not in the load path.'],B:[3,'Datum needs a rib down through the tray floor to the rod keel; tray flex is the risk.'],C:[5,'Datum clamps straight onto the rods with nothing else in between.'],D:[5,'Best of the four: bolted + dowelled to an anodized extrusion face tied by M5 joints to the whole frame.']}],
+ ['Thermal path',{A:[3,'Intake grille over the fan, exhaust louvres behind. Works only if the cartridge bank does not block the plenum.'],B:[3,'Short path through the lid, but every heat source shares one shallow volume.'],C:[5,'The compute pod sits alone in free air with its own crown and louvres.'],D:[4,'Open top intake straight onto the fan, rear louvered insert as exhaust; battery upstream at the +X end.']}],
+ ['Mass / size',{A:[3,'Densest package, but rails and cartridge shells double up plastic.'],B:[2,'Largest footprint: everything on one plane costs seat area.'],C:[4,'No outer shell; mass scales with the modules fitted. Longest of the three.'],D:[2,'~4.5 kg (3.9 without the hub), 7.6 L: the cost of metal. Ceiling to be restated.']}],
+ ['Print effort',{A:[2,'Many sliding fits to tune, a big body near the bed limit, keyed rails per bay.'],B:[3,'Tray, lid and flat plates are easy; the 300-class tray sits right at the 305 mm bed.'],C:[5,'Small parts, repeated clamp geometry, nothing near the bed limit.'],D:[5,'~41 h, no seams, nothing over 134 mm. Plus 2.58 m of extrusion to cut and 48 joints to torque.']}],
+ ['Cable discipline',{A:[4,'Short pigtails stay inside the bays; the front face stays clean.'],B:[3,'All cables cross one plane; needs tie points on the grid to stay tidy.'],C:[2,'Trunk and pigtails live outside in the open: the most exposed to snags.'],D:[4,'As A: patch points on the Core tray. T-slots double as cable channels with snap-in covers.']}],
+ ['Restraint path',{A:[3,'Belt over the rods on top; axial stop still needs metal collars on the rods.'],B:[3,'Belt under the rod keel; same axial-stop question.'],C:[2,'Belt round the rod ends; every pod carries the axial-friction problem on its own.'],D:[5,'Belt round the frame bottom members: metal end to end, no printed clamp anywhere in it.']}],
+ ['Looks like a product',{A:[5,'Reads as one piece of equipment with labelled bays.'],B:[3,'Reads as a well-made service tray.'],C:[3,'Reads as a rig: capable, but kit-like.'],D:[4,'Black frame + faceted printed faces: the most credible to a CFI, the least \'printed\'.']}]
+];
+var DECIDED='2026-09-21';
+var DECISIONS=[
+ {g:'ALL',id:'direction',q:'Concept direction',why:'What the CAD lead hardens first.',o:['A &mdash; Cartridge rack','B &mdash; Open book','C &mdash; Rod pods','Hybrid: A cartridges + rigid IMU datum','Undecided','D &mdash; Extrusion frame + A cartridges + bolted-and-dowelled IMU'],decided:{o:5,note:'A / B / C stay on the board as the printed-shell alternatives D was chosen over.'}},
+ {g:'ALL',id:'structure',q:'Structure',why:'Metal in the restraint path; print only where a hand touches or a bezel frames an opening.',o:['80/20 20-series (20 &times; 20 mm) black-anodized T-slot frame + printed ASA cartridges / bezels / panels','Printed shell (A / B / C class)','15-series extrusion (rejected: 41 % of the stiffness, 3.0 mm key neck)'],decided:{o:0}},
+ {g:'ALL',id:'hub',q:'UHR204 USB hub',why:'~0.6 kg and the largest footprint in the box, but 15 N high-retention ports.',o:['Stays in the Core &mdash; keep its bay (~0.6 kg)','Drop it: screw-lock USB into the compute ports','Panel-mount locking USB bulkhead instead'],decided:{o:0}},
+ {g:'ALL',id:'core_access',q:'Core access class (T0 lesson)',why:'The Core (compute + hub) was opened OFTEN in T0.',o:['First-class swap: own removal path, no neighbour out, no rod off','The &le; 10 min exception'],decided:{o:0,note:'Makes the Core removal path a hardening gate on D (item below, under Concept D).'}},
+ {g:'ALL',id:'mass_ceiling',q:'Mass ceiling restatement (R7.2)',why:'3.7 kg was the heaviest printed concept, not an aircraft limit. D reads ~4.5 kg; load cases still close at 4.52 kg.',o:['Restate at 4.5 kg (D as drawn)','Restate at 5.0 kg with margin','Hold 3.7 kg &mdash; D must lose mass','Owner to restate']},
+ {g:'ALL',id:'material',q:'Flight material',why:'PLA never flies. Hot-cabin creep and print effort trade against each other.',o:['ASA throughout','PA12-CF throughout','ASA body, PA12-CF for clamps / load parts','Undecided']},
+ {g:'ALL',id:'connector',q:'Connector family for the locking pigtails',why:'House rule: every connector locks. One family keeps spares simple.',o:['M8 circular, screw-lock','M12 circular, screw-lock','Latching rectangular (Micro-Fit class)','Screw-lock USB where it is USB','Mixed by signal type']},
+ {g:'ALL',id:'imuloc',q:'IMU datum location',why:'Must be rigid, keyed and tied to the metal skeleton. Location also sets lever arm and thermal neighbours.',o:['On a rod yoke, between the clamps','Dedicated two-rod clamp block','Boss tied to the rod keel through the floor','Near the unit CG, wherever that lands','On the extrusion cross member (D as drawn)']},
+ {g:'ALL',id:'imukey',q:'IMU datum keying',why:'Repeatable re-seat after a swap is the point of the datum.',o:['Two asymmetric dowels + captive screws','Keyed boss + captive screws','Three-point kinematic seat','2 &times; M5 into T-nuts + one dowel into the extrusion (D as drawn)']},
+ {g:'ALL',id:'air',q:'Where air enters and leaves',why:'Sealed is impossible at about 25 W (est). The compute fan draws from the top.',o:['In over the fan crown, out through side / rear louvres','In low at the front, out the crown','Ducted: dedicated intake and exhaust faces','Open top + louvered T-key inserts (D as drawn)']},
+ {g:'ALL',id:'inflight',q:'What needs in-flight access',why:'Sets which face must stay reachable when strapped to a seat.',o:['Nothing: everything set before engine start','Status light + power switch only','Power switch + Cabin CO stick','To be decided with the pilot lead']},
+ {g:'ALL',id:'restraint',q:'Restraint scheme',why:'Load goes into metal, never plastic. First aircraft: Cessna 172, non-aerobatic.',o:['Seat belt through the rod gap','Two cam straps around the rods','Belt + one strap','Belt round the frame bottom members (D as drawn)']},
+ {g:'A',id:'a_rail',q:'Cartridge rail / guide type',why:'Sets swap feel, print tuning effort and wear.',o:['Printed dovetail','Printed T-slot','Printed C-channel with wear strips','Metal guide pins']},
+ {g:'A',id:'a_latch',q:'Cartridge retention',why:'Must retain in six directions and show clearly when it is not seated.',o:['One captive thumbscrew','Quarter-turn latch','Spring plunger + thumbscrew','Thumbscrew + witness mark']},
+ {g:'A',id:'a_mate',q:'Cartridge electrical mating',why:'Hand-mated pigtail is simple now; blind-mate is a later tier.',o:['Short locking pigtail, hand-mated','Blind-mate backplane (later tier)','Pigtail now, leave room for blind-mate']},
+ {g:'A',id:'a_batt',q:'Battery face and retention',why:'Heaviest single item; its bay sits right at the body end.',o:['Front face cartridge, thumbscrew','End face cartridge','V-mount plate inside, door + strap','External on the rods']},
+ {g:'A',id:'a_core',q:'Core removal path under the rod spine',why:'One rod runs over the core bay: the lid can slide out, the compute cannot lift out. Same gate now applies to D.',gate:true,o:['Core as a rear-face sled','Shift the core bay clear of the rods','Rods to the sides instead of on top','Accept: inspect in place, remove on the bench']},
+ {g:'A',id:'a_seam',q:'Seam locations for the 305 mm bed',why:'Body is about 285 long: fits, but with little margin once brims are added.',o:['One-piece body, print diagonal','Split between cartridge bank and battery bay','Split front bank from rear core bay','Shorten to guarantee margin']},
+ {g:'A',id:'a_spare',q:'Spare bays',why:'Growth room costs volume now.',o:['One','Two','None']},
+ {g:'B',id:'b_lid',q:'Lid: hinge or lift-off',why:'A hinged lid cannot get lost; a lift-off lid gives clear access from every side.',o:['Pin hinge','Lift-off, four quarter-turns','Hinge with a removable pin']},
+ {g:'B',id:'b_lidret',q:'Lid retention in flight',why:'Six-direction retention applies to the lid too.',o:['Two captive thumbscrews','Two draw latches','Latches + safety strap']},
+ {g:'B',id:'b_carrier',q:'Carrier plate fixing',why:'Two thumbscrews per plate is the baseline.',o:['Two captive thumbscrews on the M3 grid','One thumbscrew + keyed slot','Quarter-turn fasteners']},
+ {g:'B',id:'b_grid',q:'Grid hardware',why:'About 670 positions: inserts everywhere is a lot of soldering-iron time.',o:['Heat-set inserts at every position','Inserts only at used positions','Through-holes + nut plate']},
+ {g:'B',id:'b_rods',q:'Rod position',why:'Rods are the restraint path and the IMU reference.',o:['Keel under the floor','Along the long edges','One edge: hinge, handle and rail']},
+ {g:'B',id:'b_seam',q:'Tray seam for the 305 mm bed',why:'Tray is about 300 &times; 262: at the bed limit with no brim margin.',o:['Split across the short axis','Stagger tray and lid seams','Shrink the tray to guarantee margin']},
+ {g:'B',id:'b_batt',q:'Battery position',why:'Battery height sets the tray wall height for everything.',o:['On the plane, in the tray','Outboard on the rods','Own shallow bay at one end']},
+ {g:'C',id:'c_clamp',q:'Pod clamp type',why:'Four cap screws per pod is slow; a lever is fast but must be vibration-proof.',o:['Split cap + knurled screws','Hinged cap, one thumbscrew','Cam lever with a secondary lock']},
+ {g:'C',id:'c_index',q:'Indexing along the rods',why:'Pods must not creep fore-aft.',o:['Two-rod clamp friction only','Indexed spacer collars','Detent holes in the rod']},
+ {g:'C',id:'c_trunk',q:'Harness trunk position',why:'The trunk is the most exposed cable in the concept.',o:['Alongside, on the service side','Between the rods','Inside a closed conduit under the rods']},
+ {g:'C',id:'c_port',q:'Trunk connection style',why:'Every pod needs exactly one locking connection.',o:['Bulkhead port on the trunk per pod','Flying pigtails from the trunk','Pigtail on the pod, port on the trunk']},
+ {g:'C',id:'c_stack',q:'What goes above vs below the rods',why:'The compute fan needs a clear crown; mass wants to be low.',o:['Compute above, hub + small pods below','Everything above','Battery below for a lower CG']},
+ {g:'C',id:'c_feet',q:'What the unit rests on',why:'As modelled it sits on its bottom pods.',o:['End frames with feet','Rest on bottom pods','Skid plate under the bottom pods']},
+ {g:'D',id:'d_core',q:'Core removal path in D',why:'Opened often in T0. As drawn: 80 mm between the set-back top longs vs 81 mm compute board / 87 mm hub. Nothing lifts straight out.',gate:true,o:['Widen the set-back top longs so the compute + hub lift straight out','Move the rods off the top (to the sides) and open the whole top','Core tray as an X-slide out the &minus;X end (intake insert comes out first)','Top longs bolted, lift off with the yoke plates']},
+ {g:'D',id:'d_cavity',q:'20-2020 slot cavity width &mdash; CONFIRM',why:'T-key head 10.4 &times; 2.0 assumes an 11.0 cavity. Read it from the 80/20 CAD before any key is cut.',o:['11.0 confirmed from the 80/20 CAD','Different &mdash; value in the note','Not yet read']},
+ {g:'D',id:'d_slide',q:'Cartridge guide: printed T-key vs mini ball-bearing slide',why:'The slot is already the rail: zero added parts, zero gap. Slides add 40&ndash;80 g, four screws and a 10&ndash;13 mm side gap per bay.',o:['Printed T-key in the slot (neck 5.6, 88 mm engaged)','Mini ball-bearing slides (100&ndash;150 mm class)','T-key now; slides only for a bay over ~1 kg']},
+ {g:'D',id:'d_anodize',q:'First fit-check frame: black vs plain anodize',why:'Black-FB carries an extended anodizing lead time; plain is faster and cheaper for a fit frame.',o:['Plain 20-2020 for the fit-check frame (~$45 class)','Black 20-2020-Black-FB from the start (~$85 class)','Plain for fit, black for the flight frame']},
+ {g:'D',id:'d_rods',q:'Rods on D',why:'As drawn the rods are handle + antenna rail only and sit outside the restraint path.',o:['Handle + antenna rail only; belt round the bottom members','Belt on the rods too &rarr; aluminium yoke plates bolted through metal','No rods on D']},
+ {g:'D',id:'d_imu_seat',q:'IMU seat material',why:'The seat is bolted + dowelled to the extrusion; the dowel sets repeatability.',o:['Machined aluminium','PA12-CF with washers under the M5 heads']},
+ {g:'D',id:'d_batt',q:'Battery retention (latch AND strap)',why:'Each must hold 131 N at 18 g in any axis on its own.',o:['End-plate M5 thumbscrew latch + secondary cam strap','V-lock plate + strap','Two M5 thumbscrews + strap']},
+ {g:'D',id:'d_insert',q:'Louvered insert retention (+Z)',why:'As drawn the inserts sit on their T-keys only; +Z retention is not settled.',o:['One captive M5 like a cartridge','Snap detent on the T-key','Captured under the yoke plate above']},
+ {g:'D',id:'d_cable',q:'T-slot cable channels',why:'Open slots double as raceways; the pigtails must not be the thing that rattles.',o:['Snap-in slot covers','Open slots + ties','Printed clip-in raceways']}
+];
+
+// ---- tiny state bus shared with the 3D module
+var st={concept:'D',explode:0,airflow:false,lid:true,selected:null,beauty:false,hold:false,phase:null,reduced:false};
+try{st.reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+var T1=window.T1={state:st,CONCEPTS:CONCEPTS,MODS:MODS,SWAP:SWAP,
+  set:function(k,v,src){st[k]=v;window.dispatchEvent(new CustomEvent('t1:'+k,{detail:{value:v,src:src||'ui'}}));},
+  fire:function(k,d){window.dispatchEvent(new CustomEvent('t1:'+k,{detail:d||{}}));}};
+function $(s,r){return (r||document).querySelector(s);} function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function plain(s){var d=document.createElement('div');d.innerHTML=s;return d.textContent;}
+
+// ---- storage (always optional)
+var KEY='canary.t1cage.decisions.v2',KEY1='canary.t1cage.decisions.v1',mem={};
+function load(){try{var r=window.localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&typeof o==='object')mem=o;return;}
+  // migrate v1 -> v2 by id (ids are unchanged; new items simply start OPEN)
+  var r1=window.localStorage.getItem(KEY1);if(r1){var o1=JSON.parse(r1);if(o1&&typeof o1==='object'){mem={};for(var k in o1)if(o1[k]&&typeof o1[k]==='object')mem[k]={o:o1[k].o,n:o1[k].n};window.localStorage.setItem(KEY,JSON.stringify(mem));}}}catch(e){}}
+function save(){try{window.localStorage.setItem(KEY,JSON.stringify(mem));}catch(e){}}
+load();
+
+// ---- concept switch
+function applyConcept(){
+  var c=st.concept,C=CONCEPTS[c];
+  $$('[data-concept]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.concept===c));});
+  $('#hudLetter').textContent='CONCEPT '+c+(C.decided?' \u00b7 DECIDED DIRECTION':''); $('#hudName').textContent=C.name; $('#hudBlurb').textContent=C.blurb;
+  $('#beautyLine').innerHTML='Concept '+c+' &middot; '+C.name.charAt(0)+C.name.slice(1).toLowerCase()+' &middot; concept massing';
+  $('#btnLid').hidden=(c!=='B');$('#dfacts').hidden=(c!=='D');$('#gateBtn').hidden=(c!=='D');
+  renderChips();renderSwap();renderScore();renderDecisions();
+}
+$$('[data-concept]').forEach(function(b){b.addEventListener('click',function(){if(st.concept!==b.dataset.concept){st.selected=null;T1.set('concept',b.dataset.concept);}});});
+window.addEventListener('t1:concept',applyConcept);
+
+// ---- swap panel
+function renderChips(){
+  var h='';CONCEPTS[st.concept].mods.forEach(function(id){h+='<button type="button" class="chip" data-mod="'+id+'" aria-pressed="'+(st.selected===id)+'">'+MODS[id].label+'</button>';});
+  $('#modChips').innerHTML=h;
+  $$('#modChips .chip').forEach(function(b){b.addEventListener('click',function(){T1.set('selected',b.dataset.mod);T1.fire('swap',{id:b.dataset.mod});});});
+}
+function renderSwap(){
+  var id=st.selected,el=$('#swapCard');
+  $$('#modChips .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mod===id));});
+  if(!id||!SWAP[st.concept][id]){el.innerHTML='<div class="micro">No module selected</div><p class="note" style="margin-top:6px">Select a module to see its swap steps, tool count and target time, and to watch it leave the cage and come back.</p>';return;}
+  var m=MODS[id],s=SWAP[st.concept][id],h='';
+  h+='<div class="micro">Concept '+st.concept+' &middot; '+m.what+'</div><h2 style="margin-top:4px">'+m.label+'</h2>';
+  h+='<div class="env">Envelope (mm): '+m.env+'</div>';
+  h+='<div class="kv"><div><div class="micro">Tools</div><div class="v">'+s.tools+'</div></div><div><div class="micro">Steps</div><div class="v">'+s.steps.length+'</div></div><div><div class="micro">Target time</div><div class="v am">'+s.target+'</div></div></div>';
+  h+='<span class="tgt">Targets to design toward &mdash; not measurements</span>';if(s.gate)h+=' <span class="tgt rd">Hardening gate &mdash; not met as drawn</span>';
+  h+='<ol class="steps">';s.steps.forEach(function(x){h+='<li data-ph="'+x.ph+'">'+x.t+'</li>';});h+='</ol>';
+  if(s.note)h+='<p class="note"><b>Note.</b> '+s.note+'</p>';
+  h+='<div class="row"><button type="button" class="tog solid" id="btnRun">'+(st.reduced?'Pull / re-seat':'Run swap again')+'</button><button type="button" class="tog" id="btnHold" aria-pressed="'+st.hold+'">Hold out for inspection</button></div>';
+  el.innerHTML=h;
+  $('#btnRun').addEventListener('click',function(){T1.fire('swap',{id:id});});
+  $('#btnHold').addEventListener('click',function(){T1.set('hold',!st.hold);this.setAttribute('aria-pressed',String(st.hold));});
+  markPhase();
+}
+function markPhase(){
+  var p=st.phase,map={lock:'in',unplug:'out'};p=map[p]||p;
+  var items=$$('#swapCard ol.steps li'),hit=false;
+  items.forEach(function(li){li.classList.remove('on');});
+  if(!p)return;
+  // highlight the LAST step for multi-step phases only once; first match otherwise
+  for(var i=0;i<items.length;i++){if(items[i].dataset.ph===p){items[i].classList.add('on');hit=true;if(p!=='unlock')break;}}
+}
+window.addEventListener('t1:selected',function(){st.phase=null;renderSwap();if(st.selected)selectTab('swap',false);});
+window.addEventListener('t1:phase',markPhase);
+
+// ---- scorecard
+function renderScore(){
+  var h='';AXES.forEach(function(ax){
+    h+='<div class="sc"><h4>'+ax[0]+'</h4><div class="bars">';
+    ['A','B','C','D'].forEach(function(k){var v=ax[1][k][0],p='';for(var i=1;i<=5;i++)p+='<i class="'+(i<=v?'f':'')+'"></i>';
+      h+='<div class="bar'+(k===st.concept?' cur':'')+'" role="img" aria-label="Concept '+k+': '+v+' of 5"><span class="l">'+k+'</span><span class="pips">'+p+'</span></div>';});
+    h+='</div><p><b>'+st.concept+' &middot; '+ax[1][st.concept][0]+'/5</b>'+ax[1][st.concept][1]+'</p></div>';
+  });
+  $('#scoreBody').innerHTML=h;
+}
+
+// ---- decisions
+function isPinned(d){if(d.decided)return true;var c=mem[d.id];return !!(c&&c.o!=null&&c.o!=='');}
+function pinnedCount(){var n=0;DECISIONS.forEach(function(d){if(isPinned(d))n++;});return n;}
+function updateCount(){var n=pinnedCount();$('#decCount').textContent=n+' of '+DECISIONS.length+' pinned';$('#tabCount').textContent=n?('('+n+')'):'';}
+function renderDecisions(){
+  var groups=[['ALL','All concepts'],[st.concept,'Concept '+st.concept+' — '+CONCEPTS[st.concept].name]],h='';
+  groups.forEach(function(g){
+    h+='<div class="dgroup"><h3>'+esc(g[1])+'</h3>';
+    DECISIONS.filter(function(d){return d.g===g[0];}).forEach(function(d){
+      var cur=mem[d.id]||{},dec=d.decided,pinned=isPinned(d),sel=dec?dec.o:cur.o;
+      h+='<div class="dec'+(pinned?' pinned':'')+(dec?' decided':'')+'" data-id="'+d.id+'"><h4>'+d.q+(d.gate?' <span class="gt">Hardening gate</span>':'')+'<span class="st">'+(dec?'DECIDED '+DECIDED+' &middot; OWNER':(pinned?'PINNED':'OPEN'))+'</span></h4><p class="why">'+d.why+'</p>'+(dec&&dec.note?'<p class="why decnote">'+dec.note+'</p>':'')+'<div class="opts" role="group" aria-label="'+esc(plain(d.q))+'">';
+      d.o.forEach(function(o,i){h+='<button type="button" class="opt" data-i="'+i+'" aria-pressed="'+(sel===i)+'"'+(dec?' disabled':'')+'>'+o+'</button>';});
+      h+='</div><input type="text" maxlength="240" placeholder="Note (optional)" aria-label="Note for: '+esc(plain(d.q))+'" value="'+esc(cur.n||'')+'"></div>';
+    });
+    h+='</div>';
+  });
+  h+='<p class="note">Items marked DECIDED were settled by the owner on '+DECIDED+' and are locked here (notes still allowed). Decisions for the other concepts are kept and included in the copied summary. Switch concept to edit them.</p>';
+  $('#decBody').innerHTML=h;
+  $$('#decBody .dec').forEach(function(box){
+    var id=box.dataset.id;
+    $$('.opt',box).forEach(function(b){b.addEventListener('click',function(){
+      if(b.disabled)return;var i=Number(b.dataset.i);mem[id]=mem[id]||{};mem[id].o=(mem[id].o===i)?null:i;save();
+      $$('.opt',box).forEach(function(x){x.setAttribute('aria-pressed',String(Number(x.dataset.i)===mem[id].o));});
+      var p=mem[id].o!=null;box.classList.toggle('pinned',p);$('.st',box).textContent=p?'PINNED':'OPEN';updateCount();
+    });});
+    $('input',box).addEventListener('input',function(){mem[id]=mem[id]||{};mem[id].n=this.value;save();});
+  });
+  updateCount();
+}
+function summary(){
+  var d=new Date(),pad=function(n){return (n<10?'0':'')+n;};
+  var L=['CANARY T1 CAGE - DECISIONS TO PIN','Generated '+d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+' from the concept board','Concept-level only: massing, not hardened dimensions. Swap times are targets; scores are judgments.',''];
+  [['ALL','ALL CONCEPTS'],['D','D - EXTRUSION FRAME (decided direction)'],['A','A - CARTRIDGE RACK'],['B','B - OPEN BOOK'],['C','C - ROD PODS']].forEach(function(g){
+    L.push('['+g[1]+']');
+    DECISIONS.filter(function(x){return x.g===g[0];}).forEach(function(x){
+      var c=mem[x.id]||{},dec=x.decided,pinned=isPinned(x),sel=dec?dec.o:c.o;
+      L.push('- '+plain(x.q)+': '+(pinned?plain(x.o[sel]):'OPEN')+(dec?'  [DECIDED '+DECIDED+' owner]':'')+(x.gate?'  [HARDENING GATE]':'')+(c.n?'  | note: '+c.n:''));
+    });L.push('');
+  });
+  L.push(pinnedCount()+' of '+DECISIONS.length+' pinned. Standing rules: straps around metal (rods, or the frame bottom members on D); six-direction retention; every connector locking; rigid keyed IMU datum (never a rail); not sealed; PLA never flies; parts split for a 305 mm bed.');
+  return L.join('\n');
+}
+$('#btnCopy').addEventListener('click',function(){
+  var t=summary(),out=$('#copyOut'),toast=$('#toast');out.value=t;out.classList.add('show');
+  function ok(){toast.textContent='Copied to clipboard';} function manual(){out.focus();out.select();var done=false;try{done=document.execCommand('copy');}catch(e){}toast.textContent=done?'Copied to clipboard':'Select the text below and copy';}
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,manual);}else manual();}catch(e){manual();}
+});
+$('#btnClear').addEventListener('click',function(){
+  if(this.dataset.arm!=='1'){this.dataset.arm='1';this.textContent='Confirm clear';var b=this;setTimeout(function(){b.dataset.arm='';b.textContent='Clear all';},3000);return;}
+  mem={};save();this.dataset.arm='';this.textContent='Clear all';$('#copyOut').classList.remove('show');$('#toast').textContent='Cleared';renderDecisions();
+});
+
+// ---- tabs
+var TABS=['swap','score','dec'];
+function selectTab(name,focus){TABS.forEach(function(t){var b=$('#tab-'+t),on=(t===name);b.setAttribute('aria-selected',String(on));b.tabIndex=on?0:-1;$('#p-'+t).hidden=!on;if(on&&focus)b.focus();});}
+TABS.forEach(function(t,i){var b=$('#tab-'+t);b.addEventListener('click',function(){selectTab(t,false);});
+  b.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();selectTab(TABS[(i+(e.key==='ArrowRight'?1:TABS.length-1))%TABS.length],true);}});});
+
+// ---- controls
+$('#explode').addEventListener('input',function(){T1.set('explode',Number(this.value)/100);$('#rEx').textContent=this.value;});
+$('#btnAir').addEventListener('click',function(){T1.set('airflow',!st.airflow);});
+window.addEventListener('t1:airflow',function(){$('#btnAir').setAttribute('aria-pressed',String(st.airflow));});
+$('#btnLid').addEventListener('click',function(){T1.set('lid',!st.lid);});
+window.addEventListener('t1:lid',function(){var b=$('#btnLid');b.setAttribute('aria-pressed',String(st.lid));b.textContent=st.lid?'Lid open':'Lid closed';});
+$('#btnReset').addEventListener('click',function(){T1.fire('resetview');});
+$('#gateBtn').addEventListener('click',function(){T1.set('selected','core');T1.fire('swap',{id:'core'});});
+function setBeauty(on){document.body.classList.toggle('beauty',on);T1.set('beauty',on);if(on){window.scrollTo(0,0);}else{$('#btnBeauty').focus();}}
+$('#btnBeauty').addEventListener('click',function(){setBeauty(true);});
+$('#beautyExit').addEventListener('click',function(){setBeauty(false);});
+var exitTimer=0;$('#stage').addEventListener('pointermove',function(){if(!st.beauty)return;var b=$('#beautyExit');b.classList.add('show');clearTimeout(exitTimer);exitTimer=setTimeout(function(){b.classList.remove('show');},1800);});
+document.addEventListener('keydown',function(e){
+  if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;
+  if(e.key==='Escape'&&st.beauty){setBeauty(false);return;}
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  var k=e.key.toLowerCase();
+  if(k==='1'||k==='2'||k==='3'||k==='4'){var c='ABCD'[Number(k)-1];if(c!==st.concept){st.selected=null;T1.set('concept',c);}}
+  else if(k==='e'){var v=st.explode>0.5?0:1;$('#explode').value=v*100;$('#rEx').textContent=v*100;T1.set('explode',v,'key');}
+  else if(k==='f'){T1.set('airflow',!st.airflow);}
+  else if(k==='b'){setBeauty(!st.beauty);}
+});
+try{window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',function(e){T1.set('reduced',e.matches);renderSwap();});}catch(e){}
+window.addEventListener('t1:envelope',function(e){var v=e.detail.value;$('#rEnv').textContent='≈ '+v[0]+' × '+v[1]+' × '+v[2]+' mm  (L × W × H)';});
+window.addEventListener('t1:view',function(e){var v=e.detail.value;$('#rAz').textContent=v[0];$('#rEl').textContent=v[1];$('#rD').textContent=v[2];});
+window.addEventListener('t1:no3d',function(){$('#fallback').style.display='flex';});
+applyConcept();
+// if the module script never runs (CDN blocked / offline), say so
+setTimeout(function(){if(!window.T1.ready)T1.fire('no3d');},6000);
+})();
+</script>
+
+<!-- =====================================================================
+     2) 3D SCENE  (ES module; three.js from jsDelivr via the import map)
+     ===================================================================== -->
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+
+const T1=window.T1, st=T1.state;
+const stage=document.getElementById('stage'), canvas=document.getElementById('gl');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ T1.ready=true; T1.fire('no3d'); throw e; }
+T1.ready=true; T1.dbg={get camera(){return camera;},get controls(){return controls;}};
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.setClearColor(0x000000,0);
+renderer.toneMapping=THREE.NeutralToneMapping||THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.25;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+const scene=new THREE.Scene();
+const pm=new THREE.PMREMGenerator(renderer); scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture; scene.environmentIntensity=0.8;
+const camera=new THREE.PerspectiveCamera(32,1,10,6000);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.dampingFactor=0.09; controls.enablePan=false; controls.minDistance=260; controls.maxDistance=2200;
+controls.maxPolarAngle=Math.PI*0.62; controls.autoRotateSpeed=1.1;
+
+const key=new THREE.DirectionalLight(0xfff1dc,2.6); key.position.set(320,620,520); key.castShadow=true;
+key.shadow.mapSize.set(1024,1024); const sc=key.shadow.camera; sc.left=-420;sc.right=420;sc.top=420;sc.bottom=-420;sc.near=100;sc.far=1800; key.shadow.bias=-0.0006; key.shadow.normalBias=1.2;
+scene.add(key);
+const rim=new THREE.DirectionalLight(0x8fb8ff,1.9); rim.position.set(-520,300,-480); scene.add(rim);
+const fill=new THREE.DirectionalLight(0xffe2b8,1.25); fill.position.set(-200,120,600); scene.add(fill);
+scene.add(new THREE.HemisphereLight(0x9fb4d0,0x0a0c10,0.35));
+
+// ---------- materials
+const M={
+  BLK:new THREE.MeshStandardMaterial({color:0x1b1e23,roughness:.78,metalness:.08}),
+  BLK2:new THREE.MeshStandardMaterial({color:0x2a2e35,roughness:.7,metalness:.1}),
+  DARK:new THREE.MeshStandardMaterial({color:0x111317,roughness:.9,metalness:.02}),
+  YEL:new THREE.MeshStandardMaterial({color:0xF7B500,roughness:.5,metalness:.05}),
+  ALU:new THREE.MeshStandardMaterial({color:0xc9ced6,roughness:.3,metalness:1}),
+  MET:new THREE.MeshStandardMaterial({color:0x5a5f68,roughness:.42,metalness:.85}),
+  PCB:new THREE.MeshStandardMaterial({color:0x0f4a3c,roughness:.55,metalness:.1}),
+  CBL:new THREE.MeshStandardMaterial({color:0x0c0d0f,roughness:.9}),
+  STAND:new THREE.MeshStandardMaterial({color:0x2b3646,roughness:.9,transparent:true,opacity:.35}),
+  ANO:new THREE.MeshStandardMaterial({color:0x26282e,roughness:.38,metalness:.7})
+};
+const CYAN=0x5CD6E8, AMBER=0xF0AA3C;
+
+// ---------- geometry helpers (three coords: x along rods, y up, z toward the service side)
+const geoCache=new Map();
+function chamferGeo(w,h,d,c=1.5){
+  c=Math.max(0.2,Math.min(c,0.3*Math.min(w,h,d)));
+  const k=[w,h,d,c].map(v=>v.toFixed(2)).join('|'); if(geoCache.has(k))return geoCache.get(k);
+  const a=w/2-c,b=h/2-c,q=c*0.6,s=new THREE.Shape();
+  s.moveTo(-a+q,-b);s.lineTo(a-q,-b);s.lineTo(a,-b+q);s.lineTo(a,b-q);s.lineTo(a-q,b);s.lineTo(-a+q,b);s.lineTo(-a,b-q);s.lineTo(-a,-b+q);s.closePath();
+  const g=new THREE.ExtrudeGeometry(s,{depth:Math.max(0.01,d-2*c),bevelEnabled:true,bevelThickness:c,bevelSize:c,bevelSegments:1,steps:1,curveSegments:1});
+  g.translate(0,0,-(d-2*c)/2); geoCache.set(k,g); return g;
+}
+function mesh(g,m){const o=new THREE.Mesh(g,m);o.castShadow=true;o.receiveShadow=true;return o;}
+function box3(w,h,d,m,c){return mesh(chamferGeo(w,h,d,c),m);}                  // three-space sizes, centred
+function cyl(r,h,m,seg=24){return mesh(new THREE.CylinderGeometry(r,r,h,seg),m);}
+
+// CAD frame kit: CAD X along rods, Y lateral (service face at y=0), Z up  ->  three (x-cx, z, cy-y)
+function kit(cx,cy){
+  const V=(x,y,z)=>new THREE.Vector3(x-cx,z,cy-y);
+  const cbox=(o,s,m,c)=>{const b=box3(s[0],s[2],s[1],m,c);b.position.copy(V(o[0]+s[0]/2,o[1]+s[1]/2,o[2]+s[2]/2));return b;};
+  return {V,cbox};
+}
+function thumb(d=11,h=7){ // captive thumbscrew, axis +Y (local), returns group with .userData.spin
+  const g=new THREE.Group(),s=new THREE.Group();g.add(s);
+  const a=cyl(d/2,h,M.YEL,12);a.position.y=h/2;s.add(a);const b=cyl(d*0.28,h+2,M.YEL,16);b.position.y=(h+2)/2;s.add(b);
+  const slot=mesh(new THREE.BoxGeometry(d*0.5,0.6,1.2),M.DARK);slot.position.y=h+2.05;s.add(slot);
+  g.userData.spin=s;return g;
+}
+const texCache=new Map();
+function plateTex(text){
+  if(texCache.has(text))return texCache.get(text);
+  const c=document.createElement('canvas');c.width=512;c.height=112;const x=c.getContext('2d');
+  x.fillStyle='#F5B81C';x.fillRect(0,0,512,112);x.fillStyle='#0b0c0e';
+  let fs=78;x.font=fs+'px "Saira Stencil One","Saira Condensed",Impact,sans-serif';
+  const w=x.measureText(text).width; if(w>460){fs=fs*460/w;x.font=fs+'px "Saira Stencil One","Saira Condensed",Impact,sans-serif';}
+  x.textAlign='center';x.textBaseline='middle';x.fillText(text,256,60);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;texCache.set(text,t);return t;
+}
+function plate(text,w,h=9){ // yellow label plate, faces +Z local, centred
+  const g=new THREE.Group();const b=box3(w,h,1.6,M.YEL,0.5);b.position.z=0.8;g.add(b);
+  const fw=Math.min(w-2,(h-1.6)*512/112), p=new THREE.Mesh(new THREE.PlaneGeometry(fw,fw*112/512),new THREE.MeshStandardMaterial({map:plateTex(text),roughness:.55}));
+  p.position.z=1.66;g.add(p);return g;
+}
+let markTexture=null;
+function markDecal(size){ // Reticle Delta, yellow, faces +Z local
+  if(!markTexture){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.translate(128,128);x.scale(1.28,1.28);
+    x.strokeStyle='#F5B81C';x.lineWidth=14;for(let k=0;k<12;k++){if(k===1)continue;const a0=(k*30+4)*Math.PI/180,a1=((k+1)*30-4)*Math.PI/180;x.beginPath();x.arc(0,0,78,-a1,-a0);x.stroke();}
+    x.fillStyle='#F5B81C';x.beginPath();x.arc(78*Math.cos(Math.PI/4),-78*Math.sin(Math.PI/4),8,0,7);x.fill();
+    x.beginPath();x.moveTo(0,-56);x.lineTo(-48,42);x.lineTo(0,60);x.lineTo(48,42);x.closePath();x.fill();
+    x.strokeStyle='#1b1e23';x.lineWidth=3;x.beginPath();x.moveTo(0,-56);x.lineTo(0,60);x.moveTo(-48,42);x.lineTo(0,28);x.lineTo(48,42);x.stroke();
+    markTexture=new THREE.CanvasTexture(c);markTexture.colorSpace=THREE.SRGBColorSpace;markTexture.anisotropy=8;}
+  return new THREE.Mesh(new THREE.PlaneGeometry(size,size),new THREE.MeshStandardMaterial({map:markTexture,transparent:true,roughness:.5,polygonOffset:true,polygonOffsetFactor:-2}));
+}
+const faceUp=o=>{o.rotation.x=-Math.PI/2;return o;}, faceBack=o=>{o.rotation.y=Math.PI;return o;}, faceRight=o=>{o.rotation.y=Math.PI/2;return o;}, faceLeft=o=>{o.rotation.y=-Math.PI/2;return o;};
+
+// wall with recessed X-brace pockets (and optional open louvre pockets). Local XY plane, outside = +Z, thickness into -Z.
+function bracedWall(W,H,t,cols,rows,{margin=8,gap=7,open=[],d=1.8,bar=5}={}){
+  const g=new THREE.Group();const pw=(W-2*margin-(cols-1)*gap)/cols,ph=(H-2*margin-(rows-1)*gap)/rows;
+  const add=(w,h,x,y,m,zc,dz)=>{const b=mesh(new THREE.BoxGeometry(w,h,dz),m);b.position.set(x,y,zc);g.add(b);return b;};
+  // lands: outer frame (chamfered so the rim catches light) + mullions
+  const fr=(w,h,x,y)=>{const b=box3(w,h,t,M.BLK,1.2);b.position.set(x,y,-t/2);g.add(b);};
+  fr(W,margin,0,H/2-margin/2);fr(W,margin,0,-H/2+margin/2);fr(margin,H-2*margin+2,-W/2+margin/2,0);fr(margin,H-2*margin+2,W/2-margin/2,0);
+  for(let i=1;i<cols;i++)add(gap,H-2*margin,-W/2+margin+i*(pw+gap)-gap/2,0,M.BLK,-t/2,t);
+  for(let j=1;j<rows;j++)add(W-2*margin,gap,0,-H/2+margin+j*(ph+gap)-gap/2,M.BLK,-t/2,t);
+  let n=0;for(let j=0;j<rows;j++)for(let i=0;i<cols;i++,n++){
+    const x=-W/2+margin+pw/2+i*(pw+gap),y=H/2-margin-ph/2-j*(ph+gap);
+    if(open.includes(n)){ const ns=Math.max(3,Math.round(ph/9));
+      for(let s=0;s<ns;s++){const sl=mesh(new THREE.BoxGeometry(pw,1.4,t*1.5),M.BLK2);sl.position.set(x,y-ph/2+(s+0.5)*ph/ns,-t/2);sl.rotation.x=-0.7;g.add(sl);} }
+    else{ add(pw,ph,x,y,M.DARK,-(t+d)/2,t-d); const L=Math.hypot(pw,ph)-bar*1.2,a=Math.atan2(ph,pw);
+      for(const sgn of[1,-1]){const b=add(L,bar,x,y,M.BLK,-d/2-0.03,d);b.rotation.z=sgn*a;} }
+  }
+  return g;
+}
+function pigtail(len=24){ // along +Z local from the origin: cable + hex locking connector with yellow ring
+  const g=new THREE.Group();const c=cyl(2.5,len,M.CBL,10);c.rotation.x=Math.PI/2;c.position.z=len/2;g.add(c);
+  const h=cyl(5,14,M.MET,6);h.rotation.x=Math.PI/2;h.position.z=len+7;g.add(h);
+  const r=cyl(5.8,3,M.YEL,20);r.rotation.x=Math.PI/2;r.position.z=len+4.5;g.add(r);return g;
+}
+function port(){ // bulkhead locking port, faces +Z local
+  const g=new THREE.Group();const n=cyl(7,3,M.MET,6);n.rotation.x=Math.PI/2;n.position.z=1.5;g.add(n);
+  const b=cyl(4.6,6,M.DARK,16);b.rotation.x=Math.PI/2;b.position.z=3;g.add(b);return g;
+}
+function rodsPair(len,x0,y,zOff=30){const g=new THREE.Group();for(const s of[-1,1]){const r=cyl(7.5,len,M.ALU,28);r.rotation.z=Math.PI/2;r.position.set(x0+len/2,y,s*zOff);g.add(r);
+  for(const e of[0,1]){const cap=cyl(7.6,4,M.DARK,28);cap.rotation.z=Math.PI/2;cap.position.set(x0+e*len+(e?2:-2),y,s*zOff);g.add(cap);}}return g;}
+function canonCap(flip=false){ // clamp cap over one rod, rod axis along X through local origin
+  const g=new THREE.Group();const b=box3(20,11,34,M.BLK2,1.5);b.position.y=(flip?-1:1)*4.5;g.add(b);
+  for(const s of[-1,1]){const t=cyl(2.6,3,M.MET,12);t.position.set(0,(flip?-1:1)*10.6,s*12.5);g.add(t);}return g;}
+function fanUnit(sz=46,h=26){ // heatsink + top-draw fan, base at local y=0
+  const g=new THREE.Group();const hs=box3(sz,h-6,sz,M.MET,1);hs.position.y=(h-6)/2;g.add(hs);
+  const ring=cyl(sz*0.46,5,M.DARK,28);ring.position.y=h-3.4;g.add(ring);const hub=cyl(sz*0.14,6,M.BLK2,16);hub.position.y=h-3;g.add(hub);
+  for(let i=0;i<7;i++){const bl=mesh(new THREE.BoxGeometry(sz*0.34,0.8,5),M.BLK2);bl.position.set(Math.cos(i*0.9)*sz*0.25,h-1.6,Math.sin(i*0.9)*sz*0.25);bl.rotation.y=-i*0.9;bl.rotation.x=0.35;g.add(bl);}
+  return g;}
+function grille(r){ // guard rings over an opening, lies in XZ plane at local y=0
+  const g=new THREE.Group();for(const k of[1,0.68,0.36]){const t=mesh(new THREE.TorusGeometry(r*k,0.9,6,32),M.BLK2);t.rotation.x=Math.PI/2;g.add(t);}
+  for(const a of[0,Math.PI/2]){const b=mesh(new THREE.BoxGeometry(r*2,1.4,1.6),M.BLK2);b.rotation.y=a;g.add(b);}return g;}
+function datum(big=false,dowels=2){ // THE IMU RULE — identical everywhere. base at local y=0. returns {fixed, carrier, screws}
+  const fixed=new THREE.Group(),carrier=new THREE.Group(),screws=[];const L=big?66:40;
+  const blk=box3(L,8,36,M.BLK2,1.5);blk.position.y=4;fixed.add(blk);
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(L+1.5,9,37.5)),new THREE.LineBasicMaterial({color:CYAN}));e.position.y=4.2;fixed.add(e);
+  for(const p of[[-L/2+7,-9],[L/2-10,9]].slice(0,dowels)){const d=cyl(1.25,5,M.ALU,10);d.position.set(p[0],10.5,p[1]);fixed.add(d);}
+  carrier.position.y=8;
+  const pcb=mesh(new THREE.BoxGeometry(26,3,24),M.PCB);pcb.position.set(big?-15:0,1.5,0);carrier.add(pcb);
+  if(big){const p2=mesh(new THREE.BoxGeometry(25.4,3,25.4),M.PCB);p2.position.set(16,1.5,0);carrier.add(p2);}
+  for(const z of[-14,14]){const b=box3(L-6,6,2.4,M.YEL,.6);b.position.set(0,6,z);carrier.add(b);}
+  for(const x of[-L/2+4.2,L/2-4.2]){const b=box3(2.4,6,26,M.YEL,.6);b.position.set(x,6,0);carrier.add(b);const t=thumb(7,4);t.position.set(x,9,0);carrier.add(t);screws.push(t);}
+  fixed.add(carrier);return {fixed,carrier,screws};
+}
+function vibNode(portPos,normal,groundY,nodePos){ // external seat-rail node on a locking cable
+  const plug=new THREE.Group(),node=new THREE.Group();
+  const p=pigtail(0.1);p.rotation.y=Math.PI;p.position.z=18; // connector body pointing back toward the port
+  const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
+  const head=new THREE.Group();head.add(p);head.quaternion.copy(q);head.position.copy(portPos);plug.add(head);
+  const a=portPos.clone().addScaledVector(normal,18),b=portPos.clone().addScaledVector(normal,70);b.y=Math.max(groundY+30,portPos.y-20);
+  const c=nodePos.clone().lerp(b,0.45);c.y=groundY+4;const e=nodePos.clone();e.y=groundY+9;
+  const curve=new THREE.CatmullRomCurve3([a,portPos.clone().addScaledVector(normal,40),b,c,e]);
+  plug.add(mesh(new THREE.TubeGeometry(curve,40,2.4,8),M.CBL));
+  const body=box3(88,18,40,M.BLK,2.5);body.position.set(nodePos.x,groundY+9,nodePos.z);node.add(body);
+  const lp=faceUp(plate('VIBRATION',50,8));lp.position.set(nodePos.x,groundY+18,nodePos.z);node.add(lp);
+  const clamp=box3(30,8,52,M.BLK2,1.5);clamp.position.set(nodePos.x,groundY+4,nodePos.z);node.add(clamp);
+  return {plug,node};
+}
+
+// ---------- concept builders. Each returns {root, mods:{id:{objs,movers:[{o,path}],screws,anchor}}, parts:[{o,ex}], air:[{pts,hot}], datumAnchor, lidPivot?, groundY}
+function V3(x,y,z){return new THREE.Vector3(x,y,z);}
+function newConcept(){return {root:new THREE.Group(),body:new THREE.Group(),mods:{},parts:[],air:[],extras:new THREE.Group()};}
+function reg(C,id,o,path,ex,screws=[],aux=false){ // register a moving module object (aux = moves with the swap but is not pickable / bracketed)
+  C.body.add(o);o.userData.mod=id;if(aux)o.userData.aux=true;const m=C.mods[id]||(C.mods[id]={objs:[],movers:[],screws:[],anchor:o});
+  m.objs.push(o);m.movers.push({o,path,home:o.position.clone(),ex:ex||V3(0,0,0),aux});m.screws.push(...screws);return m;}
+function part(C,o,ex){C.body.add(o);C.parts.push({o,ex,home:o.position.clone()});return o;}
+
+function buildA(){
+  const C=newConcept(),AX=285,AY=175,AZ=100,CD=74,{V,cbox}=kit(AX/2,AY/2);
+  // shell panels
+  part(C,cbox([0,0,0],[AX,AY,6],M.BLK,2),V3(0,-40,0));                                         // floor
+  const rear=bracedWall(AX,AZ-6,6,3,1,{margin:10});rear.rotation.y=Math.PI;rear.position.copy(V(AX/2,AY,AZ/2+3));part(C,rear,V3(0,0,-70));
+  // exhaust louvre band in the rear wall (behind the core bay)
+  const lou=new THREE.Group();for(let i=0;i<8;i++){const s=mesh(new THREE.BoxGeometry(14,5,3),M.DARK);s.position.copy(V(27+i*22,AY+0.2,72.5));lou.add(s);const l=mesh(new THREE.BoxGeometry(14,1.2,5),M.BLK2);l.position.copy(V(27+i*22,AY+1.4,74));l.rotation.x=0.6;lou.add(l);}
+  part(C,lou,V3(0,0,-70));
+  for(const s of[0,1]){const e=bracedWall(AY-8,AZ-6,8,1,1,{margin:12});(s?faceRight:faceLeft)(e);e.position.copy(V(s?AX:0,AY/2,AZ/2+3));part(C,e,V3(s?70:-70,0,0));}
+  // front service frame: mullions with chamfered bezels round every bay
+  const front=new THREE.Group();const bar=(x0,z0,w,h)=>front.add(cbox([x0,0,z0],[w,6,h],M.BLK,1.6));
+  bar(0,0,AX,8);bar(0,94,AX,6);bar(0,8,8,86);bar(80,8,4,42);bar(164,8,4,42);bar(198,8,5,86);bar(281,8,4,86);bar(8,50,190,2);bar(68,52,4,42);bar(203,76,78,18);
+  const mk=markDecal(15);mk.position.copy(V(222,-0.3,85));front.add(mk);
+  const vp=port();vp.position.copy(V(262,0,85));front.add(vp);const vl=plate('VIB',16,6);vl.position.copy(V(243,0,85));front.add(vl);
+  part(C,front,V3(0,0,36));
+  // inner partitions + rails
+  const inner=new THREE.Group();inner.add(cbox([4,CD+2,6],[AX-8,4,AZ-10],M.BLK2,.8));inner.add(cbox([198,6,6],[5,CD,AZ-10],M.BLK2,.8));inner.add(cbox([8,6,48],[190,CD-4,3],M.BLK2,.6));
+  inner.add(cbox([199,CD+6,6],[4,AY-CD-12,AZ-10],M.BLK2,.8));inner.add(cbox([210,124,6],[60,40,20],M.MET,1));
+  part(C,inner,V3(0,0,0));
+  // fixed roof (cartridge bank + battery/power end + strip under the front yoke)
+  const roof=new THREE.Group();const r1=faceUp(bracedWall(AX,CD+4,6,3,1,{margin:8}));r1.position.copy(V(AX/2,(CD+4)/2,AZ));roof.add(r1);
+  const r2=faceUp(bracedWall(AX-203,AY-CD-4,6,1,1,{margin:9}));r2.position.copy(V(203+(AX-203)/2,CD+4+(AY-CD-4)/2,AZ));roof.add(r2);
+  roof.add(cbox([0,CD+4,AZ-6],[30,AY-CD-4,6],M.BLK,1.2));
+  part(C,roof,V3(0,46,0));
+  // core internals
+  const hub=cbox([34,CD+8,6],[139,87,35],M.MET,1.5);const orin=new THREE.Group();const ob=cbox([0,0,0],[100,81,10],M.PCB,1);orin.add(ob);
+  const fu=fanUnit(46,26);orin.add(fu);orin.position.set(0,0,0);ob.position.set(0,5,0);fu.position.set(0,10,0);
+  const og=new THREE.Group();og.add(orin);og.position.copy(V(34+2+50,CD+8+3+40.5,47));
+  // core lid: 4 captive thumbscrews, real opening + guard rings over the fan
+  const lid=new THREE.Group(),LX0=30,LX1=202,LY0=CD+2,LY1=AY-6,lw=LX1-LX0,ld=LY1-LY0,fx=86,fy=CD+8+3+40.5,hole=58;
+  const lp=(x0,y0,w,d)=>{if(w>0.5&&d>0.5)lid.add(cbox([x0,y0,AZ],[w,d,5],M.BLK,1.2));};
+  lp(LX0,LY0,fx-hole/2-LX0,ld);lp(fx+hole/2,LY0,LX1-fx-hole/2,ld);lp(fx-hole/2,LY0,hole,fy-hole/2-LY0);lp(fx-hole/2,fy+hole/2,hole,LY1-fy-hole/2);
+  const gr=grille(hole/2-1);gr.position.copy(V(fx,fy,AZ+4));lid.add(gr);
+  const lscrews=[];for(const p of[[LX0+8,LY0+7],[LX1-8,LY0+7],[LX0+8,LY1-7],[LX1-8,LY1-7]]){const t=thumb();t.position.copy(V(p[0],p[1],AZ+5));lid.add(t);lscrews.push(t);}
+  const cl=faceUp(plate('CANARY CORE',70,11));cl.position.copy(V(160,LY1-14,AZ+5));lid.add(cl);
+  reg(C,'core',lid,[V3(0,0,0),V3(0,6,0),V3(0,6,-118)],V3(0,95,0),lscrews);
+  reg(C,'core',og,[V3(0,0,0)],V3(0,34,0));reg(C,'core',hub,[V3(0,0,0)],V3(0,0,0));C.mods.core.anchor=og;
+  // cartridges
+  const BAYS=[['traffic','TRAFFIC',8,8,72,42,CD,[64.93,56.03,27]],['lte','LTE',84,8,80,42,CD,[80,35,12]],['spare','SPARE',168,8,30,42,CD,null],['rtk','RTK',8,52,60,42,CD,[43.5,43.5,12]],['co','CABIN CO',72,52,126,42,CD,[114,20.92,15.12]],['battery','POWER',203,8,78,68,112,[74,107,64]]];
+  BAYS.forEach(([id,label,x0,z0,w,h,d,c],n)=>{
+    const g=new THREE.Group();g.add(cbox([x0,-2,z0],[w-1,5,h-1],M.BLK,1.6));g.add(cbox([x0+3,3,z0+2],[w-7,d-8,3],M.BLK2,.6));g.add(cbox([x0+3+(n%3)*9,3,z0],[6,d-8,2],M.BLK2,.4));
+    if(c){const cw=Math.min(c[0],w-8),cdp=Math.min(c[1],d-12);g.add(cbox([x0+(w-1-cw)/2,6,z0+5],[cw,cdp,Math.min(c[2],h-8)],id==='battery'?M.MET:M.PCB,id==='battery'?3:.6));}
+    const t=thumb(10,6);t.rotation.x=Math.PI/2;t.position.copy(V(x0+w-12,-2,z0+h/2-1));g.add(t);
+    const tab=cbox([x0+6,-9,z0+h/2-4],[10,8,7],M.YEL,1);g.add(tab);
+    if(id!=='spare'){const pl=plate(label,Math.min(w-30,46),8);pl.position.copy(V(x0+w/2+4,-2,z0+h-9));g.add(pl);}
+    if(id!=='battery'){const pg=pigtail(18);pg.rotation.y=Math.PI;pg.position.copy(V(x0+w/2,d-5,z0+14));g.add(pg);}
+    reg(C,id,g,[V3(0,0,0),V3(0,0,d+30)],V3(0,0,60+(z0>40?26:0)),[t]);
+  });
+  // rod spine on top: two yokes, rods, clamp caps, IMU datum on the rear yoke
+  const spine=new THREE.Group();
+  for(const x of[14,AX-14]){spine.add(cbox([x-14,-6,AZ],[28,22,32],M.BLK,2.5));spine.add(cbox([x-14,AY-16,AZ],[28,22,32],M.BLK,2.5));spine.add(cbox([x-14,-6,AZ+14],[28,AY+12,18],M.BLK,2.5));
+    for(const s of[-1,1]){const cc=canonCap();cc.position.copy(V(x,AY/2+s*30,AZ+32));spine.add(cc);}}
+  const rr=rodsPair(400,-70-AX/2,AZ+32);spine.add(rr);
+  const D=datum(true);D.fixed.position.copy(V(AX-14,AY/2,AZ+32));spine.add(D.fixed);
+  part(C,spine,V3(0,120,0));
+  // IMU carrier is a module that rides inside the spine group: handle separately
+  C.imu={carrier:D.carrier,screws:D.screws,parent:spine};C.datumAnchor=D.fixed;
+  C.air=[{hot:false,pts:[V(86,fy,215),V(86,fy,140),V(86,fy,88)]},{hot:true,pts:[V(60,150,66),V(50,178,74),V(40,250,96)]},{hot:true,pts:[V(110,150,66),V(115,178,74),V(120,250,96)]},{hot:true,pts:[V(165,150,66),V(178,178,74),V(195,250,96)]}];
+  C.vib={pos:V(262,-6,85),n:V3(0,0,1),node:V3(225,0,120)};C.groundY=0;C.cam=[0.62,0.98];
+  return C;
+}
+
+function buildB(){
+  const C=newConcept(),BX=300,BY=262,FL=8,WALL=72,T=4,{V,cbox}=kit(BX/2,BY/2);
+  const tray=new THREE.Group();tray.add(cbox([0,0,0],[BX,BY,FL],M.BLK,2.5));
+  const fw=bracedWall(BX,WALL-FL,T,4,1,{margin:7});fw.position.copy(V(BX/2,0,FL+(WALL-FL)/2));tray.add(fw);
+  const bw=faceBack(bracedWall(BX,WALL-FL,T,4,1,{margin:7,open:[3]}));bw.position.copy(V(BX/2,BY,FL+(WALL-FL)/2));tray.add(bw);   // open[3] = behind the compute (mirrored)
+  const lw=faceLeft(bracedWall(BY-2*T,WALL-FL,T,3,1,{margin:7,open:[1]}));lw.position.copy(V(0,BY/2,FL+(WALL-FL)/2));tray.add(lw);
+  const rw=faceRight(bracedWall(BY-2*T,WALL-FL,T,3,1,{margin:7}));rw.position.copy(V(BX,BY/2,FL+(WALL-FL)/2));tray.add(rw);
+  // 10 mm M3 grid as a canvas texture
+  const gc=document.createElement('canvas');gc.width=1168;gc.height=1016;const gx=gc.getContext('2d');gx.fillStyle='#14161a';gx.fillRect(0,0,1168,1016);gx.fillStyle='#4a4f59';
+  for(let i=1;i<=28;i++)for(let j=1;j<=24;j++){gx.beginPath();gx.arc(i*40+4,j*40+8,6.4,0,7);gx.fill();}
+  const gt=new THREE.CanvasTexture(gc);gt.colorSpace=THREE.SRGBColorSpace;gt.anisotropy=8;
+  const gp=new THREE.Mesh(new THREE.PlaneGeometry(BX-2*T,BY-2*T),new THREE.MeshStandardMaterial({map:gt,roughness:.85}));gp.rotation.x=-Math.PI/2;gp.position.copy(V(BX/2,BY/2,FL+0.1));gp.receiveShadow=true;tray.add(gp);
+  part(C,tray,V3(0,0,0));
+  const CAR=[['battery','POWER',6,6,116,82,[107,74,64],M.MET],['hub','CANARY CORE',130,6,148,96,[139,87,35],M.MET],['core','CANARY CORE',6,98,112,92,[100,81,10],M.PCB],['traffic','TRAFFIC',126,110,76,68,[64.93,56.03,27],M.PCB],
+    ['lte','LTE',210,110,84,46,[80,35,12],M.PCB],['co','CABIN CO',6,200,126,32,[114,20.92,15.12],M.PCB],['rtk','RTK',140,190,56,56,[43.5,43.5,12],M.PCB],['pdb','POWER',250,166,44,66,[40,60,20],M.MET]];
+  CAR.forEach(([id,label,x0,y0,w,d,c,mat],n)=>{
+    const g=new THREE.Group();g.add(cbox([x0,y0,FL],[w,d,4],M.BLK2,1));
+    g.add(cbox([x0+(w-c[0])/2,y0+(d-c[1])/2,FL+(id==='battery'?4:9)],c,mat,id==='battery'?3:1)); // battery sits on its plate: on 5 mm standoffs it would poke through the lid
+    if(id==='core'){const f=fanUnit(46,26);f.position.copy(V(x0+w/2,y0+d/2,FL+19));g.add(f);}
+    const sc=[];for(const p of[[6,6],[w-6,d-6]]){const t=thumb(9,6);t.position.copy(V(x0+p[0],y0+p[1],FL+4));g.add(t);sc.push(t);}
+    const pl=faceUp(plate(label,Math.min(w-30,44),7));pl.position.copy(V(x0+w/2,y0+5.5,FL+4));g.add(pl);
+    const pg=pigtail(12);pg.rotation.y=Math.PI;pg.position.copy(V(x0+w-10,y0+d-16,FL+12));g.add(pg);
+    reg(C,id,g,[V3(0,0,0),V3(0,96,0),V3(0,110,60)],V3(0,50+n*14,0),sc);
+  });
+  // rod keel under the floor + datum rib (the IMU boss is tied to the keel, not to the tray floor)
+  const keel=new THREE.Group();for(const x of[50,BX-50]){keel.add(cbox([x-22,BY/2-47,-12],[44,94,12],M.BLK,2));for(const s of[-1,1]){const cc=canonCap(true);cc.position.copy(V(x,BY/2+s*30,-12));keel.add(cc);}}
+  keel.add(rodsPair(400,-50-BX/2,-12));
+  const rib=cbox([210,BY/2-10,-9],[28,110,9],M.BLK2,1.5);keel.add(rib);const re=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(29,9.6,111)),new THREE.LineBasicMaterial({color:CYAN}));re.position.copy(rib.position);keel.add(re);
+  const boss=cbox([202,204,-2],[40,36,FL+2],M.BLK2,1);keel.add(boss);
+  const D=datum(false);D.fixed.position.copy(V(222,222,FL));keel.add(D.fixed);
+  part(C,keel,V3(0,-70,0));C.imu={carrier:D.carrier,screws:D.screws,parent:keel};C.datumAnchor=D.fixed;
+  // lid: hinged on the rear edge, X-braced, grille over the compute fan, mark + plate
+  const pivot=new THREE.Group();pivot.position.copy(V(BX/2,BY,WALL));const lid=new THREE.Group();pivot.add(lid);
+  const top=faceUp(bracedWall(BX,BY,4,2,2,{margin:10,gap:10,open:[0]}));top.position.set(0,10,BY/2);lid.add(top);
+  for(const [w,d,x,z] of[[BX,T,0,T/2],[BX,T,0,BY-T/2],[T,BY-2*T,-BX/2+T/2,BY/2],[T,BY-2*T,BX/2-T/2,BY/2]]){const s=box3(w,6.5,d,M.BLK,1);s.position.set(x,3.2,z);lid.add(s);}
+  const mk=faceUp(markDecal(44));mk.position.set(0,10.2,BY/2);lid.add(mk);const lp=faceUp(plate('CANARY T1',80,12));lp.position.set(0,10,BY-16);lid.add(lp);
+  for(const x of[-BX/2+30,BX/2-30]){const t=thumb(12,6);t.position.set(x,10,BY-8);lid.add(t);}
+  for(const x of[-90,90]){const h=cyl(5,46,M.MET,12);h.rotation.z=Math.PI/2;h.position.set(x,2,-1);lid.add(h);}
+  C.body.add(pivot);C.lidPivot=pivot;C.lidHome=pivot.position.clone();
+  C.air=[{hot:false,pts:[V(62,144,215),V(62,144,130),V(62,144,66)]},{hot:true,pts:[V(30,150,42),V(-6,152,44),V(-80,156,60)]},{hot:true,pts:[V(60,210,42),V(64,266,44),V(70,340,62)]}];
+  C.vib={pos:V(BX+2,60,44),n:V3(1,0,0),node:V3(250,0,150)};C.groundY=-23;C.cam=[0.5,0.86];
+  return C;
+}
+
+function buildC(){
+  const C=newConcept(),W=120,{V,cbox}=kit(140,0);
+  const PODS=[['core','CANARY CORE',1,0,112,50,[100,81,36]],['battery','POWER',1,118,82,74,[74,107,64]],['traffic','TRAFFIC',1,206,64,40,[56.03,64.93,27]],
+    ['hub','CANARY CORE',-1,0,148,46,[139,87,35]],['rtk','RTK',-1,154,52,26,[43.5,43.5,12]],['lte','LTE',-1,212,44,26,[35,80,12]],['co','CABIN CO',-1,262,30,26,[20.92,114,15.12]]];
+  PODS.forEach(([id,label,s,x0,L,H,c],n)=>{
+    const g=new THREE.Group(),Z=(a,b)=>s>0?a:-(a+b);  // z0 for a block of height b starting a above the rod axis, mirrored below
+    g.add(cbox([x0,-48,Z(9,7)],[L,96,7],M.BLK,1.2));
+    const shell=new THREE.Group();const zc=s>0?16+H/2:-(16+H/2);
+    // pod shell from braced walls: top/bottom face X-braced, service + rear faces
+    const tp=faceUp(bracedWall(L,W,4,1,1,{margin:8,open:(id==='core')?[0]:[]}));if(s<0)tp.rotation.x=Math.PI/2;tp.position.copy(V(x0+L/2,0,s>0?16+H:-(16+H)));shell.add(tp);
+    const f=bracedWall(L,H-4,4,1,1,{margin:6});f.position.copy(V(x0+L/2,-W/2,zc-(s>0?2:-2)));shell.add(f);
+    const b=faceBack(bracedWall(L,H-4,4,1,1,{margin:6,open:(id==='core')?[0]:[]}));b.position.copy(V(x0+L/2,W/2,zc-(s>0?2:-2)));shell.add(b);
+    for(const e of[0,1]){const w=(e?faceRight:faceLeft)(bracedWall(W-8,H-4,4,1,1,{margin:6,open:(id==='core'&&!e)?[0]:[]}));w.position.copy(V(x0+e*L,0,zc-(s>0?2:-2)));shell.add(w);}
+    g.add(shell);
+    const comp=cbox([x0+(L-c[0])/2,-c[1]/2,Z(18,Math.min(c[2],H-8))],[Math.min(c[0],L-10),Math.min(c[1],W-12),Math.min(c[2],H-8)],(id==='battery'||id==='hub')?M.MET:M.PCB,1);g.add(comp);
+    if(id==='core'){const fu=fanUnit(46,14);fu.position.copy(V(x0+L/2,0,16+36));g.add(fu);const gr=grille(34);gr.position.copy(V(x0+L/2,0,16+H+0.5));g.add(gr);}
+    const pl=plate(label,Math.min(L-12,50),8);if(s>0){faceUp(pl);pl.position.copy(V(x0+L/2,-W/2+12,16+H));}else{pl.position.copy(V(x0+L/2,-W/2,-(16+H/2)));}g.add(pl);
+    const sc=[];for(const e of[10,L-10])for(const y of[-42.5,42.5]){const t=thumb(8,5);if(s<0)t.rotation.x=Math.PI;t.position.copy(V(x0+e,y,s*16));g.add(t);sc.push(t);}
+    for(const e of[10,L-10])for(const y of[-30,30]){const cc=canonCap(s>0);cc.position.copy(V(x0+e,y,0));g.add(cc);}
+    const pg=pigtail(10);pg.position.copy(V(x0+L/2,-W/2,s*(16+Math.min(H,26)/2)));g.add(pg);
+    reg(C,id,g,[V3(0,0,0),V3(0,s*86,0)],V3(0,s*(34+n%3*16),0),sc);
+  });
+  // IMU station: plate + datum straight on the rods
+  const im=new THREE.Group();im.add(cbox([276,-48,9],[40,96,7],M.BLK,1.2));for(const e of[286,306])for(const y of[-30,30]){const cc=canonCap(true);cc.position.copy(V(e,y,0));im.add(cc);}
+  const D=datum(false);D.fixed.position.copy(V(296,0,16));im.add(D.fixed);part(C,im,V3(0,0,0));C.imu={carrier:D.carrier,screws:D.screws,parent:im};C.datumAnchor=D.fixed;
+  part(C,rodsPair(400,-60-140,0),V3(0,0,0));
+  const trunk=new THREE.Group();trunk.add(cbox([-10,-W/2-34,-9],[320,16,18],M.BLK,2));
+  PODS.forEach(p=>{const po=port();po.position.copy(V(p[3]+p[4]/2,-W/2-34,p[2]*4));trunk.add(po);const r=cyl(5.8,2,M.YEL,20);r.rotation.x=Math.PI/2;r.position.copy(V(p[3]+p[4]/2,-W/2-35,p[2]*4));trunk.add(r);});
+  for(const x of[20,280]){trunk.add(cbox([x,-W/2-20,-5],[12,40,10],M.BLK2,1));}
+  const mk=faceLeft(markDecal(13));mk.position.copy(V(-10.3,-W/2-26,0));trunk.add(mk);
+  part(C,trunk,V3(0,0,70));
+  // bench stand: NOT part of the concept, only lets the bottom pods show their travel
+  for(const x of[-45,325]){const s=cbox([x-4,-40,-150],[8,80,142],M.STAND,1);s.castShadow=false;C.extras.add(s);}
+  C.air=[{hot:false,pts:[V(56,0,190),V(56,0,120),V(56,0,70)]},{hot:true,pts:[V(56,40,40),V(56,66,42),V(56,140,62)]},{hot:true,pts:[V(20,0,40),V(-6,0,42),V(-80,0,60)]}];
+  C.vib={pos:V(312,-W/2-26,0),n:V3(1,0,0),node:V3(250,0,150)};C.groundY=-150;C.cam=[0.55,0.9];
+  return C;
+}
+
+
+// ---------- concept D: 80/20 20-series T-slot extrusion frame (mirrors t1_concepts.scad concept="D")
+const extrGeoCache=new Map();
+function extrGeo(len){ // 20 x 20 profile with a real T-slot on each face, extruded along +X and centred
+  const k=len.toFixed(1);if(extrGeoCache.has(k))return extrGeoCache.get(k);
+  const h=10,SLT=6,SLD=6,CAV=11,CD=2.5,face=[[-h,h],[-SLT/2,h],[-SLT/2,h-SLD],[-CAV/2,h-SLD],[-CAV/2,h-SLD-CD],[CAV/2,h-SLD-CD],[CAV/2,h-SLD],[SLT/2,h-SLD],[SLT/2,h]],pts=[];
+  for(let r=0;r<4;r++){const a=-r*Math.PI/2,c=Math.cos(a),s=Math.sin(a);for(const [x,y] of face)pts.push(new THREE.Vector2(x*c-y*s,x*s+y*c));}
+  const g=new THREE.ExtrudeGeometry(new THREE.Shape(pts),{depth:len,bevelEnabled:false,steps:1,curveSegments:1});
+  g.rotateY(Math.PI/2);g.translate(-len/2,0,0);extrGeoCache.set(k,g);return g;
+}
+function buildD(){
+  const C=newConcept(),DX=300,{V,cbox}=kit(DX/2,0);
+  const exX=(g,x0,len,y,z)=>{const m=mesh(extrGeo(len),M.ANO);m.position.copy(V(x0+len/2,y,z));g.add(m);};
+  const exY=(g,x,y0,len,z)=>{const m=mesh(extrGeo(len),M.ANO);m.rotation.y=Math.PI/2;m.position.copy(V(x,y0+len/2,z));g.add(m);};
+  const exZ=(g,x,y,z0,len)=>{const m=mesh(extrGeo(len),M.ANO);m.rotation.z=Math.PI/2;m.position.copy(V(x,y,z0+len/2));g.add(m);};
+  const brk=(g,x,y,z,sx,sy)=>{g.add(cbox([sx>0?x:x-16,sy>0?y:y-3,z],[16,3,16],M.MET,.3));g.add(cbox([sx>0?x:x-16,sy>0?y:y-16,z],[16,16,3],M.MET,.3));}; // 2-hole inside corner bracket class
+  // ---- frame: bottom rectangle, corner posts, mullions (cantilevered from the bottom rails), brackets
+  const frame=new THREE.Group();
+  for(const y of[-80,80])exX(frame,0,300,y,10);
+  for(const x of[10,290])exY(frame,x,-70,140,10);
+  for(const x of[10,290])for(const y of[-80,80])exZ(frame,x,y,20,100);
+  for(const x of[104,208])exZ(frame,x,-80,20,100);            // front mullions: bays TRAFFIC 74 / LTE 84 / RTK 62
+  for(const x of[60,110])exZ(frame,x,80,20,100);              // rear mullions: CABIN CO 30 / SPARE 30, then the exhaust insert
+  brk(frame,20,-70,20,1,1);brk(frame,280,-70,20,-1,1);brk(frame,20,70,20,1,-1);brk(frame,280,70,20,-1,-1);
+  for(const x of[94,114,198,218])brk(frame,x,-70,20,(x===94||x===198)?-1:1,1);
+  for(const x of[50,70,100,120])brk(frame,x,70,20,(x===50||x===100)?-1:1,-1);
+  frame.add(cbox([244,-90,96],[32,4,22],M.BLK,1));const vp=port();vp.position.copy(V(264,-90,107));frame.add(vp);const vl=plate('VIB',14,6);vl.position.copy(V(250,-90.1,111));frame.add(vl);
+  const mk=markDecal(13);mk.position.copy(V(290,-90.3,110));frame.add(mk);
+  part(C,frame,V3(0,0,0));
+  // ---- top plane: end ties, set-back top longs (30 mm behind each face), IMU cross member, datum
+  const top=new THREE.Group();
+  for(const x of[10,290])exY(top,x,-70,140,130);
+  for(const y of[-50,50])exX(top,20,260,y,130);
+  exY(top,230,-40,80,130);
+  for(const x of[20,280])for(const y of[-70,70])brk(top,x,y,104,x<150?1:-1,y<0?1:-1);
+  const D=datum(false,1);D.fixed.position.copy(V(230,0,140));top.add(D.fixed);
+  const cl=faceUp(plate('CANARY CORE',70,11));cl.position.copy(V(150,-50,140.1));top.add(cl);
+  part(C,top,V3(0,60,0));C.imu={carrier:D.carrier,screws:D.screws,parent:top};C.datumAnchor=D.fixed;
+  // ---- Core tray on the bottom longs (4 x M5 into T-nuts): hub, compute + fan, power distribution
+  const core=new THREE.Group();
+  core.add(cbox([22,-46,20],[256,92,4],M.BLK,1));
+  for(const p of[[30,-40],[270,-40],[30,40],[270,40]]){const b=cyl(3,3,M.MET,10);b.position.copy(V(p[0],p[1],25.5));core.add(b);}
+  core.add(cbox([28,-43.5,24],[139,87,35],M.MET,1.5));
+  core.add(cbox([40,-39.5,65],[100,81,10],M.PCB,1));const fu=fanUnit(46,26);fu.position.copy(V(90,1,75));core.add(fu);
+  core.add(cbox([210,-20,24],[60,40,20],M.MET,1));
+  reg(C,'core',core,[V3(0,0,0),V3(0,18,0)],V3(0,26,0));           // rises 18 mm and stops under the top longs: the gate
+  // ---- rods on top: yoke plates across the set-back longs (handle + antenna rail only; NOT the restraint path)
+  const spine=new THREE.Group(),ys=[];
+  for(const x of[45,255]){spine.add(cbox([x-14,-60,140],[28,120,5],M.BLK,1.2));
+    for(const s of[-1,1]){const cc=canonCap();cc.position.copy(V(x,s*30,152));spine.add(cc);const t=thumb(9,5);t.position.copy(V(x,s*50,145));spine.add(t);ys.push(t);}}
+  spine.add(rodsPair(400,-60-DX/2,163.7));
+  reg(C,'core',spine,[V3(0,0,0),V3(0,70,0)],V3(0,130,0),ys,true);
+  // ---- drop-in cartridges: T-keys in the facing mullion slots, ONE captive M5 thumbscrew into a T-nut, pull tab, pigtail
+  const CART=[['traffic','TRAFFIC',20,74,-1,[64.93,56.03,27]],['lte','LTE',114,84,-1,[80,35,12]],['rtk','RTK',218,62,-1,[43.5,43.5,12]],['co','CABIN CO',20,30,1,[20.92,114,15.12]],['spare','SPARE',70,30,1,null]];
+  CART.forEach(([id,label,x0,w,f,c],n)=>{
+    const g=new THREE.Group(),h=96,z0=22,fy=f*80;
+    g.add(cbox([x0,f<0?-89:84,z0],[w-1,5,h],M.BLK,1.5));
+    g.add(cbox([x0+2,f<0?-84:44,z0],[w-5,40,3],M.BLK2,.6));
+    for(const xs of[x0-6.5,x0+w-1]){g.add(cbox([xs,fy-2.8,z0+4],[6.5,5.6,88],M.BLK2,.3));g.add(cbox([xs<x0?xs-2:xs+6.5,fy-5.2,z0+4],[2,10.4,88],M.BLK2,.3));}
+    g.add(cbox([x0+2+(n%4)*8,f<0?-84:44,z0+3],[5,32,2],M.BLK2,.3));
+    if(c){const cw=Math.min(c[0],w-8),cd=Math.min(c[1],34),ch=Math.min(c[2],h-10);g.add(cbox([x0+(w-1-cw)/2,f<0?-81:47,z0+3],[cw,cd,ch],M.PCB,.6));}
+    const t=thumb(10,6);t.rotation.x=f<0?Math.PI/2:-Math.PI/2;t.position.copy(V(x0+w-10,f<0?-89:89,z0+h-14));g.add(t);
+    g.add(cbox([x0+6,f<0?-96:89,z0+h-18],[10,7,7],M.YEL,1));
+    if(id!=='spare'){const pl=plate(label,Math.min(w-20,50),9);if(f>0)faceBack(pl);pl.position.copy(V(x0+w/2,f<0?-89.1:89.1,z0+h/2));g.add(pl);}
+    const pg=pigtail(16);if(f<0)pg.rotation.y=Math.PI;pg.position.copy(V(x0+w/2,f<0?-44:44,z0+18));g.add(pg);
+    reg(C,id,g,[V3(0,0,0),V3(0,126,0)],V3(0,60+(n%3)*14,0),[t]);
+  });
+  // ---- battery: slides in along X from the +X end on the bottom longs' inner slots; end-plate thumbscrew + secondary strap
+  const bat=new THREE.Group();
+  bat.add(cbox([278,-57.5,20],[6,115,80],M.BLK,1.5));bat.add(cbox([200,-55.5,22],[78,111,2],M.BLK2,.4));bat.add(cbox([204,-53.5,24],[74,107,64],M.MET,3));
+  const bt=thumb(11,6);bt.rotation.z=-Math.PI/2;bt.position.copy(V(284,0,60));bat.add(bt);
+  bat.add(cbox([202,-43.5,88.5],[82,14,3],M.YEL,.8));
+  const bp=faceRight(plate('POWER',50,9));bp.position.copy(V(284.1,0,86));bat.add(bp);
+  reg(C,'battery',bat,[V3(0,0,0),V3(114,0,0)],V3(80,0,0),[bt]);
+  // ---- louvered T-key inserts: rear exhaust (between the last rear mullion and the post), -X end intake
+  const lv=new THREE.Group();
+  lv.add(cbox([121,85,22],[158,4,96],M.BLK,1));
+  for(let i=1;i<8;i++){lv.add(cbox([129,84.6,22+i*12],[142,4.8,6],M.DARK,.2));const sl=mesh(new THREE.BoxGeometry(142,1.2,5),M.BLK2);sl.position.copy(V(200,89.6,25+i*12));sl.rotation.x=-0.6;lv.add(sl);}
+  for(const xs of[114.5,279])lv.add(cbox([xs,77.2,26],[6.5,5.6,88],M.BLK2,.3));
+  const el=faceBack(plate('EXHAUST',44,7));el.position.copy(V(200,89.1,110));lv.add(el);
+  lv.add(cbox([8,-69,22],[4,138,96],M.BLK,1));
+  for(let i=1;i<8;i++){lv.add(cbox([7.6,-61,22+i*12],[4.8,122,6],M.DARK,.2));const sl=mesh(new THREE.BoxGeometry(1.2,5,122),M.BLK2);sl.position.copy(V(7.4,0,25+i*12));sl.rotation.z=0.6;lv.add(sl);}
+  for(const yk of[-76.5,70])lv.add(cbox([7.2,yk,26],[5.6,6.5,88],M.BLK2,.3));
+  const il=faceLeft(plate('INTAKE',44,7));il.position.copy(V(7.9,0,110));lv.add(il);
+  reg(C,'louver',lv,[V3(0,0,0),V3(0,126,0)],V3(0,40,0),[]);
+  C.air=[{hot:false,pts:[V(-80,0,60),V(-10,0,60),V(60,0,60)]},{hot:false,pts:[V(90,0,215),V(90,0,150),V(90,0,102)]},{hot:true,pts:[V(120,30,85),V(170,70,75),V(200,89,70),V(200,170,85)]}];
+  C.vib={pos:V(264,-90,107),n:V3(0,0,1),node:V3(150,0,160)};C.groundY=0;C.cam=[0.62,0.98];C.gate=true;
+  return C;
+}
+
+// ---------- assemble all four (built once, toggled by visibility)
+const builders={A:buildA,B:buildB,C:buildC,D:buildD},CONS={};
+const ground=new THREE.Group();scene.add(ground);
+{ const sh=new THREE.Mesh(new THREE.CircleGeometry(1400,48),new THREE.ShadowMaterial({opacity:.5}));sh.rotation.x=-Math.PI/2;sh.receiveShadow=true;ground.add(sh);
+  const grid=new THREE.GridHelper(1600,32,0x2b3646,0x18202c);grid.position.y=0.2;grid.material.transparent=true;grid.material.opacity=.55;ground.add(grid);
+  for(const [r,o] of[[300,.5],[460,.28],[640,.16]]){const ring=new THREE.Mesh(new THREE.RingGeometry(r,r+1.4,96),new THREE.MeshBasicMaterial({color:AMBER,transparent:true,opacity:o,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=0.4;ground.add(ring);}
+  for(let i=0;i<4;i++){const t=new THREE.Mesh(new THREE.PlaneGeometry(26,1.6),new THREE.MeshBasicMaterial({color:AMBER,transparent:true,opacity:.6,side:THREE.DoubleSide}));t.rotation.x=-Math.PI/2;t.rotation.z=i*Math.PI/2;t.position.set(Math.cos(i*Math.PI/2)*300,0.5,-Math.sin(i*Math.PI/2)*300);ground.add(t);} }
+
+function cloneMats(objs){const map=new Map(),list=[];for(const o of objs)o.traverse(n=>{if(n.isMesh&&n.material&&n.material.isMeshStandardMaterial&&n.material!==M.YEL&&!n.material.map){let c=map.get(n.material);if(!c){c=n.material.clone();map.set(n.material,c);list.push(c);}n.material=c;}});return list;}
+function finish(C){
+  // IMU module: carrier lives inside a parent group; mover offsets are local to that parent (no rotation there)
+  C.imu.carrier.userData.mod='imu';const m=C.mods.imu={objs:[C.imu.carrier],movers:[{o:C.imu.carrier,path:[V3(0,0,0),V3(0,46,0)],home:C.imu.carrier.position.clone(),ex:V3(0,26,0)}],screws:C.imu.screws,anchor:C.imu.carrier};
+  // envelope BEFORE the external vibration node / stands are added
+  C.root.add(C.body);C.root.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(C.body);C.bbox=bb;
+  C.size=[Math.round(bb.max.x-bb.min.x),Math.round(bb.max.z-bb.min.z),Math.round(bb.max.y-bb.min.y)];
+  const gy=Math.min(C.groundY,bb.min.y);C.gy=gy;
+  const vn=vibNode(C.vib.pos,C.vib.n,gy,C.vib.node);C.body.add(vn.plug);C.body.add(vn.node);vn.plug.userData.mod='vib';vn.node.userData.mod='vib';
+  C.mods.vib={objs:[vn.plug,vn.node],movers:[{o:vn.plug,path:[V3(0,0,0),C.vib.n.clone().multiplyScalar(26)],home:vn.plug.position.clone(),ex:C.vib.n.clone().multiplyScalar(40)}],screws:[],anchor:vn.plug,anchorPos:C.vib.pos};
+  C.root.add(C.extras);
+  for(const id in C.mods){C.mods[id].mats=cloneMats(C.mods[id].objs.filter(o=>!o.userData.aux));C.mods[id].out=0;}
+  // airflow overlay
+  C.airG=new THREE.Group();C.airG.visible=false;C.flow=[];
+  for(const a of C.air){const curve=new THREE.CatmullRomCurve3(a.pts),col=a.hot?AMBER:CYAN;
+    const tube=new THREE.Mesh(new THREE.TubeGeometry(curve,24,1.1,6),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.55}));C.airG.add(tube);
+    for(let i=0;i<3;i++){const cone=new THREE.Mesh(new THREE.ConeGeometry(5,14,10),new THREE.MeshBasicMaterial({color:col}));C.airG.add(cone);C.flow.push({cone,curve,off:i/3});}}
+  C.root.add(C.airG);C.root.visible=false;scene.add(C.root);
+  C.pick=[];for(const id in C.mods)for(const o of C.mods[id].objs)if(!o.userData.aux)C.pick.push(o);
+}
+
+// selection bracket (HUD corner marks around the selected module)
+const bracket=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:AMBER,depthTest:false,transparent:true,opacity:.95}));
+bracket.geometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(8*3*2*3),3));bracket.renderOrder=10;bracket.visible=false;bracket.frustumCulled=false;scene.add(bracket);
+const _bb=new THREE.Box3();
+function updateBracket(mod){
+  _bb.makeEmpty();for(const mv of mod.movers)if(!mv.aux)_bb.expandByObject(mv.o);if(mod.movers.length===0)for(const o of mod.objs)_bb.expandByObject(o);
+  _bb.expandByScalar(3);const p=bracket.geometry.attributes.position.array,mn=_bb.min,mx=_bb.max;let k=0;
+  const len=Math.min(16,(mx.x-mn.x)/3,(mx.y-mn.y)/3+4,(mx.z-mn.z)/3+4);
+  for(const x of[mn.x,mx.x])for(const y of[mn.y,mx.y])for(const z of[mn.z,mx.z]){
+    const dx=x===mn.x?len:-len,dy=y===mn.y?len:-len,dz=z===mn.z?len:-len;
+    for(const d of[[dx,0,0],[0,dy,0],[0,0,dz]]){p[k++]=x;p[k++]=y;p[k++]=z;p[k++]=x+d[0];p[k++]=y+d[1];p[k++]=z+d[2];}}
+  bracket.geometry.attributes.position.needsUpdate=true;
+}
+
+// ---------- animation state
+let cur=null,dirty=true,explodeT=0,explodeTarget=0,lidT=1,lidTarget=1,swap=null,beautyIdx=0,beautyWait=0,camTween=null;
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const DUR={lid:380,unlock:320,out:400,hold:950,in:400,lock:300};
+function pathAt(path,t){ if(path.length<2)return path[0]; let tot=0;const seg=[];for(let i=1;i<path.length;i++){const l=path[i].distanceTo(path[i-1]);seg.push(l);tot+=l;}
+  let d=t*tot;for(let i=0;i<seg.length;i++){if(d<=seg[i]||i===seg.length-1){return path[i].clone().lerp(path[i+1],seg[i]?Math.min(1,d/seg[i]):1);}d-=seg[i];}return path[path.length-1];}
+function layout(){ if(!cur)return;
+  for(const p of cur.parts)p.o.position.copy(p.home).addScaledVector(p.ex,explodeT);
+  for(const id in cur.mods){const m=cur.mods[id];for(const mv of m.movers){mv.o.position.copy(mv.home).addScaledVector(mv.ex,explodeT).add(pathAt(mv.path,m.out));}}
+  if(cur.lidPivot){cur.lidPivot.position.copy(cur.lidHome).add(V3(0,250*explodeT,0));cur.lidPivot.rotation.x=-lidT*112*Math.PI/180;}
+  dirty=true;}
+function setSel(id,src){ if(!cur)return; for(const k in cur.mods)for(const mt of cur.mods[k].mats){mt.emissive.setHex(k===id?AMBER:0);mt.emissiveIntensity=k===id?0.05:0;}
+  bracket.visible=!!id;dirty=true;}
+function startSwap(id){ if(!cur||!cur.mods[id])return; const m=cur.mods[id];
+  if(swap&&swap.id!==id){cur.mods[swap.id].out=0;for(const s of cur.mods[swap.id].screws)s.userData.spin.rotation.y=0;}
+  if(st.reduced){ const goOut=!(swap&&swap.id===id&&swap.phase==='hold'); if(cur.lidPivot&&goOut){lidT=lidTarget=1;if(!st.lid)T1.set('lid',true,'3d');}
+    m.out=goOut?1:0;swap=goOut?{id,phase:'hold',t0:performance.now(),frozen:true}:null;T1.set('phase',goOut?'hold':null,'3d');layout();return; }
+  const needLid=cur.lidPivot&&lidT<0.98; if(needLid){lidTarget=1;if(!st.lid)T1.set('lid',true,'3d');}
+  swap={id,phase:needLid?'lid':'unlock',t0:performance.now()};T1.set('phase',swap.phase,'3d');dirty=true;}
+function stepSwap(now){ if(!swap||swap.frozen)return; const m=cur.mods[swap.id];let p=(now-swap.t0)/DUR[swap.phase];
+  const next=ph=>{swap.phase=ph;swap.t0=now;T1.set('phase',ph,'3d');};
+  switch(swap.phase){
+    case'lid':if(p>=1)next('unlock');break;
+    case'unlock':for(const s of m.screws)s.userData.spin.rotation.y=Math.min(1,p)*Math.PI*3;if(p>=1)next('out');break;
+    case'out':m.out=ease(Math.min(1,p));if(p>=1)next('hold');break;
+    case'hold':if(p>=1&&!(st.hold&&!st.beauty))next('in');break;
+    case'in':m.out=1-ease(Math.min(1,p));if(p>=1)next('lock');break;
+    case'lock':for(const s of m.screws)s.userData.spin.rotation.y=(1-Math.min(1,p))*Math.PI*3;if(p>=1){swap=null;T1.set('phase',null,'3d');beautyWait=now+500;}break;}
+  layout();}
+
+function fitCamera(animate){ if(!cur)return; const bb=cur.bbox,c=bb.getCenter(new THREE.Vector3()),r=bb.getSize(new THREE.Vector3()).length()/2;
+  const asp=camera.aspect,vf=camera.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*asp),f=Math.min(vf,hf);
+  const dist=Math.min(2100,r/Math.sin(f/2)*(st.beauty?1.0:0.86)),az=cur.cam[0],el=cur.cam[1];
+  const pos=new THREE.Vector3(Math.sin(az)*Math.sin(el),Math.cos(el),Math.cos(az)*Math.sin(el)).multiplyScalar(dist).add(c);
+  if(animate&&!st.reduced){camTween={p0:camera.position.clone(),p1:pos,t0:controls.target.clone(),t1:c,s:performance.now()};}
+  else{camera.position.copy(pos);controls.target.copy(c);camTween=null;}
+  dirty=true;}
+function showConcept(k,animate){
+  if(!CONS[k]){CONS[k]=builders[k]();finish(CONS[k]);}
+  if(cur){cur.root.visible=false;if(swap){cur.mods[swap.id].out=0;for(const s of cur.mods[swap.id].screws)s.userData.spin.rotation.y=0;swap=null;T1.set('phase',null,'3d');}setSel(null);}
+  cur=CONS[k];cur.root.visible=true;ground.position.y=cur.gy;cur.airG.visible=st.airflow;
+  key.target.position.copy(cur.bbox.getCenter(new THREE.Vector3()));key.target.updateMatrixWorld();
+  if(cur.lidPivot){lidT=lidTarget=st.lid?1:0;}
+  layout();fitCamera(animate);T1.set('envelope',cur.size,'3d');beautyIdx=0;beautyWait=performance.now()+900;
+}
+
+// ---------- events from the UI
+window.addEventListener('t1:concept',e=>showConcept(e.detail.value,true));
+window.addEventListener('t1:explode',e=>{explodeTarget=e.detail.value;if(st.reduced||e.detail.src!=='key'){explodeT=explodeTarget;layout();}dirty=true;});
+window.addEventListener('t1:airflow',()=>{if(cur){cur.airG.visible=st.airflow;if(st.airflow&&cur.lidPivot&&st.lid&&!swap)T1.set('lid',false,'3d');}dirty=true;});
+window.addEventListener('t1:lid',()=>{lidTarget=st.lid?1:0;if(st.reduced){lidT=lidTarget;layout();}dirty=true;});
+window.addEventListener('t1:selected',e=>{setSel(st.selected);});
+window.addEventListener('t1:swap',e=>startSwap(e.detail.id));
+window.addEventListener('t1:resetview',()=>fitCamera(true));
+window.addEventListener('t1:beauty',()=>{controls.autoRotate=st.beauty&&!st.reduced;beautyIdx=0;beautyWait=performance.now()+1200;
+  if(st.beauty){if(explodeTarget!==0){explodeTarget=0;document.getElementById('explode').value=0;st.explode=0;document.getElementById('rEx').textContent='0';}if(st.airflow)T1.set('airflow',false,'3d');if(cur&&cur.lidPivot&&!st.lid)T1.set('lid',true,'3d');}
+  else if(!swap){T1.set('selected',null,'3d');}
+  requestAnimationFrame(()=>{resize();fitCamera(false);});});
+window.addEventListener('t1:reduced',()=>{controls.autoRotate=st.beauty&&!st.reduced;});
+
+// ---------- picking
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
+function modAt(ev){const r=canvas.getBoundingClientRect();ptr.set(((ev.clientX-r.left)/r.width)*2-1,-((ev.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObjects(cur.pick,true);for(const h of hit){let o=h.object;while(o){if(o.userData.mod)return o.userData.mod;o=o.parent;}}return null;}
+canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:performance.now()};});
+canvas.addEventListener('pointerup',e=>{ if(!down||!cur)return; const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null; if(moved>6)return;
+  if(st.beauty)return; const id=modAt(e); if(id){T1.set('selected',id,'3d');startSwap(id);} });
+canvas.addEventListener('pointermove',e=>{ if(!cur||down||st.beauty||e.pointerType==='touch')return; canvas.style.cursor=modAt(e)?'pointer':'grab'; });
+canvas.addEventListener('dblclick',()=>{ if(st.beauty)return; fitCamera(true); });
+canvas.addEventListener('keydown',e=>{ const sp=new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));let hit=true;
+  if(e.key==='ArrowLeft')sp.theta-=0.12;else if(e.key==='ArrowRight')sp.theta+=0.12;else if(e.key==='ArrowUp')sp.phi=Math.max(0.15,sp.phi-0.08);else if(e.key==='ArrowDown')sp.phi=Math.min(controls.maxPolarAngle,sp.phi+0.08);
+  else if(e.key==='+'||e.key==='=')sp.radius=Math.max(controls.minDistance,sp.radius*0.9);else if(e.key==='-'||e.key==='_')sp.radius=Math.min(controls.maxDistance,sp.radius*1.1);else hit=false;
+  if(hit){e.preventDefault();camera.position.setFromSpherical(sp).add(controls.target);dirty=true;} });
+
+// ---------- overlay tags
+const tagSel=document.getElementById('tagSel'),tagDatum=document.getElementById('tagDatum'),leadSel=document.getElementById('leadSel'),leadDatum=document.getElementById('leadDatum');
+const _v=new THREE.Vector3();let W=1,H=1;
+function placeTag(el,line,world,dx,dy){ _v.copy(world).project(camera); const x=(_v.x*.5+.5)*W,y=(-_v.y*.5+.5)*H;
+  if(_v.z>1){el.style.transform='translate(-999px,-999px)';line.setAttribute('x1',-9);line.setAttribute('x2',-9);return;}
+  const tw=el.offsetWidth,th=el.offsetHeight;let tx=x+dx,ty=y+dy; if(dx<0)tx-=tw; tx=Math.max(14,Math.min(W-tw-14,tx));ty=Math.max(64,Math.min(H-th-44,ty));
+  el.style.transform='translate('+tx.toFixed(1)+'px,'+ty.toFixed(1)+'px)';
+  line.setAttribute('x1',x);line.setAttribute('y1',y);line.setAttribute('x2',tx+(tx>x?0:tw));line.setAttribute('y2',ty+th/2);}
+function hideTag(el,line){el.style.transform='translate(-999px,-999px)';line.setAttribute('x1',-9);line.setAttribute('y1',-9);line.setAttribute('x2',-9);line.setAttribute('y2',-9);}
+const PH_TXT={lid:'opening lid',unlock:'releasing',out:'withdrawing',hold:'out — inspect / replace',in:'re-seating',lock:'locking'};
+function updateTags(){ if(!cur)return;
+  const id=st.selected,m=id&&cur.mods[id];
+  if(m){ updateBracket(m);_bb.getCenter(_v);const top=_v.clone();top.y=_bb.max.y;
+    const blocked=cur.gate&&id==='core'&&swap&&swap.id===id&&(swap.phase==='hold'||swap.phase==='out');tagSel.className='tag'+(blocked?' rd':'');
+    tagSel.innerHTML=T1.MODS[id].label+'<small>'+(blocked?'BLOCKED \u2014 hardening gate: 80 mm opening vs 81 / 87 mm parts':(swap&&swap.id===id?PH_TXT[swap.phase]:(st.beauty?'swap':'selected')))+'</small>';placeTag(tagSel,leadSel,top,-46,-70);}
+  else{hideTag(tagSel,leadSel);bracket.visible=false;}
+  if(!st.beauty&&cur.datumAnchor&&st.selected!=='imu'){cur.datumAnchor.getWorldPosition(_v);_v.y+=6;placeTag(tagDatum,leadDatum,_v.clone(),36,-96);}else hideTag(tagDatum,leadDatum);}
+
+// ---------- loop (renders only when something changed)
+function resize(){const r=stage.getBoundingClientRect();W=Math.max(1,r.width);H=Math.max(1,r.height);renderer.setSize(W,H,false);camera.aspect=W/H;camera.updateProjectionMatrix();dirty=true;}
+new ResizeObserver(()=>{resize();}).observe(stage);
+let lastView='';
+function frame(now){
+  requestAnimationFrame(frame); if(!cur)return;
+  if(Math.abs(explodeT-explodeTarget)>0.001){explodeT+=(explodeTarget-explodeT)*0.22;if(Math.abs(explodeT-explodeTarget)<0.004)explodeT=explodeTarget;layout();}
+  if(Math.abs(lidT-lidTarget)>0.001){const s=16/DUR.lid*1.0;lidT+=Math.sign(lidTarget-lidT)*Math.min(Math.abs(lidTarget-lidT),s);layout();}
+  if(swap)stepSwap(now);
+  if(st.beauty&&!swap&&now>beautyWait){const list=T1.CONCEPTS[st.concept].mods.filter(x=>x!=='vib'&&x!=='spare');const id=list[beautyIdx%list.length];beautyIdx++;
+    T1.set('selected',id,'3d');startSwap(id);if(st.reduced){const me=swap;setTimeout(()=>{if(swap===me){cur.mods[id].out=0;swap=null;layout();beautyWait=performance.now()+700;}},1400);beautyWait=now+1e9;}}
+  if(camTween){const t=Math.min(1,(now-camTween.s)/400),k=ease(t);camera.position.lerpVectors(camTween.p0,camTween.p1,k);controls.target.lerpVectors(camTween.t0,camTween.t1,k);if(t>=1)camTween=null;dirty=true;}
+  if(st.airflow&&!st.reduced){for(const f of cur.flow){const t=((now/1600)+f.off)%1;f.curve.getPointAt(t,f.cone.position);const tg=f.curve.getTangentAt(t);f.cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tg);}dirty=true;}
+  else if(st.airflow){for(const f of cur.flow){const t=0.25+f.off*0.6;f.curve.getPointAt(t,f.cone.position);f.cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),f.curve.getTangentAt(t));}}
+  if(controls.update())dirty=true;
+  if(dirty){dirty=false;renderer.render(scene,camera);updateTags();
+    const sp=new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+    const v=[((Math.round(sp.theta*180/Math.PI)%360)+360)%360,Math.round(90-sp.phi*180/Math.PI),Math.round(sp.radius)],sv=v.join();
+    if(sv!==lastView){lastView=sv;T1.set('view',v,'3d');}}
+}
+resize();
+const start=()=>{showConcept(st.concept,false);requestAnimationFrame(frame);};
+// wait (briefly) for the stencil face so the label plates render in it
+let started=false;const go=()=>{if(!started){started=true;start();}};
+try{Promise.race([document.fonts.load('40px "Saira Stencil One"'),new Promise(r=>setTimeout(r,1500))]).then(go,go);}catch(e){go();}
+// deep links for demos / screenshots: #c=B&x=60&air=1&sel=traffic&beauty=1
+try{const h=new URLSearchParams(location.hash.slice(1));
+  if(h.get('c')&&'ABCD'.includes(h.get('c')))st.concept=h.get('c');
+  window.addEventListener('load',()=>setTimeout(()=>{ if(h.get('c'))T1.set('concept',st.concept);
+    if(h.get('x')){const x=Math.max(0,Math.min(100,Number(h.get('x'))||0));document.getElementById('explode').value=x;document.getElementById('rEx').textContent=x;T1.set('explode',x/100);}
+    if(h.get('air'))T1.set('airflow',true); if(h.get('sel')&&T1.SWAP[st.concept][h.get('sel')]){T1.set('selected',h.get('sel'));T1.fire('swap',{id:h.get('sel')});}
+    if(h.get('beauty'))document.getElementById('btnBeauty').click();},1700));}catch(e){}
+</script>
+</body>
+</html>
