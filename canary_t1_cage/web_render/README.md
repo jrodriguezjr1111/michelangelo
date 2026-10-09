@@ -43,3 +43,17 @@ alone, transparent). No badge, registration, glazing, doors, type name or real-a
 Reproduce: `python3 render_cabin.py --out <dir> --width 2400 --ss 2` and
 `python3 render_cutout.py --out <dir> --still-width 2400 --frame-width 1600 --ss 2` (`--what stills,breathe,strobe`).
 Breathe: 24 frames, k = (1 - cos 2πi/24)/2, 10 fps = 2.4 s loop. Strobe: 12 frames, 6 on / 6 off.
+
+## 2026-10-09 v3 — black flush box, antennas under acrylic (outputs to `canary/company/generated/renders/canary-unit-2026-10-09-v3/`, gitignored)
+
+Javi's direction (2026-10-09): "make the box black, and the top should have the antennas below clear plexiglass, so that the
+box, with the exception of the side that has the battery, is flat on all sides." Same kit, same views, **same canvas
+sizes and filenames as v2** (prefix `v3_`), so the site swap is a file replacement.
+
+| File | Role |
+|---|---|
+| `canary_unit_web_v3.scad` | v2's massing re-cut as ONE block 444.5 x 279 x 295.38: rails, posts, both long-face plates (monolith stencil near, plain far) and both end panels flush; gussets gone from the silhouette; every member / plate boundary a 0.4 mm seam groove; plate features (vents blind 7 deep, CANARY apertures 0.8 over a rebate + backer, chevron inlays, low bolt heads) cut INTO the flush face. Top deck + proud dome replaced by a 5 mm acrylic panel flush with the top rails, inside them (0.5 clearance), over the row-3 bay. Under it, on the flat floor (top of rail 3, z 234.42): the GNSS cap on a pedestal and three generic stubs. **The v2 110 hemisphere does not fit the 55.96 bay** (40.96 clear + 20 rail − 5 acrylic), so the cap is 90 chord x 28 high (sphere R 50.2) on a 3 + 10 pedestal → top z 275.42, 15 under the acrylic; stubs Ø10 x 36 on Ø18 pucks → 17 under. Proportions only. Battery block unchanged (+X end, the one protrusion). Groups `body / dome / chevron / backer / vents / acrylic`; asserts: bay clearances, dome/stubs inside the bay, vents stay blind, battery inside the end panel. |
+| `render_web_v3.py` | Two geometry passes per view: the opaque world, then the acrylic alone; where the panel is in front, the interior is tinted `#DCE6F0` at 30 % and its edges drawn ghosted at 45 % (hidden-line see-through, no refraction); the panel's own outline is z-tested against the body. Faces near-black three-tone `#1B2129` top / `#14191F` long faces / `#0F1317` ends (vent floors `#0A0D10`, dome one pale tone); edges `#C9D2DD` at the house 1.6 px, silhouettes 1.3x; faint navy contact shadow; chevrons `#E29A1F`; backer `#353E49` off / `#FFC247` + glow backlit. **Every canvas is framed against the v2 body + dome meshes** (exported from `canary_unit_web_v2.scad` into `_mesh/v2ref_*.stl`) and the sheet crops at the v2 alpha boxes, which is what keeps 2400 x 2414 / 1903 / 2743 / 1560 / 2098 identical. SVG groups `body / dome / chevron / backer / acrylic`, each split into `feature` / `silhouette`, ghosted segments carrying `stroke-opacity`. |
+
+Reproduce: `python3 render_web_v3.py --out <dir> --width 2400 --ss 2` (`--views hero,hero_lit,opp,front,side,top,sheet`; ~2 min).
+Disclosure posture unchanged: under the acrylic only the cap, pedestal, stubs and a flat floor; no I/O, internals, cables or mounting.
