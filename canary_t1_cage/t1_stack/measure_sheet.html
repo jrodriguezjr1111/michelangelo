@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T1 Stack Measurements</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #151515; --ink2: #55544f; --muted: #8b8a84;
+  --line: #d9d7d0; --draw: #2b2b2b; --dim: #1f6fd1; --accent: #f2b705; --accent-ink: #1a1400;
+  --p1: #c2410c; --ok: #1a7f4b; --field: #fbfbf9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151514; --panel: #1f1f1d; --ink: #f2f1ec; --ink2: #c3c2b7; --muted: #8f8e87;
+    --line: #3a3936; --draw: #e6e4dc; --dim: #6aa8ff; --accent: #f2b705; --accent-ink: #1a1400;
+    --p1: #fb8a4c; --ok: #4fc58a; --field: #262624;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151514; --panel: #1f1f1d; --ink: #f2f1ec; --ink2: #c3c2b7; --muted: #8f8e87;
+  --line: #3a3936; --draw: #e6e4dc; --dim: #6aa8ff; --accent: #f2b705; --accent-ink: #1a1400;
+  --p1: #fb8a4c; --ok: #4fc58a; --field: #262624;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+header { border-bottom: 3px solid var(--accent); padding-bottom: 12px; margin-bottom: 20px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: .02em; }
+h2 { font-size: 18px; margin: 32px 0 8px; display: flex; gap: 10px; align-items: baseline; }
+h2 .tag { font-size: 12px; font-weight: 600; color: var(--accent-ink); background: var(--accent); padding: 2px 8px; border-radius: 3px; }
+p.lead, .note { color: var(--ink2); margin: 4px 0; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
+button { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; margin: 10px 0; }
+.draw { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.draw figure { margin: 0; }
+.draw figcaption { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px; }
+svg { width: 100%; height: auto; display: block; }
+svg .o { fill: none; stroke: var(--draw); stroke-width: 1.6; }
+svg .t { fill: none; stroke: var(--draw); stroke-width: 1; stroke-dasharray: 3 3; }
+svg .d { fill: none; stroke: var(--dim); stroke-width: 1; }
+svg .n circle { fill: var(--dim); } svg .n text { fill: #fff; font: 700 11px sans-serif; text-anchor: middle; dominant-baseline: central; }
+svg .lbl { fill: var(--muted); font: 11px sans-serif; }
+.wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+td.no { width: 42px; font-weight: 700; color: var(--dim); }
+td.est { width: 96px; font-variant-numeric: tabular-nums; color: var(--ink2); white-space: nowrap; }
+td.pri { width: 44px; } .p1 { color: var(--p1); font-weight: 700; }
+td input { width: 100%; min-width: 90px; font: inherit; font-variant-numeric: tabular-nums; padding: 5px 7px; border: 1px solid var(--line); border-radius: 4px; background: var(--field); color: var(--ink); }
+td input.filled { border-color: var(--ok); }
+td.how { color: var(--ink2); font-size: 13px; }
+.status { font-size: 13px; color: var(--muted); }
+footer { margin-top: 36px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+@media print {
+  body { background: #fff; } .bar, .status { display: none; } .panel { border: none; padding: 0; }
+  td input { border: none; border-bottom: 1px solid #999; border-radius: 0; background: none; }
+  h2 { break-after: avoid; } .panel { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>T1 stack: measurement sheet</h1>
+  <p class="lead">Caliper these before any ladder is printed. Every number in <code>t1_stack/make_t1_stack.scad</code> is an estimate taken from photos 33 to 35, using the cutting-mat grid and the RJ45, USB-A, DP and SMA bodies as rulers. Numbers on the drawings match the rows in the tables. <span class="p1">P1</span> means measure first, because the ladders cannot be printed without it.</p>
+  <div class="bar">
+    <button class="primary" id="csv">Copy as CSV</button>
+    <button id="dl">Download CSV</button>
+    <button id="print">Print blank / filled</button>
+    <button id="clear">Clear my entries</button>
+    <span class="status" id="status"></span>
+  </div>
+  <p class="note">All values in mm unless the row says otherwise. Entries are saved in this browser as you type. To send them back, use Copy as CSV and paste the result into the chat.</p>
+</header>
+
+<!-- =================================================================== A. CASES -->
+<h2>A. Aluminium cases (measure both) <span class="tag">P1</span></h2>
+<div class="panel">
+  <div class="draw">
+    <figure>
+      <svg viewBox="0 0 340 200" aria-label="Case I/O face with numbered dimensions">
+        <rect class="o" x="40" y="40" width="260" height="92" rx="4"/>
+        <circle class="t" cx="62" cy="62" r="4"/><circle class="t" cx="278" cy="62" r="4"/>
+        <circle class="t" cx="62" cy="110" r="4"/><circle class="t" cx="278" cy="110" r="4"/>
+        <rect class="t" x="130" y="80" width="30" height="30"/><rect class="t" x="170" y="80" width="30" height="30"/><rect class="t" x="210" y="80" width="32" height="26"/>
+        <path class="d" d="M40 158 H300 M40 152 v12 M300 152 v12"/>
+        <path class="d" d="M20 40 V132 M14 40 h12 M14 132 h12"/>
+        <path class="d" d="M62 26 H278 M62 20 v12 M278 20 v12"/>
+        <path class="d" d="M318 62 V110 M312 62 h12 M312 110 h12"/>
+        <g class="n"><circle cx="170" cy="172" r="9"/><text x="170" y="172">2</text></g>
+        <g class="n"><circle cx="20" cy="86" r="9"/><text x="20" y="86">3</text></g>
+        <g class="n"><circle cx="170" cy="14" r="9"/><text x="170" y="14">12</text></g>
+        <g class="n"><circle cx="330" cy="86" r="9"/><text x="330" y="86">12</text></g>
+        <text class="lbl" x="170" y="194" text-anchor="middle">I/O FACE (looking at the ports)</text>
+      </svg>
+      <figcaption>I/O face: width, height, and the corner-screw pattern</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 340 200" aria-label="Case side view with grooves and vents">
+        <rect class="o" x="30" y="40" width="270" height="92" rx="4"/>
+        <line class="o" x1="38" y1="40" x2="38" y2="132"/><line class="o" x1="292" y1="40" x2="292" y2="132"/>
+        <line class="t" x1="38" y1="118" x2="292" y2="118"/><line class="t" x1="38" y1="86" x2="292" y2="86"/><line class="t" x1="38" y1="54" x2="292" y2="54"/>
+        <rect class="o" x="90" y="92" width="120" height="6" rx="3"/><rect class="o" x="120" y="70" width="90" height="6" rx="3"/>
+        <path class="d" d="M30 158 H300 M30 152 v12 M300 152 v12"/>
+        <path class="d" d="M312 118 V132 M306 118 h12 M306 132 h12"/>
+        <path class="d" d="M90 150 H210"/>
+        <path class="d" d="M30 24 H38 M30 18 v12 M38 18 v12"/>
+        <g class="n"><circle cx="165" cy="172" r="9"/><text x="165" y="172">1</text></g>
+        <g class="n"><circle cx="326" cy="125" r="9"/><text x="326" y="125">5</text></g>
+        <g class="n"><circle cx="150" cy="140" r="9"/><text x="150" y="140">9</text></g>
+        <g class="n"><circle cx="34" cy="12" r="9"/><text x="34" y="12">4</text></g>
+        <g class="n"><circle cx="250" cy="110" r="9"/><text x="250" y="110">6</text></g>
+        <text class="lbl" x="165" y="194" text-anchor="middle">SIDE (I/O face on the right)</text>
+      </svg>
+      <figcaption>Side: length, end plates, grooves, vent slots</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 340 200" aria-label="Groove section detail">
+        <path class="o" d="M60 30 H150 V70 H142 V78 H150 V160 H60"/>
+        <path class="d" d="M170 70 V78 M164 70 h12 M164 78 h12"/>
+        <path class="d" d="M142 94 H150 M142 88 v12 M150 88 v12"/>
+        <path class="d" d="M100 74 V160 M94 160 h12"/>
+        <g class="n"><circle cx="190" cy="74" r="9"/><text x="190" y="74">7</text></g>
+        <g class="n"><circle cx="146" cy="110" r="9"/><text x="146" y="110">8</text></g>
+        <g class="n"><circle cx="84" cy="118" r="9"/><text x="84" y="118">5</text></g>
+        <text class="lbl" x="210" y="130">section through the side wall</text>
+        <text class="lbl" x="210" y="146">(lowest groove, bottom up)</text>
+      </svg>
+      <figcaption>Groove detail: the ladder tongue rides this</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 340 200" aria-label="Orin case top view with fan grille">
+        <rect class="o" x="40" y="30" width="200" height="150" rx="4"/>
+        <circle class="o" cx="112" cy="100" r="30"/><circle class="t" cx="112" cy="100" r="20"/>
+        <line class="t" x1="240" y1="30" x2="240" y2="180"/>
+        <path class="d" d="M40 190 H112 M40 184 v12 M112 184 v12"/>
+        <path class="d" d="M112 20 V70"/>
+        <path class="d" d="M82 140 H142"/>
+        <g class="n"><circle cx="76" cy="190" r="9"/><text x="76" y="190">10</text></g>
+        <g class="n"><circle cx="112" cy="140" r="9"/><text x="112" y="140">11</text></g>
+        <text class="lbl" x="250" y="100">I/O face</text><text class="lbl" x="18" y="100" transform="rotate(-90 18 100)">back</text>
+      </svg>
+      <figcaption>Orin top: fan grille position (the IMU plate is notched around it)</figcaption>
+    </figure>
+  </div>
+  <div class="wrap"><table id="t-cases">
+    <thead><tr><th>#</th><th>dimension</th><th>EST (model)</th><th>Orin case</th><th>RTK/LTE case</th><th>P</th><th>how</th></tr></thead>
+    <tbody>
+      <tr><td class="no">1</td><td>Outer length, I/O face to back face, <b>over the end plates</b></td><td class="est">106</td><td><input data-k="A1_orin"></td><td><input data-k="A1_rtk"></td><td class="pri p1">P1</td><td class="how">Across the end-plate faces, not over the SMAs</td></tr>
+      <tr><td class="no">2</td><td>Outer width at the I/O face (across the shell, widest point)</td><td class="est">132</td><td><input data-k="A2_orin"></td><td><input data-k="A2_rtk"></td><td class="pri p1">P1</td><td class="how">Photo 33 suggests the lower case may be ~10 % narrower. Please confirm.</td></tr>
+      <tr><td class="no">3</td><td>Outer height, feet included if any</td><td class="est">47 / 41</td><td><input data-k="A3_orin"></td><td><input data-k="A3_rtk"></td><td class="pri p1">P1</td><td class="how">On a flat surface, over the top face</td></tr>
+      <tr><td class="no">4</td><td>End plate thickness, and how far it is proud of the shell (each side)</td><td class="est">3 / 0</td><td><input data-k="A4_orin"></td><td><input data-k="A4_rtk"></td><td class="pri p1">P1</td><td class="how">The dog clamps the I/O end plate's right edge</td></tr>
+      <tr><td class="no">5</td><td>Lowest side groove: centre height above the case bottom</td><td class="est">6.0</td><td><input data-k="A5_orin"></td><td><input data-k="A5_rtk"></td><td class="pri p1">P1</td><td class="how">If there is no real groove, write "none". The model then falls back to KEY = "lip".</td></tr>
+      <tr><td class="no">6</td><td>Number of side grooves, with the centre height of each (list)</td><td class="est">3</td><td><input data-k="A6_orin"></td><td><input data-k="A6_rtk"></td><td class="pri"></td><td class="how">e.g. "6, 23.5, 41"</td></tr>
+      <tr><td class="no">7</td><td>Groove width at the mouth</td><td class="est">3.0</td><td><input data-k="A7_orin"></td><td><input data-k="A7_rtk"></td><td class="pri p1">P1</td><td class="how">Caliper jaw tips, or a feeler/drill-shank gauge</td></tr>
+      <tr><td class="no">8</td><td>Groove depth</td><td class="est">1.2</td><td><input data-k="A8_orin"></td><td><input data-k="A8_rtk"></td><td class="pri p1">P1</td><td class="how">Depth rod of the caliper</td></tr>
+      <tr><td class="no">9</td><td>Side vent slots: z from / to above the bottom, and their start / end from the back face</td><td class="est">band 30-75 % H</td><td><input data-k="A9_orin"></td><td><input data-k="A9_rtk"></td><td class="pri"></td><td class="how">The ladder window must stay open over these</td></tr>
+      <tr><td class="no">10</td><td>Fan grille centre, measured from the back face</td><td class="est">38</td><td><input data-k="A10_orin"></td><td class="est">n/a</td><td class="pri p1">P1</td><td class="how">Plus the offset from the case centreline (EST 0)</td></tr>
+      <tr><td class="no">11</td><td>Fan grille outer diameter</td><td class="est">45</td><td><input data-k="A11_orin"></td><td class="est">n/a</td><td class="pri"></td><td class="how">Outermost ring of slots</td></tr>
+      <tr><td class="no">12</td><td>I/O face corner-screw pattern, X c-c by Z c-c</td><td class="est">122 × 37</td><td><input data-k="A12_orin"></td><td><input data-k="A12_rtk"></td><td class="pri"></td><td class="how">The dog pad must land between these screws</td></tr>
+      <tr><td class="no">13</td><td>Bottom face: any threaded holes or feet? Give the pattern and thread</td><td class="est">none drawn</td><td><input data-k="A13_orin"></td><td><input data-k="A13_rtk"></td><td class="pri"></td><td class="how">1/4-20 in the bottom would allow a second retention bolt</td></tr>
+      <tr><td class="no">14</td><td>Side fins/ribs: pitch and height, if the shell is ribbed rather than grooved</td><td class="est">shallow grooves</td><td><input data-k="A14_orin"></td><td><input data-k="A14_rtk"></td><td class="pri"></td><td class="how">Photo 34 reads as grooves; confirm</td></tr>
+      <tr><td class="no">15</td><td>Mass (kitchen scale is fine)</td><td class="est">750 / 480 g</td><td><input data-k="A15_orin"></td><td><input data-k="A15_rtk"></td><td class="pri"></td><td class="how">Feeds the stack's 18 g check</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- =================================================================== B. HUB -->
+<h2>B. Advantech UHR204 hub</h2>
+<div class="panel">
+  <div class="draw">
+    <figure>
+      <svg viewBox="0 0 340 170" aria-label="Hub top view with ear pattern">
+        <rect class="o" x="50" y="40" width="240" height="90" rx="3"/>
+        <rect class="o" x="30" y="50" width="20" height="18"/><rect class="o" x="30" y="102" width="20" height="18"/>
+        <rect class="o" x="290" y="50" width="20" height="18"/><rect class="o" x="290" y="102" width="20" height="18"/>
+        <circle class="o" cx="40" cy="59" r="4"/><circle class="o" cx="40" cy="111" r="4"/><circle class="o" cx="300" cy="59" r="4"/><circle class="o" cx="300" cy="111" r="4"/>
+        <rect class="t" x="90" y="124" width="22" height="6"/><rect class="t" x="130" y="124" width="22" height="6"/><rect class="t" x="170" y="124" width="22" height="6"/><rect class="t" x="210" y="124" width="22" height="6"/>
+        <path class="d" d="M50 150 H290 M50 144 v12 M290 144 v12"/><path class="d" d="M40 22 H300 M40 16 v12 M300 16 v12"/><path class="d" d="M324 59 V111"/>
+        <g class="n"><circle cx="170" cy="160" r="9"/><text x="170" y="160">16</text></g>
+        <g class="n"><circle cx="170" cy="10" r="9"/><text x="170" y="10">18</text></g>
+        <g class="n"><circle cx="330" cy="85" r="9"/><text x="330" y="85">18</text></g>
+        <text class="lbl" x="120" y="118">ports 4-3-2-1</text><text class="lbl" x="56" y="90">host+DC</text>
+      </svg>
+      <figcaption>Top view: body, ears (if fitted), downstream face at the bottom</figcaption>
+    </figure>
+  </div>
+  <div class="wrap"><table id="t-hub">
+    <thead><tr><th>#</th><th>dimension</th><th>EST</th><th>measured</th><th>P</th><th>how</th></tr></thead>
+    <tbody>
+      <tr><td class="no">16</td><td>Body length, width and height (no ears)</td><td class="est">139 × 87 × 35 (PUB)</td><td><input data-k="B16"></td><td class="pri p1">P1</td><td class="how">The ladder inner span is set by the length: 139 + 1</td></tr>
+      <tr><td class="no">17</td><td>Ears or DIN clip fitted? Give the thickness and how far they stand out</td><td class="est">none assumed</td><td><input data-k="B17"></td><td class="pri p1">P1</td><td class="how">Ears widen the stack; remove them if possible</td></tr>
+      <tr><td class="no">18</td><td>Ear hole pattern, X c-c by Y c-c, and hole diameter</td><td class="est">unknown</td><td><input data-k="B18"></td><td class="pri"></td><td class="how">Not in the datasheet</td></tr>
+      <tr><td class="no">19</td><td>Downstream port centres from the host end, and port height above the base</td><td class="est">30 + 26 pitch, z 12</td><td><input data-k="B19"></td><td class="pri"></td><td class="how">Sets the comb-row slot positions</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- =================================================================== C. V-PLATE + BATTERY -->
+<h2>C. SmallRig V-mount plate + V99 Pro battery <span class="tag">P1</span></h2>
+<div class="panel">
+  <div class="draw">
+    <figure>
+      <svg viewBox="0 0 340 190" aria-label="V-mount plate back face with mounting holes">
+        <rect class="o" x="90" y="20" width="160" height="140" rx="8"/>
+        <circle class="o" cx="140" cy="70" r="5"/><circle class="o" cx="200" cy="70" r="5"/><circle class="o" cx="140" cy="110" r="5"/><circle class="o" cx="200" cy="110" r="5"/>
+        <circle class="o" cx="170" cy="90" r="8"/><rect class="o" x="250" y="96" width="14" height="14"/>
+        <path class="d" d="M90 176 H250 M90 170 v12 M250 170 v12"/><path class="d" d="M70 20 V160 M64 20 h12 M64 160 h12"/>
+        <path class="d" d="M140 50 H200"/><path class="d" d="M120 70 V110"/>
+        <g class="n"><circle cx="170" cy="184" r="8"/><text x="170" y="184">20</text></g>
+        <g class="n"><circle cx="60" cy="90" r="9"/><text x="60" y="90">20</text></g>
+        <g class="n"><circle cx="170" cy="42" r="9"/><text x="170" y="42">21</text></g>
+        <g class="n"><circle cx="110" cy="90" r="9"/><text x="110" y="90">21</text></g>
+        <text class="lbl" x="262" y="92">lever</text>
+      </svg>
+      <figcaption>Back of the V-mount plate: the face that bolts to the printed bracket</figcaption>
+    </figure>
+  </div>
+  <div class="wrap"><table id="t-vp">
+    <thead><tr><th>#</th><th>dimension</th><th>EST</th><th>measured</th><th>P</th><th>how</th></tr></thead>
+    <tbody>
+      <tr><td class="no">20</td><td>V-plate model number (on the plate or box), and its width × height × thickness</td><td class="est">110 × 96 × 20</td><td><input data-k="C20"></td><td class="pri p1">P1</td><td class="how">SmallRig does not publish hole drawings on its site, so the model number matters</td></tr>
+      <tr><td class="no">21</td><td>Back-face mounting holes: thread (1/4-20, 3/8-16, M4) and X/Z positions from the plate centre</td><td class="est">slots ±19, z 36-76</td><td><input data-k="C21"></td><td class="pri p1">P1</td><td class="how">List every hole you would use</td></tr>
+      <tr><td class="no">22</td><td>Release-lever side, and how far it sticks out past the plate edge</td><td class="est">right, 6</td><td><input data-k="C22"></td><td class="pri"></td><td class="how">Keeps the lever clear of the ladder</td></tr>
+      <tr><td class="no">23</td><td>Battery outer size W × D × H, and where the outputs are (battery or plate?)</td><td class="est">100 × 86 × 120</td><td><input data-k="C23"></td><td class="pri p1">P1</td><td class="how">The repo table says 107 × 74 × 64, which disagrees with photo 34</td></tr>
+      <tr><td class="no">24</td><td>Battery mass</td><td class="est">640 g</td><td><input data-k="C24"></td><td class="pri"></td><td class="how">18 g on the V-lock latch</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- =================================================================== D. CHEESE PLATE -->
+<h2>D. SmallRig cheese plate <span class="tag">P1</span></h2>
+<div class="panel">
+  <div class="draw">
+    <figure>
+      <svg viewBox="0 0 340 190" aria-label="Cheese plate plan with hole grid">
+        <rect class="o" x="40" y="30" width="260" height="130" rx="4"/>
+        <g class="o">
+          <circle cx="70" cy="60" r="4"/><circle cx="100" cy="60" r="4"/><circle cx="130" cy="60" r="4"/><circle cx="160" cy="60" r="4"/><circle cx="190" cy="60" r="4"/><circle cx="220" cy="60" r="4"/><circle cx="250" cy="60" r="4"/>
+          <circle cx="70" cy="95" r="6"/><circle cx="160" cy="95" r="6"/><circle cx="250" cy="95" r="6"/>
+          <circle cx="70" cy="130" r="4"/><circle cx="100" cy="130" r="4"/><circle cx="130" cy="130" r="4"/><circle cx="160" cy="130" r="4"/><circle cx="190" cy="130" r="4"/><circle cx="220" cy="130" r="4"/><circle cx="250" cy="130" r="4"/>
+        </g>
+        <path class="d" d="M40 176 H300 M40 170 v12 M300 170 v12"/><path class="d" d="M20 30 V160 M14 30 h12 M14 160 h12"/>
+        <path class="d" d="M70 44 H100"/><path class="d" d="M56 60 V130"/><path class="d" d="M40 60 H66"/>
+        <g class="n"><circle cx="170" cy="184" r="8"/><text x="170" y="184">25</text></g>
+        <g class="n"><circle cx="12" cy="95" r="9"/><text x="12" y="95">25</text></g>
+        <g class="n"><circle cx="85" cy="36" r="8"/><text x="85" y="36">26</text></g>
+        <g class="n"><circle cx="48" cy="110" r="8"/><text x="48" y="110">26</text></g>
+        <g class="n"><circle cx="52" cy="72" r="8"/><text x="52" y="72">27</text></g>
+      </svg>
+      <figcaption>Plan: outline, hole grid (small = 1/4-20, large = 3/8-16), edge distance</figcaption>
+    </figure>
+  </div>
+  <div class="wrap"><table id="t-ch">
+    <thead><tr><th>#</th><th>dimension</th><th>EST</th><th>measured</th><th>P</th><th>how</th></tr></thead>
+    <tbody>
+      <tr><td class="no">25</td><td>Model number, and length × width × thickness</td><td class="est">190 × 210 × 10 (DSN)</td><td><input data-k="D25"></td><td class="pri p1">P1</td><td class="how">To bolt to two deck members it must span 193 c-c plus 8 mm edge. If it is shorter, add one 2020 cross member (README).</td></tr>
+      <tr><td class="no">26</td><td>Hole grid pitch in X and Y; which holes are 1/4-20 and which 3/8-16</td><td class="est">20 (placeholder)</td><td><input data-k="D26"></td><td class="pri p1">P1</td><td class="how">Every printed foot hole is a slot at least one pitch long, so any grid works once it is known</td></tr>
+      <tr><td class="no">27</td><td>First hole to the plate edge, in X and Y</td><td class="est">10</td><td><input data-k="D27"></td><td class="pri"></td><td class="how"></td></tr>
+      <tr><td class="no">28</td><td>Countersunk or clearance holes: positions and diameter (for M5 into the deck T-nuts)</td><td class="est">none assumed</td><td><input data-k="D28"></td><td class="pri p1">P1</td><td class="how">A 1/4-20 tapped hole will not pass an M5 cleanly. Drill 5.5 through if needed.</td></tr>
+      <tr><td class="no">29</td><td>Side-face threads (photo 33 shows some): thread and positions</td><td class="est">3 per edge</td><td><input data-k="D29"></td><td class="pri"></td><td class="how">Free mounting points for the cable-bar feet</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- =================================================================== E. IMU BOARD -->
+<h2>E. MTi-3 development board (Uno shield)</h2>
+<div class="panel">
+  <div class="wrap"><table id="t-imu">
+    <thead><tr><th>#</th><th>dimension</th><th>EST</th><th>measured</th><th>P</th><th>how</th></tr></thead>
+    <tbody>
+      <tr><td class="no">30</td><td>Board outline</td><td class="est">68.6 × 53.3</td><td><input data-k="E30"></td><td class="pri p1">P1</td><td class="how">The datum plate is drilled to this</td></tr>
+      <tr><td class="no">31</td><td>Hole positions from the board corner (Uno: 13.97,2.54 / 15.24,50.8 / 66.04,7.62 / 66.04,35.56) and hole diameter</td><td class="est">Uno, O3.2</td><td><input data-k="E31"></td><td class="pri p1">P1</td><td class="how">Measure from the corner nearest the micro-USB</td></tr>
+      <tr><td class="no">32</td><td>Tallest part on the underside (standoff height), and on the top</td><td class="est">5 / 14</td><td><input data-k="E32"></td><td class="pri"></td><td class="how"></td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<footer>
+  canary_t1_cage/t1_stack · model <code>make_t1_stack.scad</code> · values feed the parameters named in README.md. EST values come from photos 33 to 36 (2026-09-26). Nothing on this sheet is an order or a print.
+</footer>
+</main>
+<script>
+(function () {
+  var KEY = "t1_stack_measure_v1";
+  var inputs = Array.prototype.slice.call(document.querySelectorAll("input[data-k]"));
+  var status = document.getElementById("status");
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
+  function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); status.textContent = "saved in this browser"; } catch (e) { status.textContent = "not saved (storage blocked) - use Copy as CSV"; } }
+  var data = load();
+  inputs.forEach(function (el) {
+    el.setAttribute("aria-label", el.getAttribute("data-k"));
+    if (data[el.dataset.k]) { el.value = data[el.dataset.k]; el.classList.add("filled"); }
+    el.addEventListener("input", function () {
+      data[el.dataset.k] = el.value; el.classList.toggle("filled", el.value.trim() !== ""); save(data);
+    });
+  });
+  function csv() {
+    var rows = [["key", "row", "dimension", "est", "measured"]];
+    inputs.forEach(function (el) {
+      var tr = el.closest("tr");
+      rows.push([el.dataset.k, tr.querySelector(".no").textContent, tr.children[1].textContent.trim(),
+                 tr.querySelector(".est").textContent.trim(), el.value.trim()]);
+    });
+    return rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","); }).join("\n");
+  }
+  document.getElementById("csv").onclick = function () {
+    var t = csv();
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { status.textContent = "CSV copied"; }, function () { status.textContent = "copy blocked - use Download CSV"; });
+    else status.textContent = "copy unavailable - use Download CSV";
+  };
+  document.getElementById("dl").onclick = function () {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv()], { type: "text/csv" }));
+    a.download = "t1_stack_measurements.csv"; a.click();
+  };
+  document.getElementById("print").onclick = function () { window.print(); };
+  document.getElementById("clear").onclick = function () {
+    if (!confirm("Clear every entry on this sheet?")) return;
+    inputs.forEach(function (el) { el.value = ""; el.classList.remove("filled"); });
+    data = {}; save(data);
+  };
+})();
+</script>
+</body>
+</html>

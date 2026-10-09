@@ -1,0 +1,13 @@
+part_number,description,length_mm_per_piece,qty,unit_price_usd,line_total_usd,notes
+20-2020-Black-FB,"cage POSTS cut to 222 instead of rev B's 100 (E06-E09): extra length only - REPLACES rev B line 1 (order 4 x 222, not 4 x 100)",122,4,4.00,16.00,$0.0328/mm; cut count unchanged vs rev B (still 4 post cuts); 222 = shortest post with the dome top 15 mm under the rail top - DO NOT CUT until the dome height is measured (post grows 1:1)
+20-2020-Black-FB,"TOP long rails E10-E11, 406 (sit ON the posts)",406,2,13.32,26.64,$0.0328/mm verified 8020.net 2026-09-21
+20-2020-Black-FB,"TOP end rails E12-E13, 239 (between the top longs)",239,2,7.84,15.68,$0.0328/mm verified 8020.net 2026-09-21
+CUT,cut charge per piece - the 4 top rails,,4,3.00,12.00,cut tolerance not on the product page - VERIFY on the order form
+20-4119-Black,"2-hole inside corner bracket: 2 per post TOP (post -> top long rail, post -> top end rail) = 8",,8,7.55,60.40,verified 8020.net; same part as the post feet
+20-4081,"flat 'L' corner plate 60 x 60 x 4, 5-hole - one per top corner (class of the owner's generic deck gussets)",,4,11.23,44.92,"8020.net clear-anodize figure from the rev B sheet; -Black exists, price VERIFY; the owner's generic 3-hole/leg plates are fine if >= 3 mm and M5"
+75-3581,M5 x 8 black BHSCS + 14122 assembly - post-top brackets 16 + top gussets 20 = 36 + 10 %,,40,0.90,36.00,verified 8020.net
+14122,"M5 slide-in economy T-nut, spare pre-loads in the top rails (lid/radome frame, carry strap) - the yoke bridges' 4 T-nuts are already in rev B's 40",,10,0.37,3.70,verified 8020.net; no 20-series drop-in: load BEFORE the top rails close the slots; yoke T-nuts now go in the posts' INNER slots
+12004,"20 Series reduction T-slot cover, black PP, 2 m - second length for the 222 posts (coax up the two rear posts + covers)",2000,1,5.40,5.40,verified 8020.net
+12305,"20 Series end cap, black - 4 open ends of the top long rails; the 4 rev B post-top caps move there (posts now closed by the rails)",,0,1.12,0.00,verified 8020.net; net 0 vs rev B
+VERIFY: 1090 / 978 stubby antennas,"SMA stubby (<= 40 tall) for 1090 and 978, replacing the 100 mm whips",,2,0.00,0.00,"generic - VERIFY; alternative: keep the 100 mm whips straight on the yoke bridge (tip z ~241, 24 under the rail top) but the tip then sits 12 mm from an aluminium rail"
+TOTAL (80/20 items only),rev C ADDITIONAL over the rev B order ($140.44),,,,220.74,rev B + rev C = $361.18; 8020.net prices read 2026-09-21/25; no purchase placed

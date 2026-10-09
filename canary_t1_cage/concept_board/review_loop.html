@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>T1 Design-Review Loop</title>
+<meta name="description" content="How Andrew (SolidWorks), Claude's CAD engineer and Javi collaborate on the Canary T1 cage: one exchange format, four stations, one gate.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Saira+Condensed:wght@400;500;600;700&family=Saira+Stencil+One&display=swap" rel="stylesheet">
+<style>
+/* Same single dark world as the concept board. Every colour painted from these tokens. */
+:root{
+  --bg:#07090D; --bg2:#0A0D12; --panel:#0E1219; --panel2:#121823; --line:#1E2633; --line2:#2B3646;
+  --ink:#E6EBF2; --ink2:#A9B4C4; --ink3:#6F7C8F;
+  --amber:#F0AA3C; --amber-dim:#7A5A24; --yellow:#F5B81C;
+  --green:#4FD08A; --red:#F0605A; --cyan:#5CD6E8; --cyan-dim:#1F5560;
+  --mono:"B612 Mono","IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --ui:"Saira Condensed","Arial Narrow",system-ui,sans-serif;
+  --stencil:"Saira Stencil One","Saira Condensed",Impact,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.4;overflow-x:hidden}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:2px}
+.micro{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+a{color:var(--amber);text-decoration:none;border-bottom:1px solid var(--amber-dim)}
+a:hover{border-bottom-color:var(--amber)}
+code{font-family:var(--mono);font-size:.88em;color:var(--ink);background:var(--panel2);padding:1px 5px;border:1px solid var(--line)}
+
+/* header — identical to the board */
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--bg2);flex-wrap:wrap}
+header svg{width:30px;height:30px;flex:none}
+.brand{font-family:var(--stencil);font-size:20px;letter-spacing:.16em;color:var(--ink);line-height:1}
+.brand b{color:var(--amber);font-weight:400}
+.hsub{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase}
+.hflags{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.flag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line2);color:var(--ink2);padding:3px 7px;background:var(--panel)}
+.flag.am{border-color:var(--amber-dim);color:var(--amber)}
+.flag a{border:0;color:inherit}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 56px}
+section{margin-top:34px}
+h2{font-family:var(--stencil);font-weight:400;font-size:22px;letter-spacing:.06em;margin:0 0 4px}
+.sub{color:var(--ink3);font-size:14.5px;margin:0 0 14px;max-width:78ch}
+.sub b{color:var(--ink2);font-weight:600}
+
+/* thesis */
+.thesis{margin-top:22px;border:1px solid var(--amber-dim);background:linear-gradient(180deg,rgba(240,170,60,.08),rgba(240,170,60,.02));padding:16px 18px;display:grid;grid-template-columns:1fr auto;gap:12px 24px;align-items:center}
+.thesis h1{margin:0;font-family:var(--stencil);font-weight:400;font-size:clamp(22px,3.6vw,34px);letter-spacing:.05em;line-height:1.05;text-wrap:balance}
+.thesis h1 b{color:var(--amber);font-weight:400}
+.thesis p{margin:6px 0 0;color:var(--ink2);font-size:15px;max-width:70ch}
+.thesis .no{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);border:1px solid var(--red);padding:8px 12px;text-align:center;line-height:1.7}
+.thesis .no b{display:block;color:var(--ink3);font-weight:400}
+@media (max-width:720px){.thesis{grid-template-columns:1fr}}
+
+/* loop stage */
+.loop{background:radial-gradient(ellipse at 50% 46%,#1B2433 0%,#0E131C 46%,#07090D 100%);border:1px solid var(--line);position:relative;padding:12px}
+.loop svg{display:block;width:100%;height:auto;max-height:520px;margin:0 auto}
+.corner{position:absolute;width:22px;height:22px;border:1px solid var(--amber-dim);opacity:.9}
+.corner.tl{left:10px;top:10px;border-right:0;border-bottom:0}.corner.tr{right:10px;top:10px;border-left:0;border-bottom:0}
+.corner.bl{left:10px;bottom:10px;border-right:0;border-top:0}.corner.br{right:10px;bottom:10px;border-left:0;border-top:0}
+.st{cursor:pointer}
+.st rect.box{fill:#0E1219;stroke:#2B3646;stroke-width:1.2;transition:stroke .15s,fill .15s}
+.st:hover rect.box,.st:focus-visible rect.box{stroke:#F0AA3C}
+.st.on rect.box{stroke:#F0AA3C;stroke-width:1.8;fill:#161A22}
+.st text{font-family:var(--ui);fill:#E6EBF2;font-size:15px;font-weight:600;pointer-events:none}
+.st text.k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;fill:#6F7C8F;font-weight:400}
+.st.on text.k{fill:#F0AA3C}
+.st text.who{font-size:12.5px;font-weight:400;fill:#A9B4C4}
+.arrow{fill:none;stroke:#2B3646;stroke-width:1.6;marker-end:url(#ah)}
+.arrow.hi{stroke:#F0AA3C}
+.lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;fill:#A9B4C4;text-transform:uppercase}
+.lab.am{fill:#F0AA3C}.lab.cy{fill:#5CD6E8}
+.gate rect{fill:#0A0D12;stroke:#5CD6E8;stroke-width:1.2}
+.gate text{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;fill:#5CD6E8}
+.hint{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink3);text-transform:uppercase;text-align:right;margin-top:6px}
+
+/* station cards */
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+@media (max-width:980px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.cards{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);background:var(--panel);padding:12px 12px 14px;transition:border-color .15s}
+.card.on{border-color:var(--amber)}
+.card h3{margin:0;font-family:var(--stencil);font-weight:400;font-size:18px;letter-spacing:.06em;display:flex;align-items:baseline;gap:8px}
+.card h3 .n{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--amber)}
+.card .who{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:4px 0 10px}
+.card .who b{color:var(--ink2);font-weight:400}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:14px;color:var(--ink2);margin:0}
+.kv dt{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);padding-top:3px}
+.kv dd{margin:0}
+.kv dd ul{margin:0;padding-left:16px}
+.kv dd li{margin:2px 0}
+.say{margin-top:10px;border-left:2px solid var(--amber);padding:6px 10px;background:rgba(240,170,60,.06);font-size:14px;color:var(--ink)}
+.say b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:2px;font-weight:400}
+
+/* tables */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+thead th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;font-weight:400}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink2)}
+tbody tr:last-child td{border-bottom:0}
+td.f{font-family:var(--mono);color:var(--ink);white-space:nowrap;font-size:13px}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 6px;border:1px solid currentColor;white-space:nowrap}
+.tag.m{color:var(--cyan)}.tag.e{color:var(--amber)}.tag.p{color:var(--red)}.tag.c{color:var(--green)}
+.legend{display:flex;flex-wrap:wrap;gap:14px 22px;margin-top:10px;font-size:13.5px;color:var(--ink2)}
+.legend div{display:flex;gap:8px;align-items:center}
+
+/* gate list */
+.gate-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:900px){.gate-list{grid-template-columns:1fr}}
+.g{border:1px solid var(--line);border-top:2px solid var(--cyan);background:var(--panel);padding:11px 12px}
+.g h4{margin:0 0 6px;font-family:var(--mono);font-weight:400;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.g ul{margin:0;padding-left:16px;font-size:14px;color:var(--ink2)}
+.g li{margin:3px 0}
+.g li b{color:var(--ink);font-weight:600}
+.g .ref{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em}
+
+/* ownership */
+.own{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:900px){.own{grid-template-columns:1fr}}
+.own .card h3{font-size:17px}
+.own ul{margin:8px 0 0;padding-left:16px;font-size:14px;color:var(--ink2)}
+.own li{margin:3px 0}
+.own li.no{color:var(--ink3)}
+.own li.no::marker{color:var(--red)}
+
+/* rules strip — same as board */
+.rules{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.rule{flex:none;max-width:240px;border:1px solid var(--line);border-left:2px solid var(--amber);padding:6px 10px;background:var(--panel)}
+.rule b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--amber);font-weight:400;text-transform:uppercase}
+.rule span{font-size:13.5px;color:var(--ink2);line-height:1.25;display:block;margin-top:2px}
+.rule.rd{border-left-color:var(--red)}.rule.rd b{color:var(--red)}
+.rule.cy{border-left-color:var(--cyan)}.rule.cy b{color:var(--cyan)}
+.rule.gn{border-left-color:var(--green)}.rule.gn b{color:var(--green)}.rule.gn i{display:block;font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink3);margin-top:4px}
+
+/* aside */
+.aside{border:1px solid var(--line);background:var(--panel);padding:12px 14px;font-size:14.5px;color:var(--ink2)}
+.aside h3{margin:0 0 6px;font-family:var(--mono);font-weight:400;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.aside b{color:var(--ink)}
+footer{margin-top:40px;padding:14px 0 0;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink3);line-height:1.7}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<header>
+  <svg viewBox="12 12 176 176" aria-hidden="true"><g fill="none" stroke="#8A94A6" stroke-width="14">
+    <path d="M177.8 105.4 A78 78 0 0 1 170.1 134.2"/><path d="M164.7 143.6 A78 78 0 0 1 143.6 164.7"/><path d="M134.2 170.1 A78 78 0 0 1 105.4 177.8"/>
+    <path d="M94.6 177.8 A78 78 0 0 1 65.8 170.1"/><path d="M56.4 164.7 A78 78 0 0 1 35.3 143.6"/><path d="M29.9 134.2 A78 78 0 0 1 22.2 105.4"/>
+    <path d="M22.2 94.6 A78 78 0 0 1 29.9 65.8"/><path d="M35.3 56.4 A78 78 0 0 1 56.4 35.3"/><path d="M65.8 29.9 A78 78 0 0 1 94.6 22.2"/>
+    <path d="M105.4 22.2 A78 78 0 0 1 134.2 29.9"/><path d="M170.1 65.8 A78 78 0 0 1 177.8 94.6"/></g>
+    <circle cx="155.2" cy="44.8" r="8" fill="#F0AA3C"/><path d="M100 44 L52 142 L100 128 Z" fill="#FFFFFF"/><path d="M100 44 L100 128 L148 142 Z" fill="#5B6572"/>
+    <path d="M52 142 L100 128 L100 160 Z" fill="#D5DAE1"/><path d="M100 128 L148 142 L100 160 Z" fill="#A8B0BD"/></svg>
+  <div>
+    <div class="brand">CANARY <b>T1</b> CAGE</div>
+    <div class="hsub">Design-review loop &middot; working agreement</div>
+  </div>
+  <div class="hflags">
+    <span class="flag am">Talk-through for Andrew</span>
+    <span class="flag">Internal</span>
+    <span class="flag">Patent pending</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="thesis" role="note">
+    <div>
+      <h1>Not a shared CAD app. <b>A shared exchange format.</b></h1>
+      <p>Andrew stays in SolidWorks. Claude's engineer works in code-CAD and checks. Javi directs and approves. The three meet on <b>verified STEP files</b> in one repo folder &mdash; the same pipeline that already produced the SolidWorks-ready Orin and Nano plates. The structure is now <b>80/20 20-series extrusion</b>, whose CAD library is SolidWorks-native, so the frame members come from the vendor and only the printed cartridges need envelopes.</p>
+    </div>
+    <div class="no">No SolidWorks connector exists<b>checked 2026-09-21 &middot; Windows-only anyway</b></div>
+  </div>
+
+  <section>
+    <h2>ALREADY DECIDED</h2>
+    <p class="sub">Javi pinned these on 2026-09-21. They are inputs to Andrew's design, not open questions &mdash; challenge them with a number, don't redesign around them silently.</p>
+    <div class="rules" aria-label="Decisions already pinned">
+      <div class="rule gn"><b>Structure &middot; 20 mm 80/20</b><span>20-series (20 &times; 20) black-anodized T-slot frame, 6 mm slot, M5 hardware. Printed parts are cartridges, bezels, panels, labels &mdash; not structure.</span><i>concept D &middot; ~4.5 kg gross as drawn</i></div>
+      <div class="rule gn"><b>UHR204 hub stays</b><span>The Core keeps its 15 N high-retention USB hub. Size a bay for 139 &times; 87 &times; 35 and ~0.6 kg; port face and ear pattern still to measure.</span><i>R7.2 &middot; mass ceiling to be restated</i></div>
+      <div class="rule gn"><b>Core opens often</b><span>T0 lesson: the Orin + hub came out often. Core access is a first-class swap &mdash; its own removal path, no neighbour out, no rod off.</span><i>R1.2 &middot; hardening gate</i></div>
+      <div class="rule gn"><b>C172, non-aerobatic</b><span>Normal-category loads plus the secured-carry-on restraint case. An aerobatic unit is T2 or a T1 variant.</span><i>R2.1</i></div>
+      <div class="rule gn"><b>Recommended hybrid</b><span>D frame + concept-A cartridges + IMU bolted and dowelled straight into the extrusion. Andrew owns whether that survives contact with real geometry.</span><i>README &sect;5</i></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>THE LOOP</h2>
+    <p class="sub">Four stations, one gate. Click a station to highlight it and its card. Keys <code>1</code>&ndash;<code>4</code> do the same.</p>
+    <div class="loop">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <svg viewBox="0 0 1000 410" role="img" aria-label="Loop diagram: hand-off to Andrew, design in SolidWorks, check by Claude's engineer, review and print by Javi, returning to hand-off.">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,1 L10,5 L0,9 z" fill="#2B3646"/></marker>
+              <marker id="ahi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,1 L10,5 L0,9 z" fill="#F0AA3C"/></marker></defs>
+
+        <!-- arrows (drawn first so boxes overlap their ends) -->
+        <path id="a1" class="arrow" d="M330,110 L670,110"/>
+        <text class="lab" x="500" y="98" text-anchor="middle">Requirements &middot; STEP envelopes &middot; board</text>
+        <path id="a2" class="arrow" d="M810,150 L810,300"/>
+        <text class="lab am" x="826" y="230">STEP out</text>
+        <path id="a3" class="arrow" d="M670,340 L330,340"/>
+        <text class="lab cy" x="500" y="392" text-anchor="middle">Verdict &middot; renders &middot; gcode</text>
+        <path id="a4" class="arrow" d="M190,300 L190,150"/>
+        <text class="lab" x="206" y="222">Print authority</text>
+        <text class="lab" x="206" y="240">T0 lessons</text>
+
+        <!-- stations -->
+        <g class="st on" data-s="1" tabindex="0" role="button" aria-label="Station 1, hand-off"><rect class="box" x="60" y="60" width="270" height="90" rx="3"/>
+          <text class="k" x="78" y="86">01 &middot; HAND-OFF</text><text x="78" y="112">Andrew receives the kit</text><text class="who" x="78" y="134">repo folder &middot; nothing to install</text></g>
+        <g class="st" data-s="2" tabindex="0" role="button" aria-label="Station 2, design"><rect class="box" x="670" y="60" width="270" height="90" rx="3"/>
+          <text class="k" x="688" y="86">02 &middot; DESIGN</text><text x="688" y="112">Andrew &middot; SolidWorks</text><text class="who" x="688" y="134">his tool, his fluency, no retraining</text></g>
+        <g class="st" data-s="3" tabindex="0" role="button" aria-label="Station 3, check"><rect class="box" x="670" y="300" width="270" height="90" rx="3"/>
+          <text class="k" x="688" y="326">03 &middot; CHECK</text><text x="688" y="352">Claude's CAD engineer</text><text class="who" x="688" y="374">imports his STEP, runs the gate</text></g>
+        <g class="st" data-s="4" tabindex="0" role="button" aria-label="Station 4, review and print"><rect class="box" x="60" y="300" width="270" height="90" rx="3"/>
+          <text class="k" x="78" y="326">04 &middot; REVIEW &amp; PRINT</text><text x="78" y="352">Javi decides</text><text class="who" x="78" y="374">renders &middot; board &middot; authorises every print</text></g>
+
+        <!-- the gate, sitting on the return leg -->
+        <g class="gate"><rect x="440" y="318" width="120" height="44" rx="2"/>
+          <text x="500" y="337" text-anchor="middle">THE GATE</text><text x="500" y="353" text-anchor="middle" style="fill:#A9B4C4;letter-spacing:.08em">pass / fail, with numbers</text></g>
+
+        <!-- centre -->
+        <text class="lab" x="500" y="215" text-anchor="middle" style="fill:#6F7C8F">ONE FOLDER</text>
+        <text x="500" y="244" text-anchor="middle" style="font-family:B612 Mono,monospace;font-size:13px;fill:#E6EBF2">michelangelo / canary_t1_cage /</text>
+        <text class="lab" x="500" y="266" text-anchor="middle" style="fill:#6F7C8F">.SLDPRT + STEP committed together</text>
+      </svg>
+      <div class="hint">click a station &middot; keys 1&ndash;4</div>
+    </div>
+
+    <div class="cards" id="cards">
+      <div class="card on" data-s="1">
+        <h3><span class="n">01</span>HAND-OFF</h3>
+        <div class="who">from <b>Claude</b> &rarr; to <b>Andrew</b></div>
+        <dl class="kv">
+          <dt>Gets</dt><dd><ul><li><code>REQUIREMENTS.md</code> &mdash; R1&ndash;R8, every line numbered</li><li><code>cad_exchange/</code> &mdash; 12 STEP envelopes</li><li>the 3D concept board + renders, concept D primary</li><li>SCAD massing models incl. the T-key detail, if he wants them</li><li>the <b>80/20 20-2020 profile</b> he pulls from 80/20's own SolidWorks library &mdash; we do not re-model vendor extrusion</li></ul></dd>
+          <dt>Not</dt><dd>a design of record. Envelopes, the decided structure, and options only.</dd>
+        </dl>
+        <div class="say"><b>Say</b>"Nothing here tells you how to draw it. It tells you what it has to satisfy and what it has to fit around."</div>
+      </div>
+      <div class="card" data-s="2">
+        <h3><span class="n">02</span>DESIGN</h3>
+        <div class="who"><b>Andrew</b> &middot; SolidWorks</div>
+        <dl class="kv">
+          <dt>Does</dt><dd>Imports the envelopes as solid bodies, mates to them, designs the cage against R1&ndash;R8.</dd>
+          <dt>Ships</dt><dd>Native <code>.SLDPRT</code>/<code>.SLDASM</code> <b>and</b> a STEP export, committed together.</dd>
+          <dt>Owns</dt><dd>Every geometry decision. The "Decisions to pin" list on the board is his checklist.</dd>
+        </dl>
+        <div class="say"><b>Say</b>"Commit the STEP next to the native file every time. The checks only ever see the STEP."</div>
+      </div>
+      <div class="card" data-s="3">
+        <h3><span class="n">03</span>CHECK</h3>
+        <div class="who"><b>Claude's engineer</b> &middot; build123d / OpenSCAD / slicer</div>
+        <dl class="kv">
+          <dt>Does</dt><dd>Imports Andrew's STEP. Runs the gate below. Slices anything he wants printed.</dd>
+          <dt>Returns</dt><dd>Pass/fail with numbers, clearance and fit reports, renders, verified gcode.</dd>
+          <dt>Never</dt><dd>Edits his geometry. Findings come back as notes, not as changed files.</dd>
+        </dl>
+        <div class="say"><b>Say</b>"It won't redesign your part. It will tell you, with a number, where it fails a requirement or won't print."</div>
+      </div>
+      <div class="card" data-s="4">
+        <h3><span class="n">04</span>REVIEW &amp; PRINT</h3>
+        <div class="who"><b>Javi</b> &middot; renders, board, the printer</div>
+        <dl class="kv">
+          <dt>Does</dt><dd>Reads the verdict, looks at the renders, brings the T0 lessons.</dd>
+          <dt>Decides</dt><dd>Which direction, what prints, in what material. Every physical print is his call.</dd>
+          <dt>Feeds back</dt><dd>Decisions and T0 experience go into the next hand-off.</dd>
+        </dl>
+        <div class="say"><b>Say</b>"PLA is for fit checks on the bench. Nothing flies until it's ASA or PA12-CF, and one frozen revision serves both partner units."</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>THE EXCHANGE CONTRACT</h2>
+    <p class="sub">What a STEP file has to be before either side trusts it. <code>verify_step.py</code> enforces this on every file in the folder; Andrew's exports get the same check on the way in.</p>
+    <div class="rules" aria-label="STEP contract">
+      <div class="rule cy"><b>One solid</b><span>Exactly one closed, valid solid per file. No loose bodies, no surfaces.</span></div>
+      <div class="rule cy"><b>Analytic</b><span>Planes, cylinders, cones. Zero tessellated or B-spline faces &mdash; it must mate, not just display.</span></div>
+      <div class="rule cy"><b>Millimetres</b><span>AP214, mm, origin at the centre of the mounting face, X = long axis, Z = up.</span></div>
+      <div class="rule"><b>Provenance in the name</b><span>Prefix tells you whether it was measured, estimated, or is a different product.</span></div>
+      <div class="rule rd"><b>Envelopes, not parts</b><span>Nothing in the folder is a cage design. Section them, mate to them, keep out of them.</span></div>
+    </div>
+
+    <div class="tablewrap" style="margin-top:12px">
+      <table>
+        <thead><tr><th>File</th><th>What</th><th>Provenance</th><th>Faces</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td class="f">orin_devkit.step</td><td>Bare Jetson Orin dev kit, 100 &times; 81, M3 pattern 91.86 &times; 58.37, Ø44 top-fan keep-out</td><td><span class="tag m">Measured</span> pattern; height est</td><td class="num">19 / 5 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">flycatcher.step</td><td>Canary Traffic receiver 64.93 &times; 56.03 &times; 27, holes 58 &times; 49</td><td><span class="tag m">Measured</span></td><td class="num">10 / 4 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">co_stick.step</td><td>Canary Cabin CO stick 114.00 &times; 20.92 &times; 15.12</td><td><span class="tag m">Measured</span></td><td class="num">6 / 1 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">zed_f9p.step</td><td>RTK receiver 43.5 sq, pattern 37.6 sq</td><td><span class="tag m">Measured</span></td><td class="num">10 / 4 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">bno085.step</td><td>IMU breakout, pattern 19.95 &times; 17.81</td><td><span class="tag m">Measured</span> pattern</td><td class="num">10 / 4 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">eg25g_lte.step</td><td>LTE carrier, pattern 70.80 &times; 24.21</td><td><span class="tag m">Measured</span> pattern; home CONFIRM</td><td class="num">10 / 4 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">EST_vmount_battery.step</td><td>V-mount pack 107 &times; 74 &times; 64 brick</td><td><span class="tag e">Estimated</span></td><td class="num">6 / 0 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">EST_uhr204_hub.step</td><td>Industrial USB hub 139 &times; 87 &times; 35 brick</td><td><span class="tag e">Estimated</span> KEPT 2026-09-21; ears + mass to measure</td><td class="num">6 / 0 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">EST_rod_15x400.step</td><td>Ø15 &times; 2 wall aluminium tube, 400 long</td><td><span class="tag e">Estimated</span> length CONFIRM</td><td class="num">2 / 2 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">CANON_tube_cap.step</td><td>Rod clamp cap, print-validated on 10+ articles</td><td><span class="tag c">Canon</span> do not re-dimension</td><td class="num">9 / 3 / 2</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">CANON_station_pair.step</td><td>Rod station pair, Ø15.4 troughs at 60 c-c</td><td><span class="tag c">Canon</span></td><td class="num">20 / 10 / 0</td><td><span class="tag c">Pass</span></td></tr>
+          <tr><td class="f">PERCH_orin_ups_stack.step</td><td>Orin-on-UPS stack &mdash; the ground unit</td><td><span class="tag p">Not in T1</span></td><td class="num">11 / 5 / 0</td><td><span class="tag c">Pass</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <div><span class="tag m">Measured</span>calipers on hardware &mdash; design to it</div>
+      <div><span class="tag e">Estimated</span>datasheet or class figure &mdash; never cut flight plastic against it</div>
+      <div><span class="tag c">Canon</span>validated rod interface &mdash; reuse verbatim</div>
+      <div><span class="tag p">Not in T1</span>different product, included so nobody mistakes it</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>THE GATE</h2>
+    <p class="sub">What station 03 runs on every STEP that comes back. Each item cites its requirement line so a fail is never a matter of taste. <b>Every printed part in this repo that skipped one of these has failed on the bed.</b></p>
+    <div class="gate-list">
+      <div class="g"><h4>Fit &amp; clearance</h4><ul>
+        <li>Every envelope inside its bay with stated clearance; nothing over the Orin fan <span class="ref">R4.2</span></li>
+        <li>Hole patterns land on the measured values, not the estimates</li>
+        <li>Ø8 driver column to every fastener with the part in place</li>
+        <li>IMU on a rigid keyed datum bolted and dowelled into the extrusion &mdash; never a rail, never a cartridge alone <span class="ref">R3.1</span></li>
+        <li>Core (Orin + hub) has its own removal path: no neighbour out, no rod off <span class="ref">R1.2</span></li></ul></div>
+      <div class="g"><h4>Loads &amp; retention</h4><ul>
+        <li>18 g forward case = <b>798 N</b> at 4.5 kg into the frame's bottom long members; belt round metal, never a printed lug <span class="ref">R2.1&ndash;2.3</span></li>
+        <li>Rods are handle + antenna rail only, out of the restraint path; 3 g swing case still closes <span class="ref">R2.3, R7.2</span></li>
+        <li>T-slot joints M5 8.8 at <b>4.5 N&middot;m</b> + Loctite 243 + torque stripe; no preload on plastic <span class="ref">R6.6</span></li>
+        <li>Printed T-key: neck 5.6, &ge; 88 mm engaged, layer lines along the neck; 11.0 cavity CONFIRM from the 80/20 CAD <span class="ref">R6.5</span></li>
+        <li>Six-direction retention; battery latch <b>and</b> strap <span class="ref">R2.4</span></li>
+        <li>Printed bearing &le; 1 MPa; insert tension &le; 50 N <span class="ref">R2.5</span></li></ul></div>
+      <div class="g"><h4>Print &amp; thermal</h4><ul>
+        <li>No <b>printed</b> part over <b>281 mm</b>; frame members are cut to length, so the bed no longer sizes the structure <span class="ref">R6.4</span></li>
+        <li><code>bottom_shell_layers &le; 6</code> &mdash; the 30-layer raft that warped <span class="ref">R6.3</span></li>
+        <li><code>max_bridge_length</code> derived from the model's longest span &mdash; the 20 mm bridge that became spaghetti <span class="ref">R6.3</span></li>
+        <li>&ge; 32 cm&sup2; intake and exhaust, battery out of the exhaust <span class="ref">R4.2&ndash;4.3</span></li>
+        <li><code>PRINT_START</code> temperatures verified literally in the gcode</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>WHO OWNS WHAT</h2>
+    <p class="sub">Three roles, no overlap. If two people think they own a decision, it goes to Javi.</p>
+    <div class="own">
+      <div class="card"><h3>ANDREW</h3><div class="who">CAD / DFM lead</div><ul>
+        <li>Every geometry decision</li><li>Extrusion cut list and bracket plan; cartridge, T-key, latch, bezel, connector-family choices</li><li>Native CAD + STEP, committed together</li><li>Cage hardening for the frozen revision</li>
+        <li class="no">Does not authorise prints</li><li class="no">Does not change a requirement &mdash; he challenges it</li></ul></div>
+      <div class="card"><h3>CLAUDE</h3><div class="who">Analysis &middot; verification &middot; slicing</div><ul>
+        <li>Requirements page and its numbers</li><li>STEP envelopes, verified</li><li>The gate, on every return</li><li>Slicing with the print guards</li><li>Renders and the concept board</li>
+        <li class="no">Does not edit Andrew's geometry</li><li class="no">Does not start a print</li></ul></div>
+      <div class="card"><h3>JAVI</h3><div class="who">Founder &middot; print authority</div><ul>
+        <li>Direction: which concept, which hybrid</li><li>Every physical print, and its material</li><li>T0 lessons into the requirements</li><li>Requirement changes</li><li>Freezes the cage revision; external share and the disclosure ledger</li>
+        <li class="no">Does not need a CAD seat unless he wants to draw</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>REPO CONVENTION</h2>
+    <p class="sub">The FLEDGE plan puts source CAD in the michelangelo repo. Git stores SolidWorks files but cannot diff or merge them, so the STEP beside each one is what the loop actually runs on.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Path</th><th>Contents</th><th>Owner</th></tr></thead>
+        <tbody>
+          <tr><td class="f">canary_t1_cage/REQUIREMENTS.md</td><td>R1&ndash;R8. Changes only by Javi, dated.</td><td>Claude drafts &middot; Javi owns</td></tr>
+          <tr><td class="f">canary_t1_cage/cad_exchange/</td><td>Verified STEP envelopes + README with provenance. Re-verify after any edit.</td><td>Claude</td></tr>
+          <tr><td class="f">canary_t1_cage/solidworks/</td><td>Andrew's <code>.SLDPRT</code> / <code>.SLDASM</code> <b>and</b> the STEP export of each, same commit. One folder per revision.</td><td>Andrew</td></tr>
+          <tr><td class="f">canary_t1_cage/checks/&lt;rev&gt;/</td><td>Gate report, clearance sweeps, renders, gcode for that revision.</td><td>Claude</td></tr>
+          <tr><td class="f">canary_t1_cage/solidworks/&lt;rev&gt;/8020_cutlist.csv</td><td>Profile part number, length, count, bracket and T-nut count per revision &mdash; the order sheet. Black vs plain anodize is Javi's call per order.</td><td>Andrew drafts &middot; Javi orders</td></tr>
+          <tr><td class="f">canary_t1_cage/concept_board/</td><td>This page and the 3D board. Massing only.</td><td>Claude</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>IF YOU WANT TO CO-EDIT INSTEAD</h2>
+    <div class="aside">
+      <h3>Only if Javi wants his own hands on the model</h3>
+      <p style="margin:0 0 8px">The loop above is a <b>review loop</b>: one author, one checker, one decider. That is the right shape while Andrew is the CAD lead and Javi directs. If Javi wants to draw alongside Andrew on the same model, the tool changes:</p>
+      <ul style="margin:0;padding-left:18px">
+        <li><b>Onshape</b> &mdash; browser, runs on the Mac, real-time multi-user, versioning built in, SolidWorks users pick it up fast. Exports STEP/STL, so station 03 stays identical. Cost: a paid seat for private documents, and Andrew learning a second tool.</li>
+        <li><b>Not Fusion 360</b> here &mdash; no collaboration advantage over Onshape, and moving licensing.</li>
+        <li><b>Not FreeCAD</b> &mdash; already on the Mac and scriptable, but a real step down from SolidWorks; Andrew would not thank you.</li>
+      </ul>
+      <p style="margin:8px 0 0">Either way, nothing about the exchange contract or the gate changes.</p>
+    </div>
+  </section>
+
+  <footer>
+    CANARY T1 CAGE &middot; DESIGN-REVIEW LOOP &middot; 2026-09-21 &middot; Companion to the T1 Cage Concepts board. Internal working agreement; the founder decides and logs any external share.
+    Requirement numbers are from REQUIREMENTS.md; STEP verdicts from verify_step.py the same day.
+  </footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+var stations=Array.prototype.slice.call(document.querySelectorAll('.st')),cards=Array.prototype.slice.call(document.querySelectorAll('#cards .card'));
+var arrows={1:'a1',2:'a2',3:'a3',4:'a4'};
+function pick(n){
+  stations.forEach(function(s){s.classList.toggle('on',s.dataset.s===String(n));});
+  cards.forEach(function(c){c.classList.toggle('on',c.dataset.s===String(n));});
+  Object.keys(arrows).forEach(function(k){var a=document.getElementById(arrows[k]),hi=(Number(k)===n);a.classList.toggle('hi',hi);a.setAttribute('marker-end',hi?'url(#ahi)':'url(#ah)');});
+}
+stations.forEach(function(s){
+  s.addEventListener('click',function(){pick(Number(s.dataset.s));});
+  s.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(Number(s.dataset.s));}});
+});
+cards.forEach(function(c){c.addEventListener('click',function(){pick(Number(c.dataset.s));});});
+document.addEventListener('keydown',function(e){
+  if(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if('1234'.indexOf(e.key)>=0)pick(Number(e.key));
+});
+pick(1);
+})();
+</script>
+</body>
+</html>
