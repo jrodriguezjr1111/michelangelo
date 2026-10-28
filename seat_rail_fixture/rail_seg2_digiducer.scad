@@ -1,26 +1,30 @@
 /* ======================================================================
    SEAT-RAIL FIXTURE — SEGMENT 2 "DG-B": the Digiducer sidecar (concept B)
    ----------------------------------------------------------------------
-   200 mm rail replica laid out as the concept-B PAIR: the rev E base at
-   "E0" (x = 22, bands 35.3 / 70.3 / 105.3) and the Digiducer sidecar
-   block (48 long, bands at 10 / 38 from its aft end) 8 mm forward of it
-   at "DG0" (x = 130, bands 140 / 168) — the node_gap the sidecar was
-   designed with.  The sidecar fits alone on its two slots; with the node
-   also on, the wrench ring / gap / stud-to-IMU-row distance can be
-   checked for real.  Layout only; geometry in seat_rail_fixture_lib.scad.
+   200 mm replica (PROVISIONAL photo profile) laid out as the concept-B
+   PAIR on straddle-clamp decks: the Digiducer sidecar on its 48 mm deck
+   at "DG0" x = 44 (jaws 46..62 / 74..90) and the rev E base on its 100 mm
+   deck at "E0" x = 100 (jaws 100..130 / 170..200), node_gap 8.  The
+   mid-span flange bolt (x 150) sits in the gap between the node's jaws;
+   the end-pair bolts (x 6) are clear of everything.  The pair is aft/fwd
+   mirrored vs the sidecar's own scene (block forward of the node) — the
+   bolt pattern forced it; on the aircraft the bolt pattern decides.
+   The sidecar fits alone on its deck.
    ====================================================================== */
 part      = "seg";
 seg_label = "SEG 2 DG-B";
 rail_L    = 200;
-E0        = 22;                                   // rev E base aft end
 node_gap  = 8;                                    // make_digiducer_sidecar.scad node_gap (REQ-4.3 >= 5)
-DG0       = E0 + 100 + node_gap;                  // 130: sidecar block aft end
-node_tun  = [13.3, 48.3, 83.3];                   // make_vib01_revE.scad tun_x (COPY — build script checks it)
-dg_tun    = [10, 38];                             // make_digiducer_sidecar.scad tun_x (COPY — build script checks it)
-stations  = concat([for (t = node_tun) E0 + t], [for (t = dg_tun) DG0 + t]);   // 35.3 70.3 105.3 140 168
-datums    = [[E0, "E0"], [DG0, "DG0"], [DG0 + 48, "DG1"]];
+DG0       = 44;                                   // sidecar deck aft end
+E0        = DG0 + 48 + node_gap;                  // 100: rev E deck aft end
+jaw_x     = [15, 85];  jaw_L = 30;                // clamp deck_L=100 (COPY — build script checks it)
+dg_jaw_x  = [10, 38];  dg_jaw_L = 16;             // clamp deck_L=48  (COPY — build script checks it)
+node_tun  = [13.3, 48.3, 83.3];                   // inferred-profile bands only (COPY)
+dg_tun    = [10, 38];
+stations  = concat([for (t = node_tun) E0 + t], [for (t = dg_tun) DG0 + t]);   // inferred profile only
+datums    = [[DG0, "DG0"], [DG0 + 48, "DG1"], [E0, "E0"]];
 hole_x0   = 10.7;
-fit_parts = [["../vib01_node/vib01e_base.stl", E0, node_tun, 36.4],
-             ["../digiducer_mount/digiducer_sidecar_pla.stl", DG0, dg_tun, 18]];
+fit_parts = [["../vib01_node/vib01e_base.stl", E0, jaw_x, jaw_L, 36.4, "rail_clamp_all100.stl", 23],
+             ["../digiducer_mount/digiducer_sidecar_pla.stl", DG0, dg_jaw_x, dg_jaw_L, 18, "rail_clamp_all48.stl", 23]];
 
 include <seat_rail_fixture_lib.scad>
