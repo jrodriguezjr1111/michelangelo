@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1132" height="230" viewBox="0 0 1132 230" font-family="Helvetica"><rect width="100%" height="100%" fill="#fff"/><text x="40.0" y="16" font-size="12" font-weight="bold" fill="#223">seat_rail_fixture — rail cross-section AS MODELLED (rail_interface.scad + lib), 4 px/mm, -Y on the left. Every INFERRED number is a caliper item (README section 5).</text><g transform="translate(0,0)">
+<polygon points="40.0,170.0 376.0,170.0 376.0,154.0 338.0,154.0 338.0,146.0 298.0,146.0 298.0,90.0 244.0,90.0 244.0,82.0 172.0,82.0 172.0,90.0 118.0,90.0 118.0,146.0 78.0,146.0 78.0,154.0 40.0,154.0" fill="#cfd8e3" stroke="#223" stroke-width="1.2"/>
+<rect x="189.0" y="82.0" width="38.0" height="64.0" fill="#fff" stroke="#223" stroke-dasharray="3,2" stroke-width="0.8"/>
+<text x="208.0" y="158.0" font-size="9" text-anchor="middle" fill="#555" font-family="Helvetica">seat-stop hole Ø9.5 @ 25.4 (blind to the flange step)</text>
+<line x1="172.0" y1="70.0" x2="244.0" y2="70.0" stroke="#b00" stroke-width="0.8"/><text x="208.0" y="67.0" font-size="10" fill="#b00" text-anchor="middle" font-family="Helvetica">head 18 (INFERRED 16-19)</text>
+<line x1="118.0" y1="52.0" x2="298.0" y2="52.0" stroke="#b00" stroke-width="0.8"/><text x="208.0" y="49.0" font-size="10" fill="#b00" text-anchor="middle" font-family="Helvetica">bearing 45 = pads 2 x 12.5 either side of the head (INFERRED: a flat 2 mm below the head top)</text>
+<line x1="78.0" y1="192.0" x2="338.0" y2="192.0" stroke="#b00" stroke-width="0.8"/><text x="208.0" y="189.0" font-size="10" fill="#b00" text-anchor="middle" font-family="Helvetica">flange step 65 x 2 (fixture only)</text>
+<line x1="306.0" y1="82.0" x2="306.0" y2="90.0" stroke="#b00" stroke-width="0.8"/><text x="309.0" y="89.0" font-size="10" fill="#b00" font-family="Helvetica">head 2 (INFERRED)</text>
+<line x1="366.0" y1="90.0" x2="366.0" y2="146.0" stroke="#b00" stroke-width="0.8"/><text x="369.0" y="121.0" font-size="10" fill="#b00" font-family="Helvetica">body 14 (fixture)</text>
+<line x1="384.0" y1="154.0" x2="384.0" y2="170.0" stroke="#b00" stroke-width="0.8"/><text x="387.0" y="165.0" font-size="10" fill="#b00" font-family="Helvetica">plate 4</text>
+<text x="40.0" y="218" font-size="11" font-family="Helvetica" fill="#223">BETWEEN band stations (solid body)</text>
+</g>
+<g transform="translate(566,0)">
+<polygon points="40.0,170.0 376.0,170.0 376.0,154.0 338.0,154.0 338.0,146.0 298.0,146.0 298.0,90.0 244.0,90.0 244.0,82.0 172.0,82.0 172.0,90.0 118.0,90.0 118.0,146.0 78.0,146.0 78.0,154.0 40.0,154.0" fill="#cfd8e3" stroke="#223" stroke-width="1.2"/>
+<rect x="114.0" y="122.0" width="188.0" height="24.0" fill="#fff" stroke="none"/>
+<polygon points="176.0,146.0 240.0,146.0 240.0,142.4 219.6,122.0 196.4,122.0 176.0,142.4" fill="#fff" stroke="#223" stroke-width="1.2"/>
+<text x="208.0" y="158.0" font-size="9" text-anchor="middle" fill="#555" font-family="Helvetica">band passes here, on the flange step</text>
+<line x1="172.0" y1="70.0" x2="244.0" y2="70.0" stroke="#b00" stroke-width="0.8"/><text x="208.0" y="67.0" font-size="10" fill="#b00" text-anchor="middle" font-family="Helvetica">head 18 (INFERRED 16-19)</text>
+<line x1="118.0" y1="52.0" x2="298.0" y2="52.0" stroke="#b00" stroke-width="0.8"/><text x="208.0" y="49.0" font-size="10" fill="#b00" text-anchor="middle" font-family="Helvetica">bearing 45 = pads 2 x 12.5 either side of the head (INFERRED: a flat 2 mm below the head top)</text>
+<line x1="78.0" y1="192.0" x2="338.0" y2="192.0" stroke="#b00" stroke-width="0.8"/><text x="208.0" y="189.0" font-size="10" fill="#b00" text-anchor="middle" font-family="Helvetica">flange step 65 x 2 (fixture only)</text>
+<line x1="306.0" y1="82.0" x2="306.0" y2="90.0" stroke="#b00" stroke-width="0.8"/><text x="309.0" y="89.0" font-size="10" fill="#b00" font-family="Helvetica">head 2 (INFERRED)</text>
+<line x1="366.0" y1="90.0" x2="366.0" y2="146.0" stroke="#b00" stroke-width="0.8"/><text x="369.0" y="121.0" font-size="10" fill="#b00" font-family="Helvetica">body 14 (fixture)</text>
+<line x1="384.0" y1="154.0" x2="384.0" y2="170.0" stroke="#b00" stroke-width="0.8"/><text x="387.0" y="165.0" font-size="10" fill="#b00" font-family="Helvetica">plate 4</text>
+<text x="40.0" y="218" font-size="11" font-family="Helvetica" fill="#223">AT a band station: slot 16 x 6, 45 deg gable to a 5.8 crown</text>
+</g></svg>
